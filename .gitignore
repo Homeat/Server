@@ -6,7 +6,7 @@ build/
 !**/src/test/**/build/
 
 ### appliciton.yml ###
-*.yml
+/src/main/resources/application.yml
 
 ### STS ###
 .apt_generated

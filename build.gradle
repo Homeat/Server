@@ -61,3 +61,7 @@ clean {
 	delete file(generated)
 }
 
+// ci/cd 를 위한 jar 파일 생성 비활성화
+jar {
+	enabled = false
+}

@@ -1,4 +1,4 @@
-package homeat.backend.config;
+package homeat.backend.global.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

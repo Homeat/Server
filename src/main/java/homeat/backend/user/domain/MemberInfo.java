@@ -1,6 +1,6 @@
 package homeat.backend.user.domain;
 
-import homeat.backend.global.common.BaseEntity;
+import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;
 
 import javax.persistence.*;

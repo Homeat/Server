@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class hashTag {
+public class InfoHashTag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

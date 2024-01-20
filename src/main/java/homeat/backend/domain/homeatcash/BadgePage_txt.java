@@ -14,11 +14,11 @@ public class BadgePage_txt extends BaseEntity {
     @Column(name = "badge_page_txt_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "is_success_id")
     private IsSuccess isSuccess;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "badge_img_id")
     private Badge_img badgeImg;
 

@@ -37,7 +37,7 @@ public class InfoTalk {
     private String content;
 
 
-    private Integer like;
+    private Integer love;
     private Integer view;
     private Integer commentNumber;
 

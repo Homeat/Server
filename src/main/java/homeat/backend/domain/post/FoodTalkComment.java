@@ -1,5 +1,6 @@
 package homeat.backend.domain.post;
 
+import homeat.backend.user.domain.Member;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -30,9 +31,9 @@ public class FoodTalkComment {
     @JoinColumn(name = "foodtalk_id")
     private FoodTalk foodTalk;
 
-    /*@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    private Member member;*/
+    private Member member;
 
     private String content;
 }

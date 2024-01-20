@@ -48,5 +48,12 @@ public class FoodTalk extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Save save;
 
+    public void update(String name, String ingredient, String memo, Tag tag) {
+        this.name = name;
+        this.ingredient = ingredient;
+        this.memo = memo;
+        this.tag = tag;
+    }
+
 
 }

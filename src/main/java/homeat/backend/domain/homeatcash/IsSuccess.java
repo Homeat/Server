@@ -15,7 +15,7 @@ public class IsSuccess extends BaseEntity {
     @Column(name = "is_success_id")
     private Long id;
 
-    @ManyToOne //HomeatCash와의 관계에서 '다'
+    @ManyToOne(fetch = FetchType.LAZY) //HomeatCash와의 관계에서 '다'
     @JoinColumn(name = "homeat_cash_id") //FK 이름이 homeatCash_id
     private HomeatCash homeatCash;
 

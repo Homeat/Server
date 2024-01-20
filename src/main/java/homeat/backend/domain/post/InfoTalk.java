@@ -1,5 +1,6 @@
 package homeat.backend.domain.post;
 
+import homeat.backend.domain.common.BaseEntity;
 import homeat.backend.user.domain.Member;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,7 +23,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class InfoTalk {
+public class InfoTalk extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

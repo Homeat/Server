@@ -40,7 +40,7 @@ public class FoodTalk {
     @Enumerated(EnumType.STRING)
     private Tag tag;
 
-    private Integer like;
+    private Integer love;
     private Integer view;
     private Integer commentNumber;
 

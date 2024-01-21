@@ -44,4 +44,9 @@ public class InfoTalk extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Save save;
+
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }

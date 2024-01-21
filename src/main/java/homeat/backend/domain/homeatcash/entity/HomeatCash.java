@@ -1,9 +1,8 @@
-package homeat.backend.domain.homeatcash;
+package homeat.backend.domain.homeatcash.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.Getter;
 
-import javax.annotation.processing.Generated;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package homeat.backend.domain.homeatcash;
+package homeat.backend.domain.homeatcash.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.Getter;

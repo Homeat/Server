@@ -1,4 +1,4 @@
-package homeat.backend.dto.post;
+package homeat.backend.domain.post.dto;
 
 import homeat.backend.domain.post.Tag;
 import lombok.AllArgsConstructor;

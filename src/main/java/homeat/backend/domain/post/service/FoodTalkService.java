@@ -1,8 +1,8 @@
-package homeat.backend.service.post;
+package homeat.backend.domain.post.service;
 
 import homeat.backend.domain.post.FoodTalk;
-import homeat.backend.dto.post.FoodTalkDTO;
-import homeat.backend.repository.post.FoodTalkRepository;
+import homeat.backend.domain.post.dto.FoodTalkDTO;
+import homeat.backend.domain.post.repository.FoodTalkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package homeat.backend.domain.post;
+package homeat.backend.domain.post.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
 import homeat.backend.user.domain.Member;
@@ -23,20 +23,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class InfoTalk extends BaseEntity {
+public class FoodTalk extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "infotalk_id")
+    @Column(name = "foodtalk_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private String title;
-    private String content;
+    private String name;
+    private String ingredient;
+    private String memo;
 
+    @Enumerated(EnumType.STRING)
+    private Tag tag;
 
     private Integer love;
     private Integer view;
@@ -44,4 +47,13 @@ public class InfoTalk extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Save save;
+
+    public void update(String name, String ingredient, String memo, Tag tag) {
+        this.name = name;
+        this.ingredient = ingredient;
+        this.memo = memo;
+        this.tag = tag;
+    }
+
+
 }

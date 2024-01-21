@@ -1,4 +1,4 @@
-package homeat.backend.domain.post;
+package homeat.backend.domain.post.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
 import javax.persistence.Column;

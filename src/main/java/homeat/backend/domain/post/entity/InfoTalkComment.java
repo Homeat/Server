@@ -1,5 +1,7 @@
-package homeat.backend.domain.post;
+package homeat.backend.domain.post.entity;
 
+import homeat.backend.global.common.domain.BaseEntity;
+import homeat.backend.user.domain.Member;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -19,20 +21,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FoodTalkComment {
+public class InfoTalkComment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "foodtalk_comment_id")
+    @Column(name = "infotalk_comment_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "foodtalk_id")
-    private FoodTalk foodTalk;
+    @JoinColumn(name = "infotalk_id")
+    private InfoTalk infoTalk;
 
-    /*@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    private Member member;*/
+    private Member member;
 
     private String content;
 }

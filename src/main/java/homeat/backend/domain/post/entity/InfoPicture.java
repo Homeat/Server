@@ -1,5 +1,6 @@
-package homeat.backend.domain.post;
+package homeat.backend.domain.post.entity;
 
+import homeat.backend.global.common.domain.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -19,16 +20,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FoodPicture {
+public class InfoPicture extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "foodPicture_id")
+    @Column(name = "infoPicture_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "foodtalk_id")
-    private FoodTalk foodTalk;
+    @JoinColumn(name = "infotalk_id")
+    private InfoTalk infoTalk;
 
     private String url;
 }

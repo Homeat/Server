@@ -1,4 +1,4 @@
-package homeat.backend.repository.post;
+package homeat.backend.domain.post.repository;
 
 import homeat.backend.domain.post.InfoTalk;
 import org.springframework.data.jpa.repository.JpaRepository;

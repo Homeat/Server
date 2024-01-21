@@ -1,12 +1,13 @@
-package homeat.backend.domain.post;
+package homeat.backend.domain.post.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,25 +19,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class InfoTalk {
+public class InfoHashTag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "infotalk_id")
+    @Column(name = "hashtag_id")
     private Long id;
 
-    /*@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;*/
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "infotalk_id")
+    private InfoTalk infoTalk;
 
-    private String title;
-    private String content;
-
-
-    private Integer like;
-    private Integer view;
-    private Integer commentNumber;
-
-    @Enumerated(EnumType.STRING)
-    private Save save;
+    private String tag;
 }

@@ -84,9 +84,9 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         );
     }
 
-    private ResponseEntity<Object> handleExceptionInternalFalse(Exception e, CommonErrorStatus errorCommonStatus,
+    private ResponseEntity<Object> handleExceptionInternalFalse(Exception e, CommonErrorStatus errorStatus,
                                                                 HttpHeaders headers, HttpStatus status, WebRequest request, String errorPoint) {
-        ApiPayload<Object> body = ApiPayload.onFailure(errorCommonStatus.getCode(),errorCommonStatus.getMessage(),errorPoint);
+        ApiPayload<Object> body = ApiPayload.onFailure(errorStatus.getCode(),errorStatus.getMessage(),errorPoint);
         return super.handleExceptionInternal(
                 e,
                 body,
@@ -96,26 +96,26 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         );
     }
 
-    private ResponseEntity<Object> handleExceptionInternalArgs(Exception e, HttpHeaders headers, CommonErrorStatus errorCommonStatus,
+    private ResponseEntity<Object> handleExceptionInternalArgs(Exception e, HttpHeaders headers, CommonErrorStatus errorStatus,
                                                                WebRequest request, Map<String, String> errorArgs) {
-        ApiPayload<Object> body = ApiPayload.onFailure(errorCommonStatus.getCode(),errorCommonStatus.getMessage(),errorArgs);
+        ApiPayload<Object> body = ApiPayload.onFailure(errorStatus.getCode(),errorStatus.getMessage(),errorArgs);
         return super.handleExceptionInternal(
                 e,
                 body,
                 headers,
-                errorCommonStatus.getHttpStatus(),
+                errorStatus.getHttpStatus(),
                 request
         );
     }
 
-    private ResponseEntity<Object> handleExceptionInternalConstraint(Exception e, CommonErrorStatus errorCommonStatus,
+    private ResponseEntity<Object> handleExceptionInternalConstraint(Exception e, CommonErrorStatus errorStatus,
                                                                      HttpHeaders headers, WebRequest request) {
-        ApiPayload<Object> body = ApiPayload.onFailure(errorCommonStatus.getCode(), errorCommonStatus.getMessage(), null);
+        ApiPayload<Object> body = ApiPayload.onFailure(errorStatus.getCode(), errorStatus.getMessage(), null);
         return super.handleExceptionInternal(
                 e,
                 body,
                 headers,
-                errorCommonStatus.getHttpStatus(),
+                errorStatus.getHttpStatus(),
                 request
         );
     }

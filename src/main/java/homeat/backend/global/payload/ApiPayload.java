@@ -19,8 +19,8 @@ public class ApiPayload<T> {
     private T data;
 
     // 성공
-    public static <T> ApiPayload<T> onSuccess(String code, String message, T data) {
-        return new ApiPayload<>(true, code, message, data);
+    public static <T> ApiPayload<T> onSuccess(BaseStatus status, T data) {
+        return new ApiPayload<>(true, status.getReasonHttpStatus().getCode(), status.getReasonHttpStatus().getMessage(), data);
     }
 
     // 실패

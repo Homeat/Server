@@ -1,6 +1,6 @@
 package homeat.backend.domain.post;
 
-import homeat.backend.domain.common.BaseEntity;
+import homeat.backend.global.common.domain.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;

@@ -1,4 +1,4 @@
-package homeat.backend.domain.homeatcash;
+package homeat.backend.domain.homeatcash.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.Getter;
@@ -7,11 +7,11 @@ import javax.persistence.*;
 
 @Entity
 @Getter
-public class CashPage_txt extends BaseEntity {
+public class BadgePage_txt extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cash_page_txt_id")
+    @Column(name = "badge_page_txt_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -22,5 +22,5 @@ public class CashPage_txt extends BaseEntity {
     @JoinColumn(name = "badge_img_id")
     private Badge_img badgeImg;
 
-    private Long week_cash;
+    private Long exceed_price;
 }

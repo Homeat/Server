@@ -1,6 +1,6 @@
 package homeat.backend.domain.post.dto;
 
-import homeat.backend.domain.post.Tag;
+import homeat.backend.domain.post.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

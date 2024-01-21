@@ -1,6 +1,5 @@
 package homeat.backend.domain.post.controller;
 
-import homeat.backend.domain.post.dto.FoodTalkDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
 import homeat.backend.domain.post.service.InfoTalkService;
 import lombok.RequiredArgsConstructor;

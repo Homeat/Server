@@ -1,6 +1,6 @@
 package homeat.backend.domain.post.service;
 
-import homeat.backend.domain.post.FoodTalk;
+import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.dto.FoodTalkDTO;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
 import lombok.RequiredArgsConstructor;

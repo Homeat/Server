@@ -3,6 +3,7 @@ package homeat.backend.domain.temp.controller;
 import homeat.backend.domain.temp.dto.TempResponse;
 import homeat.backend.domain.temp.service.TempQueryService;
 import homeat.backend.global.payload.ApiPayload;
+import homeat.backend.global.payload.CommonSuccessStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,12 +19,12 @@ public class TempController {
 
     @GetMapping("/test")
     public ApiPayload<TempResponse.TempTestDTO> testAPI() {
-        return ApiPayload.onSuccess("200", "테스트 API", TempConverter.toTempTestDTO());
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, TempConverter.toTempTestDTO());
     }
 
     @GetMapping("/exception")
     public ApiPayload<TempResponse.TempExceptionDTO> exceptionAPI(@RequestParam Integer flag) {
         tempQueryService.CheckFlag(flag);
-        return ApiPayload.onSuccess("200", "예외 API", TempConverter.toTempExceptionDTO(flag));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, TempConverter.toTempExceptionDTO(flag));
     }
 }

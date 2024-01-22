@@ -15,12 +15,12 @@ public class BadgePage_txt extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "is_success_id")
-    private IsSuccess isSuccess;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "badge_img_id")
-    private Badge_img badgeImg;
+    private Badge_img badge_img;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "week_id")
+    private Week week;
 
     private Long exceed_price;
 }

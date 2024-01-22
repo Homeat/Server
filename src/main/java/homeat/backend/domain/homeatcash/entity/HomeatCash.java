@@ -7,6 +7,8 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import homeat.backend.domain.user.entity.Member;
+
 @Entity
 @Getter
 public class HomeatCash extends BaseEntity {
@@ -16,13 +18,9 @@ public class HomeatCash extends BaseEntity {
     @Column(name = "homeat_cash_id")
     private Long id;
 
-    /*
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
-     */
-
-    private Long total_page;
 
     private Long total_success;
 
@@ -31,5 +29,5 @@ public class HomeatCash extends BaseEntity {
     private Long total_cash;
 
     @OneToMany(mappedBy = "homeatCash")
-    private List<IsSuccess> isSuccesses = new ArrayList<>();
+    private List<Week> weeks = new ArrayList<>();
 }

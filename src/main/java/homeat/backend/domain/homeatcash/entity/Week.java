@@ -21,10 +21,10 @@ public class Week extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private WeekStatus week_status;
 
-    @OneToOne(mappedBy = "week")
+    @OneToOne(mappedBy = "week", fetch = FetchType.LAZY)
     private BadgePage_txt badgePageTxt;
 
-    @OneToOne(mappedBy = "week")
+    @OneToOne(mappedBy = "week", fetch = FetchType.LAZY)
     private CashPage_txt cashPageTxt;
 
 

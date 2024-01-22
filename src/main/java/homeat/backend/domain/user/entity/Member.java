@@ -35,6 +35,6 @@ public class Member extends BaseEntity {
     @Column(name = "member_status")
     private MemberStatus status = MemberStatus.ACTIVE;
 
-    @OneToOne(mappedBy = "member")
+    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
     private HomeatCash homeatCash;
 }

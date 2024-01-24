@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -40,9 +41,14 @@ public class FoodTalk extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Tag tag;
 
-    private Integer love;
-    private Integer view;
-    private Integer commentNumber;
+    @Builder.Default
+    private Integer love = 0;
+
+    @Builder.Default
+    private Integer view = 0;
+
+    @Builder.Default
+    private Integer commentNumber = 0;
 
     @Enumerated(EnumType.STRING)
     private Save save;

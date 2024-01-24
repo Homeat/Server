@@ -15,12 +15,12 @@ import javax.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @Validated
-@RequestMapping("/v1/members")
+@RequestMapping("/v1/users")
 public class MemberController {
 
     private final MemberCommandService memberCommandService;
 
-    @PostMapping("/")
+    @PostMapping("/join")
     public ApiPayload<MemberResponse.JoinResultDTO> create(@RequestBody @Valid MemberRequest.JoinDto request) {
         Member member = memberCommandService.joinMember(request);
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member));

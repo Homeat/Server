@@ -4,7 +4,6 @@ import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 import homeat.backend.domain.user.entity.Member;
@@ -26,8 +25,4 @@ public class HomeatReport extends BaseEntity {
     private Member member;
 
     private Long total_success;
-
-    @OneToMany(mappedBy = "homeatReport", cascade = CascadeType.ALL) // CascadeType을 ALL로 설정해두면 HomeatReport를 persist할 때 Week의 객체들도 같이 persist됨.
-    private List<Week> weeks;
-
 }

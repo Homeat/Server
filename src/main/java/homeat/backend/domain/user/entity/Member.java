@@ -34,7 +34,4 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "member_status")
     private MemberStatus status = MemberStatus.ACTIVE;
-
-    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
-    private HomeatReport homeatReport;
 }

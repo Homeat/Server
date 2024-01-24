@@ -24,3 +24,4 @@ public class Management extends BaseEntity {
     private Long targetCost;
 
 }
+

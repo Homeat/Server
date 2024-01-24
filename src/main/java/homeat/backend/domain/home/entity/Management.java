@@ -1,4 +1,4 @@
-package homeat.backend.domain.home;
+package homeat.backend.domain.home.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;

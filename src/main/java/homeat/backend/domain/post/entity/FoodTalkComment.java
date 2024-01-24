@@ -1,7 +1,7 @@
 package homeat.backend.domain.post.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
-import homeat.backend.user.domain.Member;
+import homeat.backend.domain.user.entity.Member;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

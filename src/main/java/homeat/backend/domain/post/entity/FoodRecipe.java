@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -30,7 +31,8 @@ public class FoodRecipe extends BaseEntity {
     private String recipe;
     private String ingredient;
     private String tip;
-    private Integer step;
+    @Builder.Default
+    private Integer step = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "foodtalk_id")

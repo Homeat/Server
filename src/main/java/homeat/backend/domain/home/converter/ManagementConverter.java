@@ -1,6 +1,6 @@
 package homeat.backend.domain.home.converter;
 
-import homeat.backend.domain.home.Management;
+import homeat.backend.domain.home.entity.Management;
 import homeat.backend.domain.home.dto.ManagementRequestDTO;
 import homeat.backend.domain.home.dto.ManagementResponseDTO;
 

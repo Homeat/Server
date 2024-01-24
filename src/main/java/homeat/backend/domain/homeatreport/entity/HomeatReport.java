@@ -28,7 +28,6 @@ public class HomeatReport extends BaseEntity {
     private Long total_success;
 
     @OneToMany(mappedBy = "homeatReport", cascade = CascadeType.ALL) // CascadeType을 ALL로 설정해두면 HomeatReport를 persist할 때 Week의 객체들도 같이 persist됨.
-    private List<Week> weeks = new ArrayList<>();
+    private List<Week> weeks;
 
-    // 양방향 연관관계 편의 메소드
 }

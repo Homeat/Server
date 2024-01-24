@@ -1,4 +1,4 @@
-package homeat.backend.domain.homeatcash.entity;
+package homeat.backend.domain.homeatreport.entity;
 
 public enum WeekStatus {
     SUCCESS, FAIL, UNDO

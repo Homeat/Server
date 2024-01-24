@@ -2,6 +2,7 @@ package homeat.backend.domain.post.service;
 
 import homeat.backend.domain.post.dto.InfoTalkDTO;
 import homeat.backend.domain.post.entity.InfoTalk;
+import homeat.backend.domain.post.entity.Save;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,26 @@ public class InfoTalkService {
         InfoTalk infoTalk = InfoTalk.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
+                .save(Save.저장)
                 .build();
 
         infoTalkRepository.save(infoTalk);
 
 
         return ResponseEntity.ok("정보토크 저장완료");
+    }
+
+    public ResponseEntity<?> tempSaveInfoTalk(InfoTalkDTO dto) {
+        InfoTalk infoTalk = InfoTalk.builder()
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .save(Save.임시저장)
+                .build();
+
+        infoTalkRepository.save(infoTalk);
+
+
+        return ResponseEntity.ok("정보토크 임시저장완료");
     }
 
     @Transactional
@@ -51,4 +66,12 @@ public class InfoTalkService {
 
         return ResponseEntity.ok(id + " 번 게시글 수정완료");
     }
+
+    public ResponseEntity<?> getInfoTalk(Long id) {
+
+        InfoTalk infoTalk = infoTalkRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+        return ResponseEntity.ok(infoTalk);
+    }
+
 }

@@ -5,6 +5,7 @@ import homeat.backend.domain.post.service.InfoTalkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,14 @@ public class InfoTalkController {
         return infoTalkService.saveInfoTalk(dto);
     }
 
+    /**
+     * 정보토크 임시저장
+     */
+    @PostMapping("/tempSave")
+    public ResponseEntity<?> tempSaveInfoTalk(@RequestBody InfoTalkDTO dto) {
+        return infoTalkService.tempSaveInfoTalk(dto);
+    }
+
 
     /**
      * 정보토크 삭제
@@ -42,5 +51,13 @@ public class InfoTalkController {
     @PatchMapping("/update/{id}")
     public ResponseEntity<?> updateInfoTalk(@RequestBody InfoTalkDTO dto, @PathVariable("id") Long id) {
         return infoTalkService.updateInfoTalk(dto, id);
+    }
+
+    /**
+     * 정보토크 조회
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getInfoTalk(@PathVariable("id") Long id) {
+        return infoTalkService.getInfoTalk(id);
     }
 }

@@ -1,6 +1,6 @@
 package homeat.backend.domain.user.entity;
 
-import homeat.backend.domain.homeatcash.entity.HomeatCash;
+import homeat.backend.domain.homeatreport.entity.HomeatReport;
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;
 
@@ -36,5 +36,5 @@ public class Member extends BaseEntity {
     private MemberStatus status = MemberStatus.ACTIVE;
 
     @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
-    private HomeatCash homeatCash;
+    private HomeatReport homeatReport;
 }

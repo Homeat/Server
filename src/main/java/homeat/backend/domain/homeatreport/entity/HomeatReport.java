@@ -1,7 +1,7 @@
-package homeat.backend.domain.homeatcash.entity;
+package homeat.backend.domain.homeatreport.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
-import lombok.Getter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -11,11 +11,14 @@ import homeat.backend.domain.user.entity.Member;
 
 @Entity
 @Getter
-public class HomeatCash extends BaseEntity {
+@AllArgsConstructor
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class HomeatReport extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "homeat_cash_id")
+    @Column(name = "homeat_report_id")
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -24,10 +27,8 @@ public class HomeatCash extends BaseEntity {
 
     private Long total_success;
 
-    private Long cont_success;
-
-    private Long total_cash;
-
-    @OneToMany(mappedBy = "homeatCash")
+    @OneToMany(mappedBy = "homeatReport", cascade = CascadeType.ALL) // CascadeType을 ALL로 설정해두면 HomeatReport를 persist할 때 Week의 객체들도 같이 persist됨.
     private List<Week> weeks = new ArrayList<>();
+
+    // 양방향 연관관계 편의 메소드
 }

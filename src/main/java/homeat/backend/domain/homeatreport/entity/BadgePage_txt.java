@@ -1,12 +1,15 @@
-package homeat.backend.domain.homeatcash.entity;
+package homeat.backend.domain.homeatreport.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
-import lombok.Getter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
+@AllArgsConstructor
+@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BadgePage_txt extends BaseEntity {
 
     @Id

@@ -11,7 +11,6 @@ import lombok.Setter;
 public class FoodTalkDTO {
 
     private String name;
-    private String ingredient;
     private String memo;
     private Tag tag;
 }

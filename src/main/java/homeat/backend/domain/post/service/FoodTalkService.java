@@ -20,7 +20,6 @@ public class FoodTalkService {
     public ResponseEntity<?> saveFoodTalk(FoodTalkDTO dto) {
         FoodTalk foodTalk = FoodTalk.builder()
                 .name(dto.getName())
-                .ingredient(dto.getIngredient())
                 .memo(dto.getMemo())
                 .tag(dto.getTag())
                 .build();
@@ -50,7 +49,7 @@ public class FoodTalkService {
         FoodTalk foodTalk = foodTalkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
 
-        foodTalk.update(dto.getName(), dto.getIngredient(), dto.getMemo(), dto.getTag());
+        foodTalk.update(dto.getName(), dto.getMemo(), dto.getTag());
 
         return ResponseEntity.ok(id + " 번 게시글 수정완료");
     }

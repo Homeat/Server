@@ -1,11 +1,8 @@
 package homeat.backend.domain.post.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
-import homeat.backend.domain.user.entity.Member;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,35 +20,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FoodTalk extends BaseEntity {
+public class FoodRecipe extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "foodtalk_id")
+    @Column(name = "food_recipe_id")
     private Long id;
 
+    private String recipe;
+    private String ingredient;
+    private String tip;
+    private Integer step;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
-
-    private String name;
-    private String memo;
-
-    @Enumerated(EnumType.STRING)
-    private Tag tag;
-
-    private Integer love;
-    private Integer view;
-    private Integer commentNumber;
-
-    @Enumerated(EnumType.STRING)
-    private Save save;
-
-    public void update(String name, String memo, Tag tag) {
-        this.name = name;
-        this.memo = memo;
-        this.tag = tag;
-    }
-
-
+    @JoinColumn(name = "foodtalk_id")
+    private FoodTalk foodTalk;
 }

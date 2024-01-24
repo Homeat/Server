@@ -1,6 +1,6 @@
 package homeat.backend.domain.home.repository;
 
-import homeat.backend.domain.home.entity.Management;
+import homeat.backend.domain.home.Management;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

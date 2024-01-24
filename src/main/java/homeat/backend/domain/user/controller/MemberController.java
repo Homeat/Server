@@ -21,8 +21,8 @@ public class MemberController {
     private final MemberCommandService memberCommandService;
 
     @PostMapping("/")
-    public ApiPayload<MemberResponse.CreateResultDTO> create(@RequestBody @Valid MemberRequest.CreateDto request) {
-        Member member = memberCommandService.createMember(request);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toCreateResultDTO(member));
+    public ApiPayload<MemberResponse.JoinResultDTO> create(@RequestBody @Valid MemberRequest.JoinDto request) {
+        Member member = memberCommandService.joinMember(request);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member));
     }
 }

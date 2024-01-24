@@ -16,7 +16,7 @@ public class MemberCommandService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public Member createMember(MemberRequest.CreateDto request) {
+    public Member joinMember(MemberRequest.JoinDto request) {
 
         Member newMember = MemberConverter.toMember(request);
         return memberRepository.save(newMember);

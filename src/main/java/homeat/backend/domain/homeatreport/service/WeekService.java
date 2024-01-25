@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WeekService {
 
-    @Autowired
     private final WeekRepository weekRepository;
 
     /**

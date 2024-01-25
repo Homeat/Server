@@ -1,6 +1,5 @@
 package homeat.backend.domain.user.entity;
 
-import homeat.backend.domain.homeatreport.entity.HomeatReport;
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;
 

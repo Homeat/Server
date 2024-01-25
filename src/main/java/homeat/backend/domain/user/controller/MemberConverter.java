@@ -8,18 +8,18 @@ import java.time.LocalDateTime;
 
 public class MemberConverter {
 
-    public static MemberResponse.JoinResultDTO toJoinResultDTO(Member member) {
-        return MemberResponse.JoinResultDTO.builder()
-                .memberId(member.getId())
-                .createdAt(LocalDateTime.now())
-                .build();
-    }
-
     public static Member toMember(MemberRequest.JoinDto request) {
         return Member.builder()
                 .email(request.getEmail())
                 .password(request.getPassword())
                 .nickname(request.getNickname())
+                .build();
+    }
+
+    public static MemberResponse.JoinResultDTO toJoinResultDTO(Member member) {
+        return MemberResponse.JoinResultDTO.builder()
+                .memberId(member.getId())
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 }

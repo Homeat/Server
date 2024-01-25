@@ -23,18 +23,7 @@ public class MemberCommandService {
     @Transactional
     public Member joinMember(MemberRequest.JoinDto request) {
 
-        // 중복 이메일 처리
-        memberRepository.findByEmail(request.getEmail())
-                .ifPresent(member -> {
-                    throw new MemberHandler(MemberErrorStatus.EXIST_EMAIL);
-                });
-
-        // 중복 닉네임 처리
-        memberRepository.findByNickname(request.getNickname())
-                .ifPresent(member -> {
-                    throw new MemberHandler(MemberErrorStatus.EXIST_NICKNAME);
-                });
-
+        // 중복 이메일, 닉네임 -> dto 에서 처리
         // 예외 없음
         request.setPassword(encoder.encode(request.getPassword()));
         Member newMember = MemberConverter.toMember(request);

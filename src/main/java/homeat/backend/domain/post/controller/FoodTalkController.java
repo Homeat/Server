@@ -5,6 +5,7 @@ import homeat.backend.domain.post.service.FoodTalkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +21,7 @@ public class FoodTalkController {
     private final FoodTalkService foodTalkService;
 
     /**
-     * 음식토크 저장
+     * 집밥토크 저장
      */
     @PostMapping("/save")
     public ResponseEntity<?> saveFoodTalk(@RequestBody FoodTalkDTO dto) {
@@ -28,7 +29,15 @@ public class FoodTalkController {
     }
 
     /**
-     * 음식토크 삭제
+     * 집밥토크 임시저장
+     */
+    @PostMapping("/tempSave")
+    public ResponseEntity<?> tempSaveFoodTalk(@RequestBody FoodTalkDTO dto) {
+        return foodTalkService.tempSaveFoodTalk(dto);
+    }
+
+    /**
+     * 집밥토크 삭제
      */
     @DeleteMapping("delete/{id}")
     public ResponseEntity<?> deleteFoodTalk(@PathVariable("id") Long id) {
@@ -41,5 +50,13 @@ public class FoodTalkController {
     @PatchMapping("/update/{id}")
     public ResponseEntity<?> updateFoodTalk(@RequestBody FoodTalkDTO dto, @PathVariable("id") Long id) {
         return foodTalkService.updateFoodTalk(dto, id);
+    }
+
+    /**
+     * 집밥토크 조회
+     */
+    @GetMapping("{id}")
+    public ResponseEntity<?> getFoodTalk(@PathVariable("id")Long id) {
+        return foodTalkService.getFoodTalk(id);
     }
 }

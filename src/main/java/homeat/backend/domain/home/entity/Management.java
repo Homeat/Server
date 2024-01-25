@@ -1,4 +1,4 @@
-package homeat.backend.domain.home;
+package homeat.backend.domain.home.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;
@@ -24,3 +24,4 @@ public class Management extends BaseEntity {
     private Long targetCost;
 
 }
+

@@ -4,7 +4,6 @@ import homeat.backend.domain.homeatreport.entity.Week;
 import homeat.backend.domain.homeatreport.entity.WeekStatus;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

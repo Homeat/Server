@@ -2,10 +2,8 @@ package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.homeatreport.entity.HomeatReport;
 import homeat.backend.domain.homeatreport.repository.HomeatReportRepository;
-import homeat.backend.domain.post.entity.InfoTalk;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

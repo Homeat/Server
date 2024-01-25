@@ -25,4 +25,10 @@ public class MemberController {
         Member member = memberCommandService.joinMember(request);
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member));
     }
+
+    @PostMapping("/login")
+    public ApiPayload<MemberResponse.LoginResultDTO> login(@RequestBody @Valid MemberRequest.LoginDto request) {
+        String token = memberCommandService.loginMember(request);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toLoginResultDTO(token));
+    }
 }

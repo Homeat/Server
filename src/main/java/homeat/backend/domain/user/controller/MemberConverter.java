@@ -22,4 +22,11 @@ public class MemberConverter {
                 .createdAt(LocalDateTime.now())
                 .build();
     }
+
+    public static MemberResponse.LoginResultDTO toLoginResultDTO(String token) {
+        return MemberResponse.LoginResultDTO.builder()
+                .token(token)
+//                .expiredAt(LocalDateTime.now()+expriedTime)
+                .build();
+    }
 }

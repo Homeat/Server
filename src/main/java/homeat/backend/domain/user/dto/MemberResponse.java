@@ -17,4 +17,13 @@ public class MemberResponse {
         Long memberId;
         LocalDateTime createdAt;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LoginResultDTO {
+        String token;
+//        LocalDateTime expiredAt;
+    }
 }

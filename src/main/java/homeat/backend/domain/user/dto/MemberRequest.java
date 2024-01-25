@@ -25,4 +25,14 @@ public class MemberRequest {
         @ExistNickname
         String nickname;
     }
+
+    @Getter
+    public static class LoginDto {
+        @NotBlank
+        @Email
+        String email;
+
+        @NotBlank
+        String password;
+    }
 }

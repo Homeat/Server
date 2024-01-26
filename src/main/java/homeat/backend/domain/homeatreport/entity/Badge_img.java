@@ -18,4 +18,5 @@ public class Badge_img extends BaseEntity {
     private Long id;
 
     private String image_url;
+
 }

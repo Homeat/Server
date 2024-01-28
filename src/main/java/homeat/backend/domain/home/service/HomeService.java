@@ -1,9 +1,8 @@
 package homeat.backend.domain.home.service;
 
-import homeat.backend.domain.home.dto.ManagementRequestDTO;
-import homeat.backend.domain.home.repository.ManagementRepository;
+import homeat.backend.domain.home.repository.DailyExpenseRepository;
+import homeat.backend.domain.home.repository.ReceiptRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,7 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ManagementService {
 
-    private final ManagementRepository managementRepository;
+    private final DailyExpenseRepository dailyExpenseRepository;
+    private final ReceiptRepository receiptRepository;
 
 //    @Transactional
 //    public ResponseEntity<?> saveExpense(ManagementRequestDTO dto) {

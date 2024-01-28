@@ -9,6 +9,6 @@ public class ManagementRequestDTO {
     @Getter
     public static class ExpenseDTO {
         @NotBlank
-        private Long expense;
+        private Long targetExpense;
     }
 }

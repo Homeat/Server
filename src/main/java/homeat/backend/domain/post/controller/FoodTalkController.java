@@ -3,6 +3,7 @@ package homeat.backend.domain.post.controller;
 import homeat.backend.domain.post.dto.FoodTalkDTO;
 import homeat.backend.domain.post.service.FoodTalkService;
 import io.swagger.v3.oas.annotations.Operation;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,7 +27,7 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 저장 api")
     @PostMapping("/save")
-    public ResponseEntity<?> saveFoodTalk(@RequestBody FoodTalkDTO dto) {
+    public ResponseEntity<?> saveFoodTalk(@RequestBody @Valid FoodTalkDTO dto) {
         return foodTalkService.saveFoodTalk(dto);
     }
 
@@ -35,7 +36,7 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 임시저장 api")
     @PostMapping("/tempSave")
-    public ResponseEntity<?> tempSaveFoodTalk(@RequestBody FoodTalkDTO dto) {
+    public ResponseEntity<?> tempSaveFoodTalk(@RequestBody @Valid FoodTalkDTO dto) {
         return foodTalkService.tempSaveFoodTalk(dto);
     }
 
@@ -53,7 +54,7 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시글 수정 api")
     @PatchMapping("/update/{id}")
-    public ResponseEntity<?> updateFoodTalk(@RequestBody FoodTalkDTO dto, @PathVariable("id") Long id) {
+    public ResponseEntity<?> updateFoodTalk(@RequestBody @Valid FoodTalkDTO dto, @PathVariable("id") Long id) {
         return foodTalkService.updateFoodTalk(dto, id);
     }
 

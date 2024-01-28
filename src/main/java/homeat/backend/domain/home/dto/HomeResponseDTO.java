@@ -1,17 +1,31 @@
 package homeat.backend.domain.home.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-public class ManagementResponseDTO {
+import java.time.LocalDate;
+import java.util.List;
+
+public class HomeResponseDTO {
 
     @Builder
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ExpenseResultDTO {
-        Long expense;
+        private Long expense;
     }
+
+//    public static class HomeResultDTO {
+//
+//    }
+
+//    @Builder
+//    @Getter
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+//    public static class CalendarResultDTO {
+//        private LocalDate date;
+//        private Long todayJipbapPrice;
+//        private Long todayOutPrice;
+//    }
 }

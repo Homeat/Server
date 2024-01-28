@@ -59,4 +59,7 @@ public class FoodTalkController {
     public ResponseEntity<?> getFoodTalk(@PathVariable("id")Long id) {
         return foodTalkService.getFoodTalk(id);
     }
+
+
+
 }

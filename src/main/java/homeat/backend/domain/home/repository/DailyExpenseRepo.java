@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DailyExpenseRepository extends JpaRepository<DailyExpense, Long> {
-    List<DailyExpense> findByYearAndMonth(Integer year, Integer month);
+public interface DailyExpenseRepo extends JpaRepository<DailyExpense, Long>, DailyExpenseRepoCST {
+//    List<DailyExpense> findByYearAndMonth(Integer year, Integer month);
 }

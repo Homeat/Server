@@ -2,6 +2,7 @@ package homeat.backend.domain.post.controller;
 
 import homeat.backend.domain.post.dto.FoodTalkCommentDTO;
 import homeat.backend.domain.post.service.FoodTalkCommentService;
+import io.swagger.v3.oas.annotations.Operation;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ public class FoodTalkCommentController {
     /**
      * 댓글 작성
      */
+    @Operation(summary = "집밥토크 댓글 작성 api")
     @PostMapping("/save/{id}")
     public ResponseEntity<?> saveFoodComment(@RequestBody @Valid FoodTalkCommentDTO dto, @PathVariable("id") Long id) {
         return foodTalkCommentService.saveFoodComment(dto, id);
@@ -32,6 +34,7 @@ public class FoodTalkCommentController {
     /**
      * 댓글 삭제
      */
+    @Operation(summary = "집밥토크 댓글 삭제 api")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteFoodComment(@PathVariable("id") Long id) {
         return foodTalkCommentService.deleteFoodComment(id);

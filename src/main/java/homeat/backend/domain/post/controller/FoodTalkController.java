@@ -61,7 +61,7 @@ public class FoodTalkController {
     /**
      * 집밥토크 조회
      */
-    @Operation(summary = "집밥토크 조회 api")
+    @Operation(summary = "집밥토크 게시글 1개 조회 api")
     @GetMapping("{id}")
     public ResponseEntity<?> getFoodTalk(@PathVariable("id")Long id) {
         return foodTalkService.getFoodTalk(id);

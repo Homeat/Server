@@ -1,16 +1,15 @@
 package homeat.backend.domain.post.dto;
 
-import homeat.backend.domain.post.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
-public class FoodTalkDTO {
+@NoArgsConstructor
+public class FoodTalkCommentDTO {
 
-    private String name;
-    private String memo;
-    private Tag tag;
+    private String content;
 }

@@ -35,22 +35,25 @@ public class FoodTalk extends BaseEntity {
     private Member member;
 
     private String name;
-    private String ingredient;
     private String memo;
 
     @Enumerated(EnumType.STRING)
     private Tag tag;
 
-    private Integer love;
-    private Integer view;
-    private Integer commentNumber;
+    @Builder.Default
+    private Integer love = 0;
+
+    @Builder.Default
+    private Integer view = 0;
+
+    @Builder.Default
+    private Integer commentNumber = 0;
 
     @Enumerated(EnumType.STRING)
     private Save save;
 
-    public void update(String name, String ingredient, String memo, Tag tag) {
+    public void update(String name, String memo, Tag tag) {
         this.name = name;
-        this.ingredient = ingredient;
         this.memo = memo;
         this.tag = tag;
     }

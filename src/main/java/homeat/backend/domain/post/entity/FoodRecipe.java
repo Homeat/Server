@@ -1,11 +1,8 @@
 package homeat.backend.domain.post.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
-import homeat.backend.domain.user.entity.Member;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,33 +21,20 @@ import org.hibernate.annotations.ColumnDefault;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class InfoTalk extends BaseEntity {
+public class FoodRecipe extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "infotalk_id")
+    @Column(name = "food_recipe_id")
     private Long id;
 
+    private String recipe;
+    private String ingredient;
+    private String tip;
+    @Builder.Default
+    private Integer step = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
-
-    private String title;
-    private String content;
-
-
-    @Builder.Default
-    private Integer love = 0;
-    @Builder.Default
-    private Integer view = 0;
-    @Builder.Default
-    private Integer commentNumber = 0;
-
-    @Enumerated(EnumType.STRING)
-    private Save save;
-
-    public void update(String title, String content) {
-        this.title = title;
-        this.content = content;
-    }
+    @JoinColumn(name = "foodtalk_id")
+    private FoodTalk foodTalk;
 }

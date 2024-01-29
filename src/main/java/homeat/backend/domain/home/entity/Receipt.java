@@ -1,4 +1,4 @@
-package homeat.backend.domain.home;
+package homeat.backend.domain.home.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;
@@ -17,9 +17,9 @@ public class Receipt extends BaseEntity {
     @Column(name = "receipt_id")
     private Long id;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "management_id")
-//    private Managerment managerment;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "daily_expense_id")
+    private DailyExpense dailyExpense;
 
     @Enumerated(EnumType.STRING)
     private CostType costType;

@@ -42,6 +42,9 @@ public class FoodTalkComment extends BaseEntity {
 
     private String content;
 
+    // 삭제 유무
+    private Boolean removeStatus;
+
     @OneToMany(mappedBy = "foodTalkComment", cascade = CascadeType.ALL)
     private List<FoodTalkReply> replyList = new ArrayList<>();
 }

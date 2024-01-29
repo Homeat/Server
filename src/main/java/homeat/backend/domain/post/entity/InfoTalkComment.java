@@ -42,6 +42,9 @@ public class InfoTalkComment extends BaseEntity {
 
     private String content;
 
+    // 삭제 유무
+    private Boolean removeStatus;
+
     @OneToMany(mappedBy = "infoTalkComment", cascade = CascadeType.ALL)
     private List<InfoTalkReply> replyList = new ArrayList<>();
 }

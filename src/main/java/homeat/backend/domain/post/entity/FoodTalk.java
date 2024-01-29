@@ -1,5 +1,6 @@
 package homeat.backend.domain.post.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.global.common.domain.BaseEntity;
 import homeat.backend.domain.user.entity.Member;
 import java.util.ArrayList;

@@ -1,11 +1,13 @@
 package homeat.backend.domain.post.service;
 
+import homeat.backend.domain.post.dto.queryDto.FoodTalkResponse;
 import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.dto.FoodTalkDTO;
 import homeat.backend.domain.post.entity.Save;
 import homeat.backend.domain.post.repository.FoodPictureRepository;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
+import homeat.backend.domain.post.repository.querydsl.FoodTalkRepositoryCustom;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional(readOnly = true)
@@ -26,7 +29,9 @@ public class FoodTalkService {
 
     // 게시글 작성
     @Transactional
-    public ResponseEntity<?> saveFoodTalk(FoodTalkDTO dto, List<String> imgPaths) {
+    public ResponseEntity<?> saveFoodTalk(FoodTalkDTO dto, List<MultipartFile> multipartFiles) {
+        List<String> imgPaths = s3Service.upload(multipartFiles);
+        System.out.println("IMG 경로들 : " + imgPaths);
         postBlankCheck(imgPaths);
 
         FoodTalk foodTalk = FoodTalk.builder()
@@ -47,7 +52,7 @@ public class FoodTalkService {
             imgList.add(foodPicture.getUrl());
         }
 
-        return ResponseEntity.ok("집밥토크 저장완료");
+        return ResponseEntity.ok(foodTalk.getId() + "번 집밥토크 저장완료");
     }
     private void postBlankCheck(List<String> imgPaths) {
         if(imgPaths == null || imgPaths.isEmpty()){ //.isEmpty()도 되는지 확인해보기
@@ -95,10 +100,9 @@ public class FoodTalkService {
 
     public ResponseEntity<?> getFoodTalk(Long id) {
 
-        FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+        FoodTalk response = foodTalkRepository.findByFoodTalkId(id);
 
-        return ResponseEntity.ok(foodTalk);
+        return ResponseEntity.ok(response);
     }
 
 

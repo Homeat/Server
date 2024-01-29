@@ -27,12 +27,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class FoodTalkController {
 
     private final FoodTalkService foodTalkService;
-    private final S3Service s3Service;
 
     /**
      * 집밥토크 저장
      */
-    @Operation(summary = "집밥토크 저장 api")
+    @Operation(summary = "집밥토크 저장 api, 스웨거 사용 X")
     @PostMapping(value = "/save", consumes = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> saveFoodTalk(@RequestPart("content") FoodTalkDTO dto,
@@ -41,10 +40,7 @@ public class FoodTalkController {
         if (multipartFiles == null) {
             throw new IllegalArgumentException("사진이 없습니다");
         }
-        List<String> imgPaths = s3Service.upload(multipartFiles);
-        System.out.println("IMG 경로들 : " + imgPaths);
-
-        return foodTalkService.saveFoodTalk(dto, imgPaths);
+        return foodTalkService.saveFoodTalk(dto, multipartFiles);
     }
 
     /**

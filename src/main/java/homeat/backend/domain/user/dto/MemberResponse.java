@@ -26,4 +26,13 @@ public class MemberResponse {
         String token;
 //        LocalDateTime expiredAt;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MyPageResultDTO {
+        String email;
+        String nickname;
+    }
 }

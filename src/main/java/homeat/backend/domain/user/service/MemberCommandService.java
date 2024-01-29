@@ -6,7 +6,7 @@ import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.handler.MemberErrorStatus;
 import homeat.backend.domain.user.handler.MemberHandler;
 import homeat.backend.domain.user.repository.MemberRepository;
-import homeat.backend.global.security.jwt.JwtProvider;
+import homeat.backend.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class MemberCommandService {
 
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder encoder;
-    private final JwtProvider jwtProvider;
+    private final JwtUtil jwtUtil;
 
     @Transactional
     public Member joinMember(MemberRequest.JoinDto request) {
@@ -44,6 +44,6 @@ public class MemberCommandService {
             throw new MemberHandler(MemberErrorStatus.INVALID_PASSWORD);
         }
 
-        return jwtProvider.createJwt(selectedMember.getId());
+        return jwtUtil.createJwt(selectedMember.getId());
     }
 }

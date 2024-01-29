@@ -29,4 +29,11 @@ public class MemberConverter {
 //                .expiredAt(LocalDateTime.now()+expriedTime)
                 .build();
     }
+
+    public static MemberResponse.MyPageResultDTO toMyPageResultDTO(Member member) {
+        return MemberResponse.MyPageResultDTO.builder()
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .build();
+    }
 }

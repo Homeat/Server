@@ -95,11 +95,12 @@ public class InfoTalkService {
         return ResponseEntity.ok(id + " 번 게시글 수정완료");
     }
 
+    // 정보토크 게시글 1개 조회
     public ResponseEntity<?> getInfoTalk(Long id) {
 
-        InfoTalk infoTalk = infoTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
-        return ResponseEntity.ok(infoTalk);
+        InfoTalk response = infoTalkRepository.findByInfoTalkId(id);
+
+        return ResponseEntity.ok(response);
     }
 
 }

@@ -1,6 +1,5 @@
 package homeat.backend.domain.post.service;
 
-import homeat.backend.domain.post.dto.queryDto.FoodTalkResponse;
 import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.dto.FoodTalkDTO;

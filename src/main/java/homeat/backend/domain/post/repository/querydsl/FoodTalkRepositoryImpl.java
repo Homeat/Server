@@ -4,13 +4,7 @@ import static homeat.backend.domain.post.entity.QFoodPicture.foodPicture;
 import static homeat.backend.domain.post.entity.QFoodTalk.*;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import homeat.backend.domain.post.dto.queryDto.FoodTalkResponse;
-import homeat.backend.domain.post.dto.queryDto.QFoodTalkResponse;
-import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.FoodTalk;
-import homeat.backend.domain.post.entity.QFoodPicture;
-import homeat.backend.domain.post.entity.QFoodTalk;
-import java.util.List;
 import javax.persistence.EntityManager;
 
 public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {

@@ -8,11 +8,14 @@ import homeat.backend.domain.home.repository.DailyExpenseRepo;
 import homeat.backend.domain.home.repository.ReceiptRepo;
 import homeat.backend.domain.homeatreport.entity.Week;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
+import homeat.backend.domain.user.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,16 +52,24 @@ public class HomeService {
     /**
      * 지출 확인
      */
-//    public ResponseEntity<List<HomeResponseDTO.CalendarResultDTO>> getCalendar(Integer year, Integer month) {
-//        // 해당 연, 월의 데이터 조회
-//        List<DailyExpense> calendarData = dailyExpenseRepo.findByYearAndMonth(year, month);
-//        // 조회된 데이터를 DTO로 변환
-//        List<HomeResponseDTO.CalendarResultDTO> result = new ArrayList<>();
-//        for (DailyExpense data : calendarData) {
-//            HomeResponseDTO.CalendarResultDTO dto = HomeConverter.toCalendarResult(data);
-//            result.add(dto);
-//        }
-//        return ResponseEntity.ok(result);
-//    }
+    public ResponseEntity<List<HomeResponseDTO.CalendarResultDTO>> getCalendar(Integer year, Integer month, Member member) {
+
+        // 해당 연도의 월 시작일과 마지막 날짜
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        // 해당 연, 월의 데이터 조회
+        List<DailyExpense> calendarData = dailyExpenseRepo.findByMemberIdAndCreatedAtBetween(member.getId(), startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX));
+
+        // 조회된 데이터를 DTO로 변환
+        List<HomeResponseDTO.CalendarResultDTO> result = new ArrayList<>();
+        for (DailyExpense data : calendarData) {
+            if (data.getTodayJipbapPrice() != 0 || data.getTodayOutPrice() != 0) {
+                HomeResponseDTO.CalendarResultDTO dto = HomeConverter.toCalendarResult(data);
+                result.add(dto);
+            }
+        }
+        return ResponseEntity.ok(result);
+    }
 
 }

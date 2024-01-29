@@ -12,7 +12,6 @@ spring:
       hibernate:
         format_sql: true
         highlight_sql: true
-
 ## s3설정
 cloud:
   aws:
@@ -25,3 +24,7 @@ cloud:
       auto: false
     region:
       static: ap-northeast-2
+
+jwt:
+  secret:
+    key: ${jwt.secret.key}

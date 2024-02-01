@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -45,21 +46,21 @@ public class HomeController {
 
 
     /**
-     *  지출(영수증) 추가 후, 데이터 저장
+     *  OCR 영수증 처리
      */
 //    @PostMapping("/receipt")
-//    public ResponseEntity<?> createExpense(@RequestBody HomeRequestDTO.ReceiptDTO dto) {
-//        return homeService.
+//    public ResponseEntity<?> processReceipt(@RequestParam("file")MultipartFile file) {
+//
 //    }
 
     /**
      * 지출 확인(해당 월 데이터) -> 하루 데이터를 리스트로 전송(목표 금액은 없음)
      */
     @Operation(summary = "연월별 데이터 조회 api")
-    @GetMapping("/check/{year}/{month}")
+    @GetMapping("/check")
     public ResponseEntity<?> getCalendar(
-            @PathVariable("year") Integer year,
-            @PathVariable("month") Integer month,
+            @RequestParam("year") Integer year,
+            @RequestParam("month") Integer month,
             Authentication authentication) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
         return homeService.getCalendar(year, month, member);

@@ -87,9 +87,19 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 최신순 조회, lastFoodTalkId 보다 작은 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/latest")
-    public ResponseEntity<?> getFoodTalksLatest(@RequestParam Long lastFoodTalkId) {
-        return foodTalkService.getFoodTalksLatest(lastFoodTalkId);
+    public ResponseEntity<?> getFoodTalkLatest(@RequestParam Long lastFoodTalkId) {
+        return foodTalkService.getFoodTalkLatest(lastFoodTalkId);
     }
+
+    /**
+     * 무한 스크롤 오래된 순 조회
+     */
+    @Operation(summary = "집밥토크 오래된 순 조회, lastFoodTalkId 보다 큰 6개 게시물을 보여줍니다.")
+    @GetMapping("/posts/oldest")
+    public ResponseEntity<?> getFoodTalkOldest(@RequestParam Long OldestFoodTalkId) {
+        return foodTalkService.getFoodTalkOldest(OldestFoodTalkId);
+    }
+
 
 
     /**

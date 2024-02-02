@@ -105,12 +105,20 @@ public class FoodTalkService {
     }
 
 
-    public ResponseEntity<?> getFoodTalksLatest(Long lastFoodTalkId) {
+    public ResponseEntity<?> getFoodTalkLatest(Long lastFoodTalkId) {
 
         PageRequest pageRequest = PageRequest.of(0, 6);
 
         return ResponseEntity.ok().body(foodTalkRepository.findByIdLessThanOrderByIdDesc(lastFoodTalkId,pageRequest));
 
 
+    }
+
+    public ResponseEntity<?> getFoodTalkOldest(Long OldestFoodTalkId) {
+
+
+        PageRequest pageRequest = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok().body(foodTalkRepository.findByIdGreaterThanOrderByIdAsc(OldestFoodTalkId, pageRequest));
     }
 }

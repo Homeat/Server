@@ -1,5 +1,6 @@
 package homeat.backend.domain.post.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.global.common.domain.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,6 +30,7 @@ public class FoodPicture extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "foodtalk_id")
+    @JsonIgnore
     private FoodTalk foodTalk;
 
     private String url;

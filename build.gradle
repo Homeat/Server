@@ -42,6 +42,9 @@ dependencies {
 	implementation 'io.springfox:springfox-swagger2:2.9.2'
 	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 
+	// AWS s3 설정
+	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws', version: '2.2.5.RELEASE'
+
 	// queryDSL 설정
 	implementation "com.querydsl:querydsl-jpa"
 	implementation "com.querydsl:querydsl-core"

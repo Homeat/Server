@@ -54,6 +54,7 @@ public class InfoTalk extends BaseEntity {
     private Save save;
 
     @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<InfoPicture> infoPictures = new ArrayList<>();
 
     public void update(String title, String content) {

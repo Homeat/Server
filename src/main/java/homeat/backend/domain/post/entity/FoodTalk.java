@@ -59,6 +59,7 @@ public class FoodTalk extends BaseEntity {
     private Save save;
 
     @OneToMany(mappedBy = "foodTalk", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<FoodPicture> foodPictures = new ArrayList<>();
 
     public void update(String name, String memo, Tag tag) {

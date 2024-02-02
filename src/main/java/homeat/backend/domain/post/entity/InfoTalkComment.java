@@ -46,5 +46,6 @@ public class InfoTalkComment extends BaseEntity {
     private Boolean removeStatus;
 
     @OneToMany(mappedBy = "infoTalkComment", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<InfoTalkReply> replyList = new ArrayList<>();
 }

@@ -16,3 +16,8 @@ spring:
 jwt:
   secret:
     key: ${jwt.secret.key}
+
+ocr:
+  secret:
+    key: ${ocr.secret.key}
+  url: ${ocr.url}

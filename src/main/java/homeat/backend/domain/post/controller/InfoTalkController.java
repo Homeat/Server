@@ -1,6 +1,8 @@
 package homeat.backend.domain.post.controller;
 
+import homeat.backend.domain.post.dto.InfoHashTagDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
+import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.service.InfoTalkService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,12 +36,13 @@ public class InfoTalkController {
     @PostMapping(value = "/save", consumes = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> saveInfoTalk(@RequestPart("content") InfoTalkDTO dto,
+                                          @RequestPart(value = "tags", required = false) List<String> tags,
                                           @RequestPart("imgUrl") List<MultipartFile> multipartFiles) {
 
         if (multipartFiles == null) {
             throw new IllegalArgumentException("사진이 없습니다");
         }
-        return infoTalkService.saveInfoTalk(dto, multipartFiles);
+        return infoTalkService.saveInfoTalk(dto, tags, multipartFiles);
     }
 
     /**
@@ -77,4 +81,40 @@ public class InfoTalkController {
     public ResponseEntity<?> getInfoTalk(@PathVariable("id") Long id) {
         return infoTalkService.getInfoTalk(id);
     }
+
+//    /**
+//     * 무한 스크롤 최신순 조회
+//     */
+//    @Operation(summary = "집밥토크 최신순 조회, lastFoodTalkId 보다 작은 6개 게시물을 보여줍니다.")
+//    @GetMapping("/posts/latest")
+//    public ResponseEntity<?> getInfoTalkLatest(FoodTalkSearchCondition condition, @RequestParam Long lastFoodTalkId) {
+//        return infoTalkService.getInfoTalkLatest(condition,lastFoodTalkId);
+//    }
+//
+//    /**
+//     * 무한 스크롤 오래된 순 조회
+//     */
+//    @Operation(summary = "집밥토크 오래된 순 조회, lastFoodTalkId 보다 큰 6개 게시물을 보여줍니다.")
+//    @GetMapping("/posts/oldest")
+//    public ResponseEntity<?> getInfoTalkOldest(FoodTalkSearchCondition condition,@RequestParam Long OldestFoodTalkId) {
+//        return infoTalkService.getInfoTalkOldest(condition,OldestFoodTalkId);
+//    }
+//
+//    /**
+//     * 무한 스크롤 공감 순 조회
+//     */
+//    @Operation(summary = "집밥토크 공감 순 조회, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
+//    @GetMapping("/posts/love")
+//    public ResponseEntity<?> getInfoTalkByLove(FoodTalkSearchCondition condition, @RequestParam Long id, @RequestParam int love) {
+//        return infoTalkService.getInfoTalkByLove(condition,id,love);
+//    }
+//
+//    /**
+//     * 무한 스크롤 조회 순 조회
+//     */
+//    @Operation(summary = "집밥토크 조회 순 조회, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
+//    @GetMapping("/posts/view")
+//    public ResponseEntity<?> getInfoTalkByView(FoodTalkSearchCondition condition,@RequestParam Long id,@RequestParam int view) {
+//        return infoTalkService.getInfoTalkByView(condition,id,view);
+//    }
 }

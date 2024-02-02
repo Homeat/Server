@@ -19,13 +19,13 @@ public class HomeResponseDTO {
 //
 //    }
 
-//    @Builder
-//    @Getter
-//    @NoArgsConstructor
-//    @AllArgsConstructor
-//    public static class CalendarResultDTO {
-//        private LocalDate date;
-//        private Long todayJipbapPrice;
-//        private Long todayOutPrice;
-//    }
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CalendarResultDTO {
+        private LocalDate date;
+        private Long todayJipbapPrice;
+        private Long todayOutPrice;
+    }
 }

@@ -1,5 +1,6 @@
 package homeat.backend.domain.home.dto;
 
+import homeat.backend.domain.home.entity.CostType;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,8 +15,11 @@ public class HomeRequestDTO {
         private Long targetExpense;
     }
 
-    // 영수증 사진
+    // 영수증 등록
+    @Getter
     public static class ReceiptDTO {
-        private MultipartFile imageFile;
+        private Long money;
+        private CostType type;
+        private String memo;
     }
 }

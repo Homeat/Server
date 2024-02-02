@@ -6,11 +6,11 @@ import homeat.backend.domain.post.dto.FoodTalkDTO;
 import homeat.backend.domain.post.entity.Save;
 import homeat.backend.domain.post.repository.FoodPictureRepository;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
-import homeat.backend.domain.post.repository.querydsl.FoodTalkRepositoryCustom;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -105,4 +105,12 @@ public class FoodTalkService {
     }
 
 
+    public ResponseEntity<?> getFoodTalksLatest(Long lastFoodTalkId) {
+
+        PageRequest pageRequest = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok().body(foodTalkRepository.findByIdLessThanOrderByIdDesc(lastFoodTalkId,pageRequest));
+
+
+    }
 }

@@ -6,7 +6,9 @@ import homeat.backend.global.service.S3Service;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import javax.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -78,6 +81,20 @@ public class FoodTalkController {
     public ResponseEntity<?> getFoodTalk(@PathVariable("id")Long id) {
         return foodTalkService.getFoodTalk(id);
     }
+
+    /**
+     * 무한 스크롤 최신순 조회
+     */
+    @Operation(summary = "집밥토크 최신순 조회, lastFoodTalkId 보다 작은 6개 게시물을 보여줍니다.")
+    @GetMapping("/posts/latest")
+    public ResponseEntity<?> getFoodTalksLatest(@RequestParam Long lastFoodTalkId) {
+        return foodTalkService.getFoodTalksLatest(lastFoodTalkId);
+    }
+
+
+    /**
+     * 검색
+     */
 
 
 

@@ -1,5 +1,6 @@
 package homeat.backend.domain.post.service;
 
+import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.dto.FoodTalkDTO;
@@ -110,36 +111,36 @@ public class FoodTalkService {
     }
 
 
-    public ResponseEntity<?> getFoodTalkLatest(Long lastFoodTalkId) {
-
-        PageRequest pageRequest = PageRequest.of(0, 6);
-
-        return ResponseEntity.ok().body(foodTalkRepository.findByIdLessThanOrderByIdDesc(lastFoodTalkId,pageRequest));
-
-
-    }
-
-    public ResponseEntity<?> getFoodTalkOldest(Long OldestFoodTalkId) {
-
-
-        PageRequest pageRequest = PageRequest.of(0, 6);
-
-        return ResponseEntity.ok().body(foodTalkRepository.findByIdGreaterThanOrderByIdAsc(OldestFoodTalkId, pageRequest));
-    }
-
-    public ResponseEntity<?> getFoodTalkByLove(Long id, int love) {
+    public ResponseEntity<?> getFoodTalkLatest(FoodTalkSearchCondition condition, Long lastFoodTalkId) {
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByLoveLessThanOrderByLoveDesc(id,love, pageable));
+        return ResponseEntity.ok().body(foodTalkRepository.findByIdLessThanOrderByIdDesc(condition,lastFoodTalkId,pageable));
 
 
     }
 
-    public ResponseEntity<?> getFoodTalkByView(Long id,int view) {
+    public ResponseEntity<?> getFoodTalkOldest(FoodTalkSearchCondition condition, Long OldestFoodTalkId) {
+
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByViewLessThanOrderByViewDesc(id,view, pageable));
+        return ResponseEntity.ok().body(foodTalkRepository.findByIdGreaterThanOrderByIdAsc(condition,OldestFoodTalkId, pageable));
+    }
+
+    public ResponseEntity<?> getFoodTalkByLove(FoodTalkSearchCondition condition, Long id, int love) {
+
+        Pageable pageable = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok().body(foodTalkRepository.findByLoveLessThanOrderByLoveDesc(condition,id,love, pageable));
+
+
+    }
+
+    public ResponseEntity<?> getFoodTalkByView(FoodTalkSearchCondition condition, Long id, int view) {
+
+        Pageable pageable = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok().body(foodTalkRepository.findByViewLessThanOrderByViewDesc(condition,id,view, pageable));
     }
 }

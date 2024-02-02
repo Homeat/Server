@@ -1,6 +1,7 @@
 package homeat.backend.domain.post.controller;
 
 import homeat.backend.domain.post.dto.FoodTalkDTO;
+import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.service.FoodTalkService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
@@ -86,8 +87,8 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 최신순 조회, lastFoodTalkId 보다 작은 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/latest")
-    public ResponseEntity<?> getFoodTalkLatest(@RequestParam Long lastFoodTalkId) {
-        return foodTalkService.getFoodTalkLatest(lastFoodTalkId);
+    public ResponseEntity<?> getFoodTalkLatest(FoodTalkSearchCondition condition,@RequestParam Long lastFoodTalkId) {
+        return foodTalkService.getFoodTalkLatest(condition,lastFoodTalkId);
     }
 
     /**
@@ -95,8 +96,8 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 오래된 순 조회, lastFoodTalkId 보다 큰 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/oldest")
-    public ResponseEntity<?> getFoodTalkOldest(@RequestParam Long OldestFoodTalkId) {
-        return foodTalkService.getFoodTalkOldest(OldestFoodTalkId);
+    public ResponseEntity<?> getFoodTalkOldest(FoodTalkSearchCondition condition,@RequestParam Long OldestFoodTalkId) {
+        return foodTalkService.getFoodTalkOldest(condition,OldestFoodTalkId);
     }
 
     /**
@@ -104,8 +105,8 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 공감 순 조회, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/love")
-    public ResponseEntity<?> getFoodTalkByLove(@RequestParam Long id,@RequestParam int love) {
-        return foodTalkService.getFoodTalkByLove(id,love);
+    public ResponseEntity<?> getFoodTalkByLove(FoodTalkSearchCondition condition, @RequestParam Long id, @RequestParam int love) {
+        return foodTalkService.getFoodTalkByLove(condition,id,love);
     }
 
     /**
@@ -113,8 +114,8 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 조회 순 조회, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/view")
-    public ResponseEntity<?> getFoodTalkByView(@RequestParam Long id,@RequestParam int view) {
-        return foodTalkService.getFoodTalkByView(id,view);
+    public ResponseEntity<?> getFoodTalkByView(FoodTalkSearchCondition condition,@RequestParam Long id,@RequestParam int view) {
+        return foodTalkService.getFoodTalkByView(condition,id,view);
     }
 
 

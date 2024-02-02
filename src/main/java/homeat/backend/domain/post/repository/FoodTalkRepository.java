@@ -4,16 +4,17 @@ import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.repository.querydsl.FoodTalkRepositoryCustom;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FoodTalkRepository extends JpaRepository<FoodTalk, Long>, FoodTalkRepositoryCustom {
 
-    List<FoodTalk> findByIdLessThanOrderByIdDesc(Long lastFoodTalkId, PageRequest pageRequest);
+    Slice<FoodTalk> findByIdLessThanOrderByIdDesc(Long lastFoodTalkId, PageRequest pageRequest);
 
-    List<FoodTalk> findByIdGreaterThanOrderByIdAsc(Long OldestFoodTalkId, PageRequest pageRequest);
+    Slice<FoodTalk> findByIdGreaterThanOrderByIdAsc(Long OldestFoodTalkId, PageRequest pageRequest);
 
-    List<FoodTalk> findByLoveLessThanOrderByLoveDesc(int love);
+    Slice<FoodTalk> findByLoveLessThanOrderByLoveDesc(int love, PageRequest pageRequest);
 
-    List<FoodTalk> findByViewLessThanOrderByViewDesc(int view);
+    Slice<FoodTalk> findByViewLessThanOrderByViewDesc(int view, PageRequest pageRequest);
 
 }

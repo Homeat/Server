@@ -130,7 +130,7 @@ public class FoodTalkService {
 
         PageRequest pageRequest = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByLoveLessThanOrderByLoveDesc(love));
+        return ResponseEntity.ok().body(foodTalkRepository.findByLoveLessThanOrderByLoveDesc(love, pageRequest));
 
 
     }
@@ -139,6 +139,6 @@ public class FoodTalkService {
 
         PageRequest pageRequest = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByViewLessThanOrderByViewDesc(view));
+        return ResponseEntity.ok().body(foodTalkRepository.findByViewLessThanOrderByViewDesc(view, pageRequest));
     }
 }

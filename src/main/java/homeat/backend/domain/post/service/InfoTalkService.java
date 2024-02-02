@@ -2,6 +2,7 @@ package homeat.backend.domain.post.service;
 
 import homeat.backend.domain.post.dto.InfoHashTagDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
+import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.InfoHashTag;
 import homeat.backend.domain.post.entity.InfoPicture;
@@ -14,6 +15,8 @@ import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -122,4 +125,11 @@ public class InfoTalkService {
         return ResponseEntity.ok(response);
     }
 
+    public ResponseEntity<?> getInfoTalkLatest(InfoTalkSearchCondition condition, Long lastInfoTalkId) {
+
+        Pageable pageable = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok()
+                .body(infoTalkRepository.findByIdLessThanOrderByIdDesc(condition, lastInfoTalkId, pageable));
+    }
 }

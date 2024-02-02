@@ -3,6 +3,7 @@ package homeat.backend.domain.post.controller;
 import homeat.backend.domain.post.dto.InfoHashTagDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
+import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.service.InfoTalkService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
@@ -82,14 +83,14 @@ public class InfoTalkController {
         return infoTalkService.getInfoTalk(id);
     }
 
-//    /**
-//     * 무한 스크롤 최신순 조회
-//     */
-//    @Operation(summary = "집밥토크 최신순 조회, lastFoodTalkId 보다 작은 6개 게시물을 보여줍니다.")
-//    @GetMapping("/posts/latest")
-//    public ResponseEntity<?> getInfoTalkLatest(FoodTalkSearchCondition condition, @RequestParam Long lastFoodTalkId) {
-//        return infoTalkService.getInfoTalkLatest(condition,lastFoodTalkId);
-//    }
+    /**
+     * 무한 스크롤 최신순 조회
+     */
+    @Operation(summary = "정보 최신순 조회, lastInfoTalkId 보다 작은 6개 게시물을 보여줍니다.")
+    @GetMapping("/posts/latest")
+    public ResponseEntity<?> getInfoTalkLatest(InfoTalkSearchCondition condition, @RequestParam Long lastInfoTalkId) {
+        return infoTalkService.getInfoTalkLatest(condition,lastInfoTalkId);
+    }
 //
 //    /**
 //     * 무한 스크롤 오래된 순 조회

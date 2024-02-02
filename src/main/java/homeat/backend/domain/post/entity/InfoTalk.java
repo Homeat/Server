@@ -57,6 +57,10 @@ public class InfoTalk extends BaseEntity {
     @Builder.Default
     private List<InfoPicture> infoPictures = new ArrayList<>();
 
+    @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<InfoHashTag> infoHashTags = new ArrayList<>();
+
     public void update(String title, String content) {
         this.title = title;
         this.content = content;

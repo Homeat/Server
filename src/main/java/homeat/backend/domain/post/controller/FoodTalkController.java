@@ -103,19 +103,19 @@ public class FoodTalkController {
     /**
      * 무한 스크롤 공감 순 조회
      */
-    @Operation(summary = "집밥토크 공감 순 조회, 6개 게시물을 보여줍니다.")
+    @Operation(summary = "집밥토크 공감 순 조회, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/love")
-    public ResponseEntity<?> getFoodTalkByLove(@RequestParam int love) {
-        return foodTalkService.getFoodTalkByLove(love);
+    public ResponseEntity<?> getFoodTalkByLove(@RequestParam Long id,@RequestParam int love) {
+        return foodTalkService.getFoodTalkByLove(id,love);
     }
 
     /**
      * 무한 스크롤 조회 순 조회
      */
-    @Operation(summary = "집밥토크 조회 순 조회, 6개 게시물을 보여줍니다.")
+    @Operation(summary = "집밥토크 조회 순 조회, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/view")
-    public ResponseEntity<?> getFoodTalkByView(@RequestParam int view) {
-        return foodTalkService.getFoodTalkByView(view);
+    public ResponseEntity<?> getFoodTalkByView(@RequestParam Long id,@RequestParam int view) {
+        return foodTalkService.getFoodTalkByView(id,view);
     }
 
 

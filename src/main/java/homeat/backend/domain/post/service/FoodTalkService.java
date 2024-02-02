@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -126,19 +127,19 @@ public class FoodTalkService {
         return ResponseEntity.ok().body(foodTalkRepository.findByIdGreaterThanOrderByIdAsc(OldestFoodTalkId, pageRequest));
     }
 
-    public ResponseEntity<?> getFoodTalkByLove(int love) {
+    public ResponseEntity<?> getFoodTalkByLove(Long id, int love) {
 
-        PageRequest pageRequest = PageRequest.of(0, 6);
+        Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByLoveLessThanOrderByLoveDesc(love, pageRequest));
+        return ResponseEntity.ok().body(foodTalkRepository.findByLoveLessThanOrderByLoveDesc(id,love, pageable));
 
 
     }
 
-    public ResponseEntity<?> getFoodTalkByView(int view) {
+    public ResponseEntity<?> getFoodTalkByView(Long id,int view) {
 
-        PageRequest pageRequest = PageRequest.of(0, 6);
+        Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByViewLessThanOrderByViewDesc(view, pageRequest));
+        return ResponseEntity.ok().body(foodTalkRepository.findByViewLessThanOrderByViewDesc(id,view, pageable));
     }
 }

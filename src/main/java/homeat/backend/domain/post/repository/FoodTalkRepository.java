@@ -13,8 +13,6 @@ public interface FoodTalkRepository extends JpaRepository<FoodTalk, Long>, FoodT
 
     Slice<FoodTalk> findByIdGreaterThanOrderByIdAsc(Long OldestFoodTalkId, PageRequest pageRequest);
 
-    Slice<FoodTalk> findByLoveLessThanOrderByLoveDesc(int love, PageRequest pageRequest);
 
-    Slice<FoodTalk> findByViewLessThanOrderByViewDesc(int view, PageRequest pageRequest);
 
 }

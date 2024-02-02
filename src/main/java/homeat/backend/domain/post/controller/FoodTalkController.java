@@ -2,7 +2,6 @@ package homeat.backend.domain.post.controller;
 
 import homeat.backend.domain.post.dto.FoodTalkDTO;
 import homeat.backend.domain.post.service.FoodTalkService;
-import homeat.backend.global.service.S3Service;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import javax.validation.Valid;

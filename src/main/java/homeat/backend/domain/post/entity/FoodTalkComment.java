@@ -46,5 +46,6 @@ public class FoodTalkComment extends BaseEntity {
     private Boolean removeStatus;
 
     @OneToMany(mappedBy = "foodTalkComment", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<FoodTalkReply> replyList = new ArrayList<>();
 }

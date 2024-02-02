@@ -61,4 +61,8 @@ public class InfoTalk extends BaseEntity {
         this.title = title;
         this.content = content;
     }
+
+    public void plusView(int nowView) {
+        this.view = nowView;
+    }
 }

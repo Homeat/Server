@@ -100,6 +100,8 @@ public class InfoTalkService {
 
         InfoTalk response = infoTalkRepository.findByInfoTalkId(id);
 
+        response.plusView(response.getView() + 1);
+
         return ResponseEntity.ok(response);
     }
 

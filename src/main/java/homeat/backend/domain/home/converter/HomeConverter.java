@@ -22,11 +22,11 @@ public class HomeConverter {
 //    }
 
     // 월별 데이터 entity -> dto
-//    public static HomeResponseDTO.CalendarResultDTO toCalendarResult(DailyExpense expense) {
-//        return HomeResponseDTO.CalendarResultDTO.builder()
-//                .date(expense.getCreatedAt().toLocalDate())
-//                .todayJipbapPrice(expense.getTodayJipbapPrice())
-//                .todayOutPrice(expense.getTodayOutPrice())
-//                .build();
-//    }
+    public static HomeResponseDTO.CalendarResultDTO toCalendarResult(DailyExpense expense) {
+        return HomeResponseDTO.CalendarResultDTO.builder()
+                .date(expense.getCreatedAt().toLocalDate())
+                .todayJipbapPrice(expense.getTodayJipbapPrice())
+                .todayOutPrice(expense.getTodayOutPrice())
+                .build();
+    }
 }

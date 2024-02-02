@@ -38,7 +38,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
     }
 
     private BooleanExpression search(String search) {
-        return hasText(search) ? infoTalk.title.eq(search).or(infoTalk.content.contains(search).or(infoHashTag.tag.eq(search)))  : null;
+        return hasText(search) ? infoTalk.title.contains(search).or(infoTalk.content.contains(search).or(infoHashTag.tag.eq(search)))  : null;
 
     }
 
@@ -60,11 +60,63 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                         infoTalk.id.lt(lastInfoTalkId),
                         search(condition.getSearch())
                 )
-                .join(infoTalk.infoHashTags, infoHashTag).fetchJoin()
+                .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
                 .orderBy(infoTalk.id.desc())
                 .limit(pageable.getOffset() + 6)
                 .fetch();
 
         return checkEndPage(pageable, results);
+    }
+
+    @Override
+    public Slice<InfoTalk> findByIdGreaterThanOrderByIdAsc(InfoTalkSearchCondition condition, Long oldestInfoTalkId,
+                                                           Pageable pageable) {
+        List<InfoTalk> results = queryFactory
+                .selectFrom(infoTalk)
+                .where(
+                        infoTalk.id.gt(oldestInfoTalkId),
+                        search(condition.getSearch())
+                )
+                .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
+                .orderBy(infoTalk.id.asc())
+                .limit(pageable.getOffset() + 6)
+                .fetch();
+
+        return checkEndPage(pageable, results);
+    }
+
+    @Override
+    public Slice<InfoTalk> findByLoveLessThanOrderByLoveDesc(InfoTalkSearchCondition condition, Long id, int love,
+                                                             Pageable pageable) {
+        List<InfoTalk> result = queryFactory
+                .selectFrom(infoTalk)
+                .where(
+                        infoTalk.love.lt(love).or(infoTalk.love.eq(love).and(infoTalk.id.lt(id))),
+                        search(condition.getSearch())
+
+                )
+                .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
+                .orderBy(infoTalk.love.desc(), infoTalk.id.desc())
+                .limit(pageable.getOffset()+ 6)
+                .fetch();
+
+        return checkEndPage(pageable, result);
+    }
+
+    @Override
+    public Slice<InfoTalk> findByViewLessThanOrderByViewDesc(InfoTalkSearchCondition condition, Long id, int view,
+                                                             Pageable pageable) {
+        List<InfoTalk> result = queryFactory
+                .selectFrom(infoTalk)
+                .where(
+                        infoTalk.view.lt(view).or(infoTalk.view.eq(view).and(infoTalk.id.lt(id))),
+                        search(condition.getSearch())
+                )
+                .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
+                .orderBy(infoTalk.view.desc(), infoTalk.id.desc())
+                .limit(pageable.getOffset() + 6)
+                .fetch();
+
+        return checkEndPage(pageable, result);
     }
 }

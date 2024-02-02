@@ -91,31 +91,31 @@ public class InfoTalkController {
     public ResponseEntity<?> getInfoTalkLatest(InfoTalkSearchCondition condition, @RequestParam Long lastInfoTalkId) {
         return infoTalkService.getInfoTalkLatest(condition,lastInfoTalkId);
     }
-//
-//    /**
-//     * 무한 스크롤 오래된 순 조회
-//     */
-//    @Operation(summary = "집밥토크 오래된 순 조회, lastFoodTalkId 보다 큰 6개 게시물을 보여줍니다.")
-//    @GetMapping("/posts/oldest")
-//    public ResponseEntity<?> getInfoTalkOldest(FoodTalkSearchCondition condition,@RequestParam Long OldestFoodTalkId) {
-//        return infoTalkService.getInfoTalkOldest(condition,OldestFoodTalkId);
-//    }
-//
-//    /**
-//     * 무한 스크롤 공감 순 조회
-//     */
-//    @Operation(summary = "집밥토크 공감 순 조회, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
-//    @GetMapping("/posts/love")
-//    public ResponseEntity<?> getInfoTalkByLove(FoodTalkSearchCondition condition, @RequestParam Long id, @RequestParam int love) {
-//        return infoTalkService.getInfoTalkByLove(condition,id,love);
-//    }
-//
-//    /**
-//     * 무한 스크롤 조회 순 조회
-//     */
-//    @Operation(summary = "집밥토크 조회 순 조회, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
-//    @GetMapping("/posts/view")
-//    public ResponseEntity<?> getInfoTalkByView(FoodTalkSearchCondition condition,@RequestParam Long id,@RequestParam int view) {
-//        return infoTalkService.getInfoTalkByView(condition,id,view);
-//    }
+
+    /**
+     * 무한 스크롤 오래된 순 조회
+     */
+    @Operation(summary = "정보토크 오래된 순 조회, lastInfoTalkId 보다 큰 6개 게시물을 보여줍니다.")
+    @GetMapping("/posts/oldest")
+    public ResponseEntity<?> getInfoTalkOldest(InfoTalkSearchCondition condition,@RequestParam Long oldestInfoTalkId) {
+        return infoTalkService.getInfoTalkOldest(condition,oldestInfoTalkId);
+    }
+
+    /**
+     * 무한 스크롤 공감 순 조회
+     */
+    @Operation(summary = "정보토크 공감 순 조회, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
+    @GetMapping("/posts/love")
+    public ResponseEntity<?> getInfoTalkByLove(InfoTalkSearchCondition condition, @RequestParam Long id, @RequestParam int love) {
+        return infoTalkService.getInfoTalkByLove(condition,id,love);
+    }
+
+    /**
+     * 무한 스크롤 조회 순 조회
+     */
+    @Operation(summary = "정보토크 조회 순 조회, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
+    @GetMapping("/posts/view")
+    public ResponseEntity<?> getInfoTalkByView(InfoTalkSearchCondition condition,@RequestParam Long id,@RequestParam int view) {
+        return infoTalkService.getInfoTalkByView(condition,id,view);
+    }
 }

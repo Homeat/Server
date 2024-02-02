@@ -132,4 +132,28 @@ public class InfoTalkService {
         return ResponseEntity.ok()
                 .body(infoTalkRepository.findByIdLessThanOrderByIdDesc(condition, lastInfoTalkId, pageable));
     }
+
+    public ResponseEntity<?> getInfoTalkOldest(InfoTalkSearchCondition condition, Long oldestInfoTalkId) {
+
+        Pageable pageable = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok()
+                .body(infoTalkRepository.findByIdGreaterThanOrderByIdAsc(condition, oldestInfoTalkId, pageable));
+    }
+
+    public ResponseEntity<?> getInfoTalkByLove(InfoTalkSearchCondition condition, Long id, int love) {
+
+        Pageable pageable = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok()
+                .body(infoTalkRepository.findByLoveLessThanOrderByLoveDesc(condition, id, love, pageable));
+    }
+
+    public ResponseEntity<?> getInfoTalkByView(InfoTalkSearchCondition condition, Long id, int view) {
+
+        Pageable pageable = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok()
+                .body(infoTalkRepository.findByViewLessThanOrderByViewDesc(condition, id, view, pageable));
+    }
 }

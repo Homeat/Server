@@ -67,5 +67,9 @@ public class FoodTalk extends BaseEntity {
         this.tag = tag;
     }
 
+    public void plusView(int nowView) {
+        this.view = nowView;
+    }
+
 
 }

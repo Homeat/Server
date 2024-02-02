@@ -12,4 +12,8 @@ public interface FoodTalkRepository extends JpaRepository<FoodTalk, Long>, FoodT
 
     List<FoodTalk> findByIdGreaterThanOrderByIdAsc(Long OldestFoodTalkId, PageRequest pageRequest);
 
+    List<FoodTalk> findByLoveLessThanOrderByLoveDesc(int love);
+
+    List<FoodTalk> findByViewLessThanOrderByViewDesc(int view);
+
 }

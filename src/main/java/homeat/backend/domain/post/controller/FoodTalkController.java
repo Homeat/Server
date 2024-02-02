@@ -100,6 +100,26 @@ public class FoodTalkController {
         return foodTalkService.getFoodTalkOldest(OldestFoodTalkId);
     }
 
+    /**
+     * 무한 스크롤 공감 순 조회
+     */
+    @Operation(summary = "집밥토크 공감 순 조회, 6개 게시물을 보여줍니다.")
+    @GetMapping("/posts/love")
+    public ResponseEntity<?> getFoodTalkByLove(@RequestParam int love) {
+        return foodTalkService.getFoodTalkByLove(love);
+    }
+
+    /**
+     * 무한 스크롤 조회 순 조회
+     */
+    @Operation(summary = "집밥토크 조회 순 조회, 6개 게시물을 보여줍니다.")
+    @GetMapping("/posts/view")
+    public ResponseEntity<?> getFoodTalkByView(@RequestParam int view) {
+        return foodTalkService.getFoodTalkByView(view);
+    }
+
+
+
 
 
     /**

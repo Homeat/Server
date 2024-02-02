@@ -97,9 +97,13 @@ public class FoodTalkService {
         return ResponseEntity.ok(id + " 번 게시글 수정완료");
     }
 
+    @Transactional
     public ResponseEntity<?> getFoodTalk(Long id) {
 
+
         FoodTalk response = foodTalkRepository.findByFoodTalkId(id);
+
+        response.plusView(response.getView() + 1);
 
         return ResponseEntity.ok(response);
     }
@@ -120,5 +124,21 @@ public class FoodTalkService {
         PageRequest pageRequest = PageRequest.of(0, 6);
 
         return ResponseEntity.ok().body(foodTalkRepository.findByIdGreaterThanOrderByIdAsc(OldestFoodTalkId, pageRequest));
+    }
+
+    public ResponseEntity<?> getFoodTalkByLove(int love) {
+
+        PageRequest pageRequest = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok().body(foodTalkRepository.findByLoveLessThanOrderByLoveDesc(love));
+
+
+    }
+
+    public ResponseEntity<?> getFoodTalkByView(int view) {
+
+        PageRequest pageRequest = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok().body(foodTalkRepository.findByViewLessThanOrderByViewDesc(view));
     }
 }

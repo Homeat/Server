@@ -1,5 +1,6 @@
 package homeat.backend.domain.post.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -28,6 +29,7 @@ public class InfoHashTag {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "infotalk_id")
+    @JsonIgnore
     private InfoTalk infoTalk;
 
     private String tag;

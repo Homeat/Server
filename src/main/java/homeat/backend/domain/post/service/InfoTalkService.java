@@ -1,16 +1,22 @@
 package homeat.backend.domain.post.service;
 
+import homeat.backend.domain.post.dto.InfoHashTagDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
+import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.entity.FoodPicture;
+import homeat.backend.domain.post.entity.InfoHashTag;
 import homeat.backend.domain.post.entity.InfoPicture;
 import homeat.backend.domain.post.entity.InfoTalk;
 import homeat.backend.domain.post.entity.Save;
+import homeat.backend.domain.post.repository.InfoHashTagRepository;
 import homeat.backend.domain.post.repository.InfoPictureRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,11 +29,12 @@ public class InfoTalkService {
 
     private final InfoTalkRepository infoTalkRepository;
     private final InfoPictureRepository infoPictureRepository;
+    private final InfoHashTagRepository infoHashTagRepository;
     private final S3Service s3Service;
 
     // 정보토크 게시글 작성
     @Transactional
-    public ResponseEntity<?> saveInfoTalk(InfoTalkDTO dto, List<MultipartFile> multipartFiles) {
+    public ResponseEntity<?> saveInfoTalk(InfoTalkDTO dto, List<String> tags, List<MultipartFile> multipartFiles) {
 
         List<String> imgPaths = s3Service.upload(multipartFiles);
         System.out.println("IMG 경로들 : " + imgPaths);
@@ -40,6 +47,18 @@ public class InfoTalkService {
                 .build();
 
         infoTalkRepository.save(infoTalk);
+
+        if (tags != null && !tags.isEmpty()) {
+            for (String tag : tags) {
+                InfoHashTag infoHashTag = InfoHashTag.builder()
+                        .infoTalk(infoTalk)
+                        .tag(tag)
+                        .build();
+                infoHashTagRepository.save(infoHashTag);
+            }
+
+        }
+
 
         List<String> imgList = new ArrayList<>();
         for (String imgUrl : imgPaths) {
@@ -95,12 +114,46 @@ public class InfoTalkService {
         return ResponseEntity.ok(id + " 번 게시글 수정완료");
     }
 
+    @Transactional
     // 정보토크 게시글 1개 조회
     public ResponseEntity<?> getInfoTalk(Long id) {
 
         InfoTalk response = infoTalkRepository.findByInfoTalkId(id);
 
+        response.plusView(response.getView() + 1);
+
         return ResponseEntity.ok(response);
     }
 
+    public ResponseEntity<?> getInfoTalkLatest(InfoTalkSearchCondition condition, Long lastInfoTalkId) {
+
+        Pageable pageable = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok()
+                .body(infoTalkRepository.findByIdLessThanOrderByIdDesc(condition, lastInfoTalkId, pageable));
+    }
+
+    public ResponseEntity<?> getInfoTalkOldest(InfoTalkSearchCondition condition, Long oldestInfoTalkId) {
+
+        Pageable pageable = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok()
+                .body(infoTalkRepository.findByIdGreaterThanOrderByIdAsc(condition, oldestInfoTalkId, pageable));
+    }
+
+    public ResponseEntity<?> getInfoTalkByLove(InfoTalkSearchCondition condition, Long id, int love) {
+
+        Pageable pageable = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok()
+                .body(infoTalkRepository.findByLoveLessThanOrderByLoveDesc(condition, id, love, pageable));
+    }
+
+    public ResponseEntity<?> getInfoTalkByView(InfoTalkSearchCondition condition, Long id, int view) {
+
+        Pageable pageable = PageRequest.of(0, 6);
+
+        return ResponseEntity.ok()
+                .body(infoTalkRepository.findByViewLessThanOrderByViewDesc(condition, id, view, pageable));
+    }
 }

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,5 +47,11 @@ public class MemberController {
     public ApiPayload<MemberResponse.MyPageResultDTO> mypage(Authentication authentication) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toMyPageResultDTO(member));
+    }
+
+    @Operation(summary = "회원가입시, 부가 회원정보 추가 api")
+    @PostMapping("/mypage")
+    public ApiPayload<?> createMypage(Authentication authentication) {
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 }

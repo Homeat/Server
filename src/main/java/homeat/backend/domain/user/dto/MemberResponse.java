@@ -24,7 +24,7 @@ public class MemberResponse {
     @AllArgsConstructor
     public static class LoginResultDTO {
         String token;
-//        LocalDateTime expiredAt;
+        LocalDateTime expiredAt;
     }
 
     @Builder

@@ -13,6 +13,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,7 +34,8 @@ public class MemberController {
     @PostMapping("/login")
     public ApiPayload<MemberResponse.LoginResultDTO> login(@RequestBody @Valid MemberRequest.LoginDto request) {
         String token = memberCommandService.loginMember(request);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toLoginResultDTO(token));
+        LocalDateTime expiredAt = memberCommandService.getJwtExpiredAt(token);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toLoginResultDTO(token, expiredAt));
     }
 
     @GetMapping("/mypage")

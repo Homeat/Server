@@ -1,5 +1,6 @@
 package homeat.backend.domain.post.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.global.common.domain.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,7 +30,10 @@ public class InfoPicture extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "infotalk_id")
+    @JsonIgnore
     private InfoTalk infoTalk;
+
+
 
     private String url;
 }

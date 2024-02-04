@@ -5,6 +5,7 @@ import homeat.backend.domain.user.dto.MemberResponse;
 import homeat.backend.domain.user.entity.Member;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 public class MemberConverter {
 
@@ -23,10 +24,10 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponse.LoginResultDTO toLoginResultDTO(String token) {
+    public static MemberResponse.LoginResultDTO toLoginResultDTO(String token, LocalDateTime expiredAt) {
         return MemberResponse.LoginResultDTO.builder()
                 .token(token)
-//                .expiredAt(LocalDateTime.now()+expriedTime)
+                .expiredAt(expiredAt)
                 .build();
     }
 

@@ -12,7 +12,24 @@ spring:
       hibernate:
         format_sql: true
         highlight_sql: true
+## s3설정
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS.S3.ACCESS.KEY.ID}
+      secret-key: ${AWS.S3.SECRET.ACCESS.KEY}
+    s3:
+      bucket: homeat-dev-s3
+    stack:
+      auto: false
+    region:
+      static: ap-northeast-2
 
 jwt:
   secret:
     key: ${jwt.secret.key}
+
+ocr:
+  secret:
+    key: ${ocr.secret.key}
+  url: ${ocr.url}

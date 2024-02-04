@@ -2,6 +2,9 @@ package homeat.backend.domain.post.entity;
 
 import homeat.backend.global.common.domain.BaseEntity;
 import homeat.backend.domain.user.entity.Member;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,6 +15,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,8 +53,20 @@ public class InfoTalk extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Save save;
 
+    @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<InfoPicture> infoPictures = new ArrayList<>();
+
+    @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<InfoHashTag> infoHashTags = new ArrayList<>();
+
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public void plusView(int nowView) {
+        this.view = nowView;
     }
 }

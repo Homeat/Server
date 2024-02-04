@@ -3,11 +3,9 @@ package homeat.backend.domain.post.dto;
 import homeat.backend.domain.post.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 @AllArgsConstructor
+@Getter
 public class FoodTalkDTO {
 
     private String name;

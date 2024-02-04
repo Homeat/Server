@@ -1,5 +1,6 @@
 package homeat.backend.domain.post.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.global.common.domain.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,14 +28,11 @@ public class FoodRecipePicture extends BaseEntity {
     @Column(name = "foodRecipePicture_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "foodtalk_id")
-    private FoodTalk foodTalk;
-
     private String url;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "food_recipe_id")
+    @JsonIgnore
     private FoodRecipe foodRecipe;
 
 

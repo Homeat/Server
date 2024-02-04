@@ -77,8 +77,13 @@ public class FoodTalkService {
     @Transactional
     public ResponseEntity<?> deleteFoodTalk(Long id) {
 
+
         FoodTalk foodTalk = foodTalkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+
+        for (FoodPicture foodPicture : foodTalk.getFoodPictures()) {
+            s3Service.fileDelete(foodPicture.getUrl());
+        }
 
         foodTalkRepository.delete(foodTalk);
 

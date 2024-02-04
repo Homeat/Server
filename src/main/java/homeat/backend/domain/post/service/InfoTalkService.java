@@ -98,6 +98,10 @@ public class InfoTalkService {
         InfoTalk infoTalk = infoTalkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
 
+        for (InfoPicture infoPicture : infoTalk.getInfoPictures()) {
+            s3Service.fileDelete(infoPicture.getUrl());
+        }
+
         infoTalkRepository.delete(infoTalk);
 
         return ResponseEntity.ok(id + " 번 게시글 삭제완료");

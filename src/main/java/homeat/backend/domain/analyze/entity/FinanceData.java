@@ -22,12 +22,16 @@ public class FinanceData extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private Long month_jipbap_price; // 이번달 집밥 비용
+    @Builder.Default
+    private Long month_jipbap_price = 0L; // 이번달 집밥 비용
 
-    private Long month_out_price; // 이번달 배달/외식 비용
+    @Builder.Default
+    private Long month_out_price = 0L; // 이번달 배달/외식 비용
+
 
     private Long income; // 사용자 수입
 
-    private Long num_homeat_badge; // 홈잇뱃지 개수
+    @Builder.Default
+    private Long num_homeat_badge = 0L; // 홈잇뱃지 개수
 
 }

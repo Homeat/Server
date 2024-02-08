@@ -35,6 +35,7 @@ public class MonthService {
             Optional<FinanceData> existingFinanceData =
                     financeDataRepository.findByMemberAndDate(member, today);
 
+            // 회원가입 날짜가 1일 경우 예외처리
             if (existingFinanceData.isEmpty()) {
                 FinanceData financeData = FinanceData.builder()
                         .member(member)

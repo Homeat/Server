@@ -15,9 +15,18 @@ public class HomeResponseDTO {
         private Long expense;
     }
 
-//    public static class HomeResultDTO {
-//
-//    }
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HomeResultDTO {
+        private String nickname;
+        private Long targetMoney;
+        private int lastWeekSavingPercent;
+        private Long usedMoney;
+        private int badgeCount;
+        private int usedPercent;
+    }
 
     @Builder
     @Getter

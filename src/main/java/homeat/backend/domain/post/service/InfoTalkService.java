@@ -34,11 +34,7 @@ public class InfoTalkService {
 
     // 정보토크 게시글 작성
     @Transactional
-    public ResponseEntity<?> saveInfoTalk(InfoTalkDTO dto, List<String> tags, List<MultipartFile> multipartFiles) {
-
-        List<String> imgPaths = s3Service.upload(multipartFiles);
-        System.out.println("IMG 경로들 : " + imgPaths);
-        postBlankCheck(imgPaths);
+    public ResponseEntity<?> saveInfoTalk(InfoTalkDTO dto) {
 
         InfoTalk infoTalk = InfoTalk.builder()
                 .title(dto.getTitle())
@@ -48,8 +44,8 @@ public class InfoTalkService {
 
         infoTalkRepository.save(infoTalk);
 
-        if (tags != null && !tags.isEmpty()) {
-            for (String tag : tags) {
+        if (dto.getTags() != null && !dto.getTags().isEmpty()) {
+            for (String tag : dto.getTags()) {
                 InfoHashTag infoHashTag = InfoHashTag.builder()
                         .infoTalk(infoTalk)
                         .tag(tag)
@@ -60,19 +56,31 @@ public class InfoTalkService {
         }
 
 
-        List<String> imgList = new ArrayList<>();
+        return ResponseEntity.ok().body(infoTalk);
+    }
+
+    @Transactional
+    public ResponseEntity<?> uploadImages(Long id, List<MultipartFile> multipartFiles) {
+        List<String> imgPaths = s3Service.upload(multipartFiles);
+        System.out.println("IMG 경로들 : " + imgPaths);
+        postBlankCheck(imgPaths);
+
+        InfoTalk infoTalk = infoTalkRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+
         for (String imgUrl : imgPaths) {
             InfoPicture infoPicture = InfoPicture.builder()
                     .infoTalk(infoTalk)
                     .url(imgUrl)
                     .build();
             infoPictureRepository.save(infoPicture);
-            imgList.add(infoPicture.getUrl());
         }
 
 
-        return ResponseEntity.ok(infoTalk.getId() + "번 정보토크 저장완료");
+        return ResponseEntity.ok(infoTalk.getId() + "번 정보토크 사진 저장완료");
     }
+
+
     private void postBlankCheck(List<String> imgPaths) {
         if(imgPaths == null || imgPaths.isEmpty()){ //.isEmpty()도 되는지 확인해보기
             throw new IllegalArgumentException("사진 입력 오류입니다.");
@@ -160,4 +168,6 @@ public class InfoTalkService {
         return ResponseEntity.ok()
                 .body(infoTalkRepository.findByViewLessThanOrderByViewDesc(condition, id, view, pageable));
     }
+
+
 }

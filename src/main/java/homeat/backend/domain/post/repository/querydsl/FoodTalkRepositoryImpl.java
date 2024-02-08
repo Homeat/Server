@@ -49,7 +49,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                         tagEq(condition.getTag())
                 )
                 .orderBy(foodTalk.id.desc())
-                .limit(pageable.getOffset() + 6)
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         return checkEndPage(pageable, results);
@@ -68,7 +68,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                         tagEq(condition.getTag())
                 )
                 .orderBy(foodTalk.id.asc())
-                .limit(pageable.getOffset() + 6)
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         return checkEndPage(pageable, results);
@@ -85,7 +85,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
 
                 )
                 .orderBy(foodTalk.love.desc(), foodTalk.id.desc())
-                .limit(pageable.getOffset()+ 6)
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         return checkEndPage(pageable, result);
@@ -111,7 +111,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                         tagEq(condition.getTag())
                 )
                 .orderBy(foodTalk.view.desc(), foodTalk.id.desc())
-                .limit(pageable.getOffset() + 6)
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         return checkEndPage(pageable, result);

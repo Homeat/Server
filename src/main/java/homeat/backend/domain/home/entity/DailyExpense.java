@@ -32,8 +32,12 @@ public class DailyExpense extends BaseEntity {
     @Builder.Default
     private long todayOutPrice = 0;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    public void addJipbapPrice(long price) {
+        this.todayJipbapPrice += price;
+    }
+
+    public void addOutPrice(long price) {
+        this.todayOutPrice += price;
+    }
 }
 

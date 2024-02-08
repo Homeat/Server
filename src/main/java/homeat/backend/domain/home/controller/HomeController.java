@@ -38,12 +38,14 @@ public class HomeController {
 
     /**
      * 홈 화면 조회
+     * 목표 금액 0 원 -> 닉네임, 현재 누적 뱃지 개수
+     * 목표 금액 0 원 이상 -> 닉네임, 현재 누적 뱃지 개수, 목표금액, 지난 주(과거 사용 금액) 대비 이번 주 절약 퍼센트, 이번 주 사용 금액, 목표금액 대비 이번 주 사용 퍼센트 반환
      */
-//    @GetMapping("/")
-//    public ResponseEntity<?> getHome() {
-//        return homeService.;
-//    }
-
+    @GetMapping("/")
+    public ResponseEntity<?> getHome(Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return ResponseEntity.ok(homeService.getHome(member));
+    }
 
     /**
      *  OCR 영수증 처리

@@ -28,7 +28,7 @@ public class HomeController {
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     /**
-     * 목표 금액 저장
+     * 목표 금액 저장 (수정 없다면 데이터 계속 유지. 만약 수정하면 다음 주 목표식비에 반영)
      */
     @Operation(summary = "홈 화면 목표 금액 추가 api")
     @PostMapping("/target-expense")
@@ -48,7 +48,7 @@ public class HomeController {
     }
 
     /**
-     *  OCR 영수증 처리
+     *  OCR 영수증 처리 (끝 -> 다른 양식은 어떻게 할 지 고민해보기)
      */
     @Operation(summary = "영수증 추출(ocr) API")
     @PostMapping(value = "/receipt", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -64,11 +64,14 @@ public class HomeController {
 
     /**
      * 지출 추가
+     * OCR로 금액 추출뿐만 아니라 직접 수기로 금액 작성 가능
      */
     @Operation(summary = "지출 추가 api")
     @PostMapping("/add-expense")
-    public ResponseEntity<?> createReceipt(@RequestBody HomeRequestDTO.ReceiptDTO dto) {
-        return homeService.createReceipt(dto);
+    public ResponseEntity<?> createReceipt(@RequestBody HomeRequestDTO.ReceiptDTO dto,
+                                           Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return homeService.createReceipt(dto, member);
     }
 
     /**
@@ -77,6 +80,8 @@ public class HomeController {
     @Operation(summary = "연월별 데이터 조회 api")
     @GetMapping("/calendar")
     public ResponseEntity<?> getCalendar(
+            // default year, month 를 오늘 날짜 기준으로
+            // year, month를 string? int?
             @RequestParam("year") Integer year,
             @RequestParam("month") Integer month,
             Authentication authentication) {

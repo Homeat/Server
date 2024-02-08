@@ -164,16 +164,46 @@ public class HomeService {
      * 지출 추가
      */
     @Transactional
-    public ResponseEntity<?> createReceipt(HomeRequestDTO.ReceiptDTO dto) {
-        Receipt receipt = Receipt.builder()
-                .expense(dto.getMoney())
-                .costType(dto.getType())
-                .memo(dto.getMemo())
-                .build();
+    public ResponseEntity<?> createReceipt(HomeRequestDTO.ReceiptDTO dto, Member member) {
+        try {
+            // FinanceData 엔티티 조회
+            FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
+                    .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
 
-        receiptRepo.save(receipt);
+            // DailyExpense 엔티티 조회(없다면 생성)
+            LocalDate todayDate = LocalDate.now();
+            DailyExpense dailyExpense = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), todayDate)
+                    .orElseGet(() -> DailyExpense.builder()
+                            .financeData(financeData)
+                            .todayJipbapPrice(0)
+                            .todayOutPrice(0)
+                            .build());
 
-        return ResponseEntity.ok("지출 추가완료");
+            // receipt 추출
+            Receipt receipt = Receipt.builder()
+                    .expense(dto.getMoney())
+                    .costType(dto.getType())
+                    .memo(dto.getMemo())
+                    .build();
+
+            receiptRepo.save(receipt);
+
+            // finance, daily 실시간 반영(receipt 추가되는)
+            if(dto.getType() == CostType.장보기) {
+                financeData.addJipbapPrice(dto.getMoney());
+                dailyExpense.addJipbapPrice(dto.getMoney());
+            } else if (dto.getType() == CostType.배달비 || dto.getType() == CostType.외식비) {
+                financeData.addOutPrice(dto.getMoney());
+                dailyExpense.addOutPrice(dto.getMoney());
+            }
+
+            financeDataRepository.save(financeData);
+            dailyExpenseRepo.save(dailyExpense);
+
+            return ResponseEntity.ok("Receipt 저장 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Receipt 저장 실패: " + e.getMessage());
+        }
     }
 
     /**

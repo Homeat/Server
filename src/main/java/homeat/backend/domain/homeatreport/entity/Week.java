@@ -40,4 +40,16 @@ public class Week extends BaseEntity {
     @Builder.Default
     private TierStatus tierStatus =TierStatus.홈잇스타터;
 
+    // ExceedPrice 업데이트 메서드
+    public void updateExceedPrice() {
+        this.exceed_price = this.goal_price - (financeData.getMonth_jipbap_price() + financeData.getMonth_out_price());
+    }
+
+    // week_status setter
+    public void setWeekStatus(WeekStatus week_status) {
+        this.week_status = week_status;
+    }
+
+    // finance data pk 지정 메서드
+
 }

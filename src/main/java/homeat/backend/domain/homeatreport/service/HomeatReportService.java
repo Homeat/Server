@@ -2,9 +2,7 @@ package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
-import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeRequestDTO;
 import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeResponseDTO;
-import homeat.backend.domain.homeatreport.repository.WeekRepository;
 import homeat.backend.domain.user.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +19,7 @@ public class HomeatReportService {
     public ResponseEntity<ReportMonthlyAnalyzeResponseDTO> getWeeklyAnalyze(Integer input_year, Integer input_month, Member member) {
 
         // input year과 month에 대한 FinanceDataList
-        FinanceData inputFinanceData = financeDataRepository.findByMemberIdAndCreatedAtYearAndCreatedAtMonth(member.getId(), input_year, input_month);
+        FinanceData inputFinanceData = financeDataRepository.findByMemberIdAndCreatedYearAndCreatedMonth(member.getId(), input_year, input_month);
         Long input_month_jipbap_price = inputFinanceData.getMonth_jipbap_price();
         Long input_month_out_price = inputFinanceData.getMonth_out_price();
 
@@ -46,7 +44,7 @@ public class HomeatReportService {
                 previous_month--;
             }
 
-            previousFinanceData = financeDataRepository.findByMemberIdAndCreatedAtYearAndCreatedAtMonth(member.getId(), previous_year, previous_month);
+            previousFinanceData = financeDataRepository.findByMemberIdAndCreatedYearAndCreatedMonth(member.getId(), previous_year, previous_month);
 
             // previousFinanceData가 존재하고 지출 합이 0이 아닌 경우, save_percent 계산 후 루프 탈출
             if (previousFinanceData != null && (previousFinanceData.getMonth_jipbap_price() + previousFinanceData.getMonth_out_price()) != 0) {

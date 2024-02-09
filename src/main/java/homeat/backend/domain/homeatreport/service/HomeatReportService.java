@@ -63,9 +63,4 @@ public class HomeatReportService {
         return ResponseEntity.ok(reportMonthlyAnalyzeResponseDTO);
     }
 
-
-
-
-
-
 }

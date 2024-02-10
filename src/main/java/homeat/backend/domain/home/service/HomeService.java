@@ -70,7 +70,7 @@ public class HomeService {
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
 
         // 목표 식비 조회
-        Long goalPrice = weekRepository.findTopByFinanceDataOrderByCreatedAtDesc(financeData)
+        Long goalPrice = weekRepository.findTopByFinanceDataOrderByCreatedAtDesc(financeData.getId())
                 .map(Week::getGoal_price)
                 .orElse(0L);
 

@@ -30,10 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -209,14 +206,19 @@ public class HomeService {
     /**
      * 지출 확인
      */
-    public ResponseEntity<List<HomeResponseDTO.CalendarResultDTO>> getCalendar(Integer year, Integer month, Member member) {
-
-        // 해당 연도의 월 시작일과 마지막 날짜
-        LocalDate startDate = LocalDate.of(year, month, 1);
-        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+    public ResponseEntity<List<HomeResponseDTO.CalendarResultDTO>> getCalendar(String year, String month, Member member) {
 
         // 해당 연, 월의 데이터 조회
-        List<DailyExpense> calendarData = dailyExpenseRepo.findByMemberIdAndCreatedAtBetween(member.getId(), startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX));
+        Optional<FinanceData> financeDataOpt = financeDataRepository.findByMemberAndYearAndMonth(member, year, month);
+
+        if (financeDataOpt.isEmpty()) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+
+        FinanceData financeData = financeDataOpt.get();
+
+        // DailyExpense 조회
+        List<DailyExpense> calendarData = dailyExpenseRepo.findByFinanceDataId(financeData.getId());
 
         // 조회된 데이터를 DTO로 변환
         List<HomeResponseDTO.CalendarResultDTO> result = new ArrayList<>();

@@ -80,10 +80,8 @@ public class HomeController {
     @Operation(summary = "연월별 데이터 조회 api")
     @GetMapping("/calendar")
     public ResponseEntity<?> getCalendar(
-            // default year, month 를 오늘 날짜 기준으로
-            // year, month를 string? int?
-            @RequestParam("year") Integer year,
-            @RequestParam("month") Integer month,
+            @RequestParam("year") String year,
+            @RequestParam("month") String month,
             Authentication authentication) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
         return homeService.getCalendar(year, month, member);

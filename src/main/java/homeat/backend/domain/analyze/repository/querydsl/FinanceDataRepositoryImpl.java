@@ -1,7 +1,9 @@
 package homeat.backend.domain.analyze.repository.querydsl;
 
+import com.querydsl.core.types.dsl.DateTemplate;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.entity.QFinanceData;
@@ -11,15 +13,15 @@ import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public class FinanceRepositoryImpl implements FinanceRepositoryCustom {
+public class FinanceDataRepositoryImpl implements FinanceDataRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    public FinanceRepositoryImpl(EntityManager em) {
+    public FinanceDataRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
@@ -65,24 +67,24 @@ public class FinanceRepositoryImpl implements FinanceRepositoryCustom {
         return Optional.ofNullable(latestFinanceData);
     }
 
-    /**
-     * 요청 연, 월에 대한 finance id 조회
-     */
     @Override
-    public Optional<FinanceData> findByMemberAndYearAndMonth(Member member, int year, int month) {
+    public Optional<FinanceData> findByMemberAndYearAndMonth(Member member, String year, String month) {
         QFinanceData financeData = QFinanceData.financeData;
 
-        LocalDateTime startOfMonth = LocalDateTime.of(year, month, 1, 0, 0);
-        LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusSeconds(1);
+        // 문자열로 된 년과 월을 합쳐서 'YYYY-MM' 형태의 문자열을 만듭니다.
+        String yearMonthString = year + "-" + month;
 
-        List<FinanceData> financeDataList = queryFactory.selectFrom(financeData)
+        // 'createdAt' 필드의 년과 월을 'YYYY-MM' 형태의 문자열로 변환합니다.
+        StringExpression formattedDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, '%Y-%m')", financeData.createdAt);
+
+        FinanceData foundFinanceData = queryFactory
+                .selectFrom(financeData)
                 .where(
-                        financeData.member.eq(member)
-                                .and(financeData.createdAt.between(startOfMonth, endOfMonth))
+                        financeData.member.eq(member),
+                        formattedDate.eq(yearMonthString)
                 )
-                .fetch();
+                .fetchOne();
 
-        return financeDataList.stream().findAny();
+        return Optional.ofNullable(foundFinanceData);
     }
-
 }

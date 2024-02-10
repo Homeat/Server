@@ -33,7 +33,7 @@ public class MonthService {
 
         members.forEach(member -> {
             Optional<FinanceData> existingFinanceData =
-                    financeDataRepository.findByMemberAndDate(member, today);
+                    financeDataRepository.findByMemberAndCreatedAt(member, today);
 
             // 회원가입 날짜가 1일 경우 예외처리
             if (existingFinanceData.isEmpty()) {

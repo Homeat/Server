@@ -2,6 +2,7 @@ package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
+import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeRequestDTO;
 import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeResponseDTO;
 import homeat.backend.domain.user.entity.Member;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,10 @@ public class HomeatReportService {
 
     private final FinanceDataRepository financeDataRepository;
 
-    public ResponseEntity<ReportMonthlyAnalyzeResponseDTO> getWeeklyAnalyze(Integer input_year, Integer input_month, Member member) {
+    public ResponseEntity<ReportMonthlyAnalyzeResponseDTO> getWeeklyAnalyze(ReportMonthlyAnalyzeRequestDTO.DateInputDTO dateInputDTO, Member member) {
+
+        Integer input_year = dateInputDTO.getInput_year();
+        Integer input_month = dateInputDTO.getInput_month();
 
         // input year과 month에 대한 FinanceDataList
         FinanceData inputFinanceData = financeDataRepository.findByMemberIdAndCreatedYearAndCreatedMonth(member.getId(), input_year, input_month);

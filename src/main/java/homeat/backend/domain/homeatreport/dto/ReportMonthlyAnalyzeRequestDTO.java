@@ -6,8 +6,10 @@ public class ReportMonthlyAnalyzeRequestDTO {
     @Getter
     public static class DateInputDTO {
 
-        private int input_year;
+        private Integer input_year;
 
-        private int input_month;
+        private Integer input_month;
+
+        private Integer input_day;
     }
 }

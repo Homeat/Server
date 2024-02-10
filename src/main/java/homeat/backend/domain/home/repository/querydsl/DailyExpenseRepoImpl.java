@@ -1,11 +1,14 @@
 package homeat.backend.domain.home.repository.querydsl;
 
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.home.entity.DailyExpense;
 import homeat.backend.domain.home.entity.QDailyExpense;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public class DailyExpenseRepoImpl implements DailyExpenseRepoCST{
@@ -43,12 +46,13 @@ public class DailyExpenseRepoImpl implements DailyExpenseRepoCST{
 
         QDailyExpense dailyExpense = QDailyExpense.dailyExpense;
 
+        StringExpression formattedDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, '%Y-%m-%d')", dailyExpense.createdAt);
+        String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
         return Optional.ofNullable(queryFactory
                 .selectFrom(dailyExpense)
                 .where(dailyExpense.financeData.id.eq(financeDataId)
-                        .and(dailyExpense.createdAt.year().eq(date.getYear())
-                                .and(dailyExpense.createdAt.month().eq(date.getMonthValue())
-                                        .and(dailyExpense.createdAt.dayOfMonth().eq(date.getDayOfMonth())))))
+                        .and(formattedDate.eq(dateString)))
                 .fetchOne());
     }
 }

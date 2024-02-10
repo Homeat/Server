@@ -1,5 +1,6 @@
 package homeat.backend.domain.homeatreport.entity;
 
+import com.amazonaws.services.s3.model.Tier;
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;
@@ -49,6 +50,9 @@ public class Week extends BaseEntity {
     public void setWeekStatus(WeekStatus week_status) {
         this.week_status = week_status;
     }
+
+    // tier_status setter
+    public void setTierStatus(TierStatus tier_status) { this.tierStatus = tier_status; }
 
     // finance data pk 지정 메서드
 

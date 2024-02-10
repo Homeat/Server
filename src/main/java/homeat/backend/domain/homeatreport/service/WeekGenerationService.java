@@ -2,6 +2,7 @@ package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
+import homeat.backend.domain.homeatreport.entity.TierStatus;
 import homeat.backend.domain.homeatreport.entity.Week;
 import homeat.backend.domain.homeatreport.entity.WeekStatus;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
@@ -30,18 +31,16 @@ public class WeekGenerationService {
     // 회원가입 시점이 일요일 00시 00분인 경우 예외처리 필요
     @Scheduled(cron = "0 0 0 * * SUN")
     public void generateNewWeek() {
-        Week newWeek = Week.builder().build();
-
+        Week newWeek = Week.builder().build(); // 1. 매주 일요일에 week 엔티티 새로 생성
         weekRepository.save(newWeek);
 
-
-
+        // 2. 직전 week 엔티티의 목표 달성 여부 최신화
         // 직전 week 찾기
         Optional<Week> optionalPreviousWeek = weekRepository.findById(newWeek.getId() - 1);
         if (optionalPreviousWeek.isPresent()) {
             Week previousWeek = optionalPreviousWeek.get();
+            FinanceData previousFinanceData = previousWeek.getFinanceData();
 
-            // 이번주 달성 여부 지정 메서드
             Long previousExceedPrice = previousWeek.getExceed_price();
             int isSuccess;
             if (previousExceedPrice <= 0) {
@@ -52,13 +51,21 @@ public class WeekGenerationService {
                 isSuccess = 0;
             }
 
+            // 3. week 엔티티 생성 시점에 month가 바뀌었으면 financedata 엔티티 새로 생성
             LocalDate now = LocalDate.now();
             // 일주일 전과 비교하여 월(month)이 바뀐 경우에 대하여
             if (now.getMonthValue() != now.minusWeeks(1).getMonthValue()) {
-                FinanceData previousFinanceData = previousWeek.getFinanceData();
                 Long badge_num;
                 if (isSuccess == 1) { // 직전 week에서 목표 달성인 경우
                     badge_num = previousFinanceData.getNum_homeat_badge() + 1; // badge 개수 1개 추가
+                    // 2. 홈잇 티어 지정 메서드
+                    if (badge_num <= 5 ) {
+                        previousWeek.setTierStatus(TierStatus.홈잇스타터);
+                    } else if (badge_num <= 10) {
+                        previousWeek.setTierStatus(TierStatus.홈잇러버);
+                    } else {
+                        previousWeek.setTierStatus(TierStatus.홈잇마스터);
+                    }
                 } else { // 직전 week에서 목표 달성 실패인 경우
                     badge_num = previousFinanceData.getNum_homeat_badge(); // badge 개수 그대로
                 }
@@ -69,7 +76,6 @@ public class WeekGenerationService {
                 financeDataRepository.save(newFinanceData);
             }
 
-            // 홈잇 티어 지정 메서드
             // badge img pk 지정 메서드
         }
     }

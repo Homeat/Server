@@ -2,7 +2,6 @@ package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
-import homeat.backend.domain.homeatreport.dto.ReportAnalyzeRequestDTO;
 import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeResponseDTO;
 import homeat.backend.domain.homeatreport.dto.ReportWeeklyResponseDTO;
 import homeat.backend.domain.user.entity.Member;
@@ -25,10 +24,7 @@ public class HomeatReportService {
     private final FinanceDataRepository financeDataRepository;
 
     // 소비분석 중 상단의 월별 분석
-    public ResponseEntity<ReportMonthlyAnalyzeResponseDTO> getMonthlyAnalyze(ReportAnalyzeRequestDTO.DateInputDTO dateInputDTO, Member member) {
-
-        Integer input_year = dateInputDTO.getInput_year();
-        Integer input_month = dateInputDTO.getInput_month();
+    public ResponseEntity<ReportMonthlyAnalyzeResponseDTO> getMonthlyAnalyze(Integer input_year, Integer input_month, Member member) {
 
         // input year과 month에 대한 FinanceDataList
         FinanceData inputFinanceData = financeDataRepository.findByMemberIdAndCreatedYearAndCreatedMonth(member.getId(), input_year, input_month);
@@ -76,16 +72,12 @@ public class HomeatReportService {
     }
 
     // 소비분석 중 하단의 주별 분석
-    public ResponseEntity<ReportWeeklyResponseDTO> getWeeklyAnalyze(ReportAnalyzeRequestDTO.DateInputDTO dateInputDTO, Member member) {
+    public ResponseEntity<ReportWeeklyResponseDTO> getWeeklyAnalyze(Integer input_year, Integer input_month, Integer input_day, Member member) {
 
         /**
          * 날짜에 대한 달별 주차(Week of Month)
          */
         Calendar calendar = Calendar.getInstance();
-
-        Integer input_year = dateInputDTO.getInput_year();
-        Integer input_month = dateInputDTO.getInput_month();
-        Integer input_day = dateInputDTO.getInput_day();
 
         calendar.set(input_year, input_month - 1, input_day);
         Integer thisWeek = calendar.get(Calendar.WEEK_OF_MONTH); // 날짜에 대한 이번달 주차

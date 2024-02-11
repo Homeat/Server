@@ -2,13 +2,20 @@ package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
-import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeRequestDTO;
+import homeat.backend.domain.homeatreport.dto.ReportAnalyzeRequestDTO;
 import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeResponseDTO;
+import homeat.backend.domain.homeatreport.dto.ReportWeeklyResponseDTO;
 import homeat.backend.domain.user.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.WeekFields;
+import java.util.Calendar;
+import java.util.Locale;
 
 @Service
 @Transactional(readOnly = true)
@@ -17,7 +24,8 @@ public class HomeatReportService {
 
     private final FinanceDataRepository financeDataRepository;
 
-    public ResponseEntity<ReportMonthlyAnalyzeResponseDTO> getWeeklyAnalyze(ReportMonthlyAnalyzeRequestDTO.DateInputDTO dateInputDTO, Member member) {
+    // 소비분석 중 상단의 월별 분석
+    public ResponseEntity<ReportMonthlyAnalyzeResponseDTO> getMonthlyAnalyze(ReportAnalyzeRequestDTO.DateInputDTO dateInputDTO, Member member) {
 
         Integer input_year = dateInputDTO.getInput_year();
         Integer input_month = dateInputDTO.getInput_month();
@@ -65,6 +73,25 @@ public class HomeatReportService {
         }
         ReportMonthlyAnalyzeResponseDTO reportMonthlyAnalyzeResponseDTO = new ReportMonthlyAnalyzeResponseDTO(input_month_jipbap_price, input_month_out_price, jipbap_ratio, out_ratio, save_percent);
         return ResponseEntity.ok(reportMonthlyAnalyzeResponseDTO);
+    }
+
+    // 소비분석 중 하단의 주별 분석
+    public ResponseEntity<ReportWeeklyResponseDTO> getWeeklyAnalyze(ReportAnalyzeRequestDTO.DateInputDTO dateInputDTO, Member member) {
+
+        /**
+         * 날짜에 대한 달별 주차(Week of Month)
+         */
+        Calendar calendar = Calendar.getInstance();
+
+        Integer input_year = dateInputDTO.getInput_year();
+        Integer input_month = dateInputDTO.getInput_month();
+        Integer input_day = dateInputDTO.getInput_day();
+
+        calendar.set(input_year, input_month - 1, input_day);
+        Integer thisWeek = calendar.get(Calendar.WEEK_OF_MONTH); // 날짜에 대한 이번달 주차
+
+
+
     }
 
 }

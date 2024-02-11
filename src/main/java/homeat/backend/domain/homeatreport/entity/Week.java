@@ -29,8 +29,15 @@ public class Week extends BaseEntity {
 
     // WeekStatus(enum) : SUCCESS, FAIL, UNDO
     @Enumerated(EnumType.STRING)
-    private WeekStatus week_status; // 이번주 달성 여부
+    @Builder.Default
+    private WeekStatus week_status = WeekStatus.UNDO; // 이번주 달성 여부
 
-    private Long exceed_price; // 초과 금액
+    @Builder.Default
+    private Long exceed_price = 0L; // 초과 금액
+
+    // TierStatus(enum) : 홈잇스타터, 홈잇러버, 홈잇마스터
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private TierStatus tierStatus =TierStatus.홈잇스타터;
 
 }

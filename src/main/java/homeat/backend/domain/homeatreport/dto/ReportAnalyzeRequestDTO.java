@@ -2,7 +2,7 @@ package homeat.backend.domain.homeatreport.dto;
 
 import lombok.Getter;
 
-public class ReportMonthlyAnalyzeRequestDTO {
+public class ReportAnalyzeRequestDTO {
     @Getter
     public static class DateInputDTO {
 

@@ -1,7 +1,6 @@
 package homeat.backend.domain.homeatreport.controller;
 
-import homeat.backend.domain.home.controller.HomeController;
-import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeRequestDTO;
+import homeat.backend.domain.homeatreport.dto.ReportAnalyzeRequestDTO;
 import homeat.backend.domain.homeatreport.service.HomeatReportService;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
@@ -26,13 +25,13 @@ public class HomeatReportController {
     /**
      * 소비분석 input_year & input_month 요청
      */
-    @Operation(summary = "홈잇리포트 소비분석 상단의 input_year과 input_month 조회 api")
+    @Operation(summary = "홈잇리포트 소비분석 상단의 날짜 조회 api")
     @GetMapping("/input-date")
     public ResponseEntity<?> getInputDate(
-            @RequestBody ReportMonthlyAnalyzeRequestDTO.DateInputDTO dateInputDTO,
+            @RequestBody ReportAnalyzeRequestDTO.DateInputDTO dateInputDTO,
             Authentication authentication
     ) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
-        return homeatReportService.getWeeklyAnalyze(dateInputDTO, member);
+        return homeatReportService.getMonthlyAnalyze(dateInputDTO, member);
     }
 }

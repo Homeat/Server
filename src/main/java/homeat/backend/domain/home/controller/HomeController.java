@@ -28,12 +28,15 @@ public class HomeController {
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     /**
-     * 목표 금액 저장 (수정 없다면 데이터 계속 유지. 만약 수정하면 다음 주 목표식비에 반영)
+     * 목표 금액 수정 (수정하면 다음 주 목표식비에 반영)
      */
-    @Operation(summary = "홈 화면 목표 금액 추가 api")
-    @PostMapping("/target-expense")
-    public ResponseEntity<?> createTargetExpense(@RequestBody HomeRequestDTO.TargetExpenseDTO dto) {
-        return homeService.createTargetExpense(dto);
+    @Operation(summary = "홈 화면 목표 금액 수정 api")
+    @PatchMapping("/target-expense")
+    public ResponseEntity<?> updateTargetExpense(
+            @RequestBody HomeRequestDTO.TargetExpenseDTO dto,
+            Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return homeService.updateTargetExpense(dto, member);
     }
 
     /**

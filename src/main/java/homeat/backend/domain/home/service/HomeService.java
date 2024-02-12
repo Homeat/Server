@@ -48,17 +48,20 @@ public class HomeService {
     private static final Logger logger = LoggerFactory.getLogger(HomeService.class);
 
     /**
-     *  목표 금액 저장
+     *  목표 금액 수정
      */
     @Transactional
-    public ResponseEntity<?> createTargetExpense(HomeRequestDTO.TargetExpenseDTO dto) {
-        Week week = Week.builder()
-                .goal_price(dto.getTargetExpense())
-                .build();
+    public ResponseEntity<?> updateTargetExpense(HomeRequestDTO.TargetExpenseDTO dto, Member member) {
 
-        weekRepository.save(week);
+        // 최신 FinanceData 조회
+        FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원의 FinanceData가 존재하지 않습니다."));
 
-        return ResponseEntity.ok("목표금액 저장완료");
+        Week nextWeek = weekRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData);
+
+        nextWeek.updateGoalPrice(dto.getTargetExpense());
+
+        return ResponseEntity.ok("목표금액 수정완료");
     }
 
     /**

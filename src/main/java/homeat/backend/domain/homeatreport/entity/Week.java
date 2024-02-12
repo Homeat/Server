@@ -33,4 +33,8 @@ public class Week extends BaseEntity {
 
     private Long exceed_price; // 초과 금액
 
+    // 목표 금액 수정
+    public void updateGoalPrice(Long targetMoney) {
+        this.goal_price = targetMoney;
+    }
 }

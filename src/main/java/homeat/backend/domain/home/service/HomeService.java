@@ -55,9 +55,11 @@ public class HomeService {
 
         // 최신 FinanceData 조회
         FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원의 FinanceData가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 회원의 FinanceData가 존재하지 않습니다."));
 
-        Week nextWeek = weekRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData);
+        // 다음 주 Week 조회
+        Week nextWeek = weekRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData)
+                        .orElseThrow(() -> new NoSuchElementException("해당 회원의 Week가 존재하지 않습니다."));
 
         nextWeek.updateGoalPrice(dto.getTargetExpense());
 

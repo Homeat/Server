@@ -53,7 +53,7 @@ public class HomeController {
     /**
      *  OCR 영수증 처리 (끝 -> 다른 양식은 어떻게 할 지 고민해보기)
      */
-    @Operation(summary = "영수증 추출(ocr) API")
+    @Operation(summary = "영수증 추출(ocr) API, 완료")
     @PostMapping(value = "/receipt", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> processReceipt(@RequestParam("file") MultipartFile file) {
         try {
@@ -69,7 +69,7 @@ public class HomeController {
      * 지출 추가
      * OCR로 금액 추출뿐만 아니라 직접 수기로 금액 작성 가능
      */
-    @Operation(summary = "지출 추가 api")
+    @Operation(summary = "지출 추가 api, 완료")
     @PostMapping("/add-expense")
     public ResponseEntity<?> createReceipt(@RequestBody HomeRequestDTO.ReceiptDTO dto,
                                            Authentication authentication) {

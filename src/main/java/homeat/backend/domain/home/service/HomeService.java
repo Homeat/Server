@@ -230,8 +230,15 @@ public class HomeService {
         // 조회된 데이터를 DTO로 변환
         List<HomeResponseDTO.CalendarResultDTO> result = new ArrayList<>();
         for (DailyExpense data : calendarData) {
-            if (data.getTodayJipbapPrice() != 0 || data.getTodayOutPrice() != 0) {
-                HomeResponseDTO.CalendarResultDTO dto = HomeConverter.toCalendarResult(data);
+            long total = data.getTodayJipbapPrice() + data.getTodayJipbapPrice();
+            if (total != 0) {
+                int jipbapPricePercent = (int)((double)data.getTodayJipbapPrice() / total * 100);
+                int outPricePercent = 100 - jipbapPricePercent;
+                HomeResponseDTO.CalendarResultDTO dto = HomeResponseDTO.CalendarResultDTO.builder()
+                        .date(data.getCreatedAt().toLocalDate())
+                        .todayJipbapPricePercent(jipbapPricePercent)
+                        .todayOutPricePercent(outPricePercent)
+                        .build();
                 result.add(dto);
             }
         }

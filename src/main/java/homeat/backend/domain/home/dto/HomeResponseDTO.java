@@ -34,7 +34,7 @@ public class HomeResponseDTO {
     @AllArgsConstructor
     public static class CalendarResultDTO {
         private LocalDate date;
-        private Long todayJipbapPrice;
-        private Long todayOutPrice;
+        private int todayJipbapPricePercent;
+        private int todayOutPricePercent;
     }
 }

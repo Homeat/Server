@@ -76,6 +76,9 @@ public class HomeService {
 
         // 목표 식비 조회(이번 주, 다음 주 데이터 조회 후 이번 주 값만 추출)
         List<Week> weeks = weekRepository.findTop2ByFinanceDataOrderByCreatedAtDesc(financeData);
+        if (weeks.size() < 2) {
+            throw new NoSuchElementException("해당 회원은 Week 데이터가 2개 이상 존재하지 않습니다.");
+        }
         Long thisWeekGoalPrice = weeks.get(1).getGoal_price();
 
         // 목표 식비가 0원 (default) -> nickname, 뱃지 개수만 반환

@@ -72,10 +72,9 @@ public class HomeService {
         FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
 
-        // 목표 식비 조회
-        Long goalPrice = weekRepository.findTopByFinanceDataOrderByCreatedAtDesc(financeData.getId())
-                .map(Week::getGoal_price)
-                .orElse(0L);
+        // 목표 식비 조회(이번 주, 다음 주 데이터 조회 후 이번 주 값만 추출)
+        List<Week> weeks = weekRepository.findTop2ByFinanceDataOrderByCreatedAtDesc(financeData);
+        Long thisWeekGoalPrice = weeks.get(1).getGoal_price();
 
         // 목표 식비가 0원 (default) -> nickname, 뱃지 개수만 반환
         HomeResponseDTO.HomeResultDTO.HomeResultDTOBuilder builder = HomeResponseDTO.HomeResultDTO.builder()
@@ -83,7 +82,7 @@ public class HomeService {
                 .nickname(member.getNickname());
 
         // 목표 식비가 0원이 아닐 경우
-        if(goalPrice > 0) {
+        if(thisWeekGoalPrice > 0) {
             LocalDate today = LocalDate.now();
             // 예외처리(저번 주 존재하지 않는 경우)
             LocalDate lastMonday = today.minusWeeks(1).with(DayOfWeek.MONDAY);
@@ -98,11 +97,11 @@ public class HomeService {
             // 목표 금액에 대한 이번 주 남은 사용 퍼센트
             int usedPercent = 100;
             if (thisWeekTotal != null) {
-                usedPercent = (int) (usedPercent - (double) thisWeekTotal / goalPrice * 100);
+                usedPercent = (int) (usedPercent - (double) thisWeekTotal / thisWeekGoalPrice * 100);
             }
 
             // 목표 금액 & 전주 대비 이번 주 절약 퍼센트 & 사용 금액 & 목표 금액 대비 사용 금액 퍼센트
-            builder.targetMoney(goalPrice)
+            builder.targetMoney(thisWeekGoalPrice)
                     .lastWeekSavingPercent(thisWeekSavingPercent)
                     .usedMoney(thisWeekTotal)
                     .usedPercent(usedPercent);

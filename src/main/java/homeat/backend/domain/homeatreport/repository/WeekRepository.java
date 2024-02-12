@@ -10,6 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface WeekRepository extends JpaRepository<Week, Long> {
-    Optional<Week> findTopByFinanceDataOrderByCreatedAtDesc(FinanceData financeData);
+    List<Week> findTop2ByFinanceDataOrderByCreatedAtDesc(FinanceData financeData);
     Week findFirstByFinanceDataOrderByCreatedAtDesc(FinanceData financeData);
 }

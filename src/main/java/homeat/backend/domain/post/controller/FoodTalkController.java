@@ -32,16 +32,25 @@ public class FoodTalkController {
     /**
      * 집밥토크 저장
      */
-    @Operation(summary = "집밥토크 저장 api, 스웨거 사용 X")
-    @PostMapping(value = "/save", consumes = {MediaType.APPLICATION_JSON_VALUE,
-            MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> saveFoodTalk(@RequestPart("content") FoodTalkDTO dto,
-                                          @RequestPart("imgUrl") List<MultipartFile> multipartFiles) {
+    @Operation(summary = "집밥토크 저장 api")
+    @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> saveFoodTalk(@RequestBody @Valid FoodTalkDTO dto) {
 
+
+        return foodTalkService.saveFoodTalk(dto);
+    }
+
+    /**
+     * 집밥토크 사진 업로드
+     */
+    @Operation(summary = "집밥토크 사진 저장 api")
+    @PostMapping(value = "/upload/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadImages(@PathVariable("id") Long id,@RequestPart("imgUrl") List<MultipartFile> multipartFiles) {
         if (multipartFiles == null) {
             throw new IllegalArgumentException("사진이 없습니다");
         }
-        return foodTalkService.saveFoodTalk(dto, multipartFiles);
+
+        return foodTalkService.uploadImages(id, multipartFiles);
     }
 
     /**

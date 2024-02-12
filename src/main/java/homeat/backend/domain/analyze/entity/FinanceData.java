@@ -29,7 +29,11 @@ public class FinanceData extends BaseEntity {
     @Builder.Default
     private Long month_out_price = 0L; // 이번달 배달/외식 비용
 
-    private Long num_homeat_badge; // 홈잇뱃지 개수
+
+    private Long income; // 사용자 수입
+
+    @Builder.Default
+    private Long num_homeat_badge = 0L; // 홈잇뱃지 개수
 
     public void addJipbapPrice(long price) {
         this.month_jipbap_price += price;

@@ -1,5 +1,6 @@
 package homeat.backend.domain.post.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.global.common.domain.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,10 +32,9 @@ public class FoodRecipe extends BaseEntity {
     private String recipe;
     private String ingredient;
     private String tip;
-    @Builder.Default
-    private Integer step = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "foodtalk_id")
+    @JsonIgnore
     private FoodTalk foodTalk;
 }

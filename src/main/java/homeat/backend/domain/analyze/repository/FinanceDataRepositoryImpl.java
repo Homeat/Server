@@ -1,29 +1,39 @@
-package homeat.backend.domain.analyze.repository.querydsl;
+package homeat.backend.domain.analyze.repository;
 
-import com.querydsl.core.types.dsl.DateTemplate;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
-import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.entity.QFinanceData;
 import homeat.backend.domain.user.entity.Member;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
-public class FinanceDataRepositoryImpl implements FinanceDataRepositoryCustom {
+@Repository
+public class FinanceDataRepositoryImpl implements FinanceDataRepositoryCustom{
 
     private final JPAQueryFactory queryFactory;
 
     public FinanceDataRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
     }
+
+    @Override
+    public FinanceData findByMemberIdAndCreatedYearAndCreatedMonth(Long member_id, Integer year, Integer month) {
+        QFinanceData qFinanceData = QFinanceData.financeData;
+        return queryFactory.selectFrom(qFinanceData)
+                .where(qFinanceData.member.id.eq(member_id)
+                        .and(qFinanceData.createdAt.year().eq(year)
+                                .and(qFinanceData.createdAt.month().eq(month))))
+                .fetchOne();
+    }
+
 
     /**
      * '회원가입 시 row 추가 + 매달 1일 row 추가' 에 대한 예외처리

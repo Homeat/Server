@@ -4,6 +4,8 @@ import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.dto.FoodTalkDTO;
+import homeat.backend.domain.post.entity.InfoPicture;
+import homeat.backend.domain.post.entity.InfoTalk;
 import homeat.backend.domain.post.entity.Save;
 import homeat.backend.domain.post.repository.FoodPictureRepository;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
@@ -30,10 +32,7 @@ public class FoodTalkService {
 
     // 게시글 작성
     @Transactional
-    public ResponseEntity<?> saveFoodTalk(FoodTalkDTO dto, List<MultipartFile> multipartFiles) {
-        List<String> imgPaths = s3Service.upload(multipartFiles);
-        System.out.println("IMG 경로들 : " + imgPaths);
-        postBlankCheck(imgPaths);
+    public ResponseEntity<?> saveFoodTalk(FoodTalkDTO dto) {
 
         FoodTalk foodTalk = FoodTalk.builder()
                 .name(dto.getName())
@@ -43,18 +42,31 @@ public class FoodTalkService {
                 .build();
         foodTalkRepository.save(foodTalk);
 
-        List<String> imgList = new ArrayList<>();
+
+        return ResponseEntity.ok().body(foodTalk);
+    }
+
+    @Transactional
+    public ResponseEntity<?> uploadImages(Long id, List<MultipartFile> multipartFiles) {
+        List<String> imgPaths = s3Service.upload(multipartFiles);
+        System.out.println("IMG 경로들 : " + imgPaths);
+        postBlankCheck(imgPaths);
+
+        FoodTalk foodTalk = foodTalkRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+
         for (String imgUrl : imgPaths) {
             FoodPicture foodPicture = FoodPicture.builder()
                     .foodTalk(foodTalk)
                     .url(imgUrl)
                     .build();
             foodPictureRepository.save(foodPicture);
-            imgList.add(foodPicture.getUrl());
         }
 
-        return ResponseEntity.ok(foodTalk.getId() + "번 집밥토크 저장완료");
+
+        return ResponseEntity.ok(foodTalk.getId() + "번 집밥토크 사진 저장완료");
     }
+
     private void postBlankCheck(List<String> imgPaths) {
         if(imgPaths == null || imgPaths.isEmpty()){ //.isEmpty()도 되는지 확인해보기
             throw new IllegalArgumentException("사진 입력 오류입니다.");
@@ -77,8 +89,13 @@ public class FoodTalkService {
     @Transactional
     public ResponseEntity<?> deleteFoodTalk(Long id) {
 
+
         FoodTalk foodTalk = foodTalkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+
+        for (FoodPicture foodPicture : foodTalk.getFoodPictures()) {
+            s3Service.fileDelete(foodPicture.getUrl());
+        }
 
         foodTalkRepository.delete(foodTalk);
 
@@ -143,4 +160,6 @@ public class FoodTalkService {
 
         return ResponseEntity.ok().body(foodTalkRepository.findByViewLessThanOrderByViewDesc(condition,id,view, pageable));
     }
+
+
 }

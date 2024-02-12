@@ -33,17 +33,25 @@ public class InfoTalkController {
     /**
      * 정보토크 저장
      */
-    @Operation(summary = "정보토크 저장 api, , 스웨거 사용 X")
-    @PostMapping(value = "/save", consumes = {MediaType.APPLICATION_JSON_VALUE,
-            MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> saveInfoTalk(@RequestPart("content") InfoTalkDTO dto,
-                                          @RequestPart(value = "tags", required = false) List<String> tags,
-                                          @RequestPart("imgUrl") List<MultipartFile> multipartFiles) {
+    @Operation(summary = "정보토크 내용 저장 api")
+    @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> saveInfoTalk(@RequestBody InfoTalkDTO dto) {
 
+
+        return infoTalkService.saveInfoTalk(dto);
+    }
+
+    /**
+     * 정보토크 사진 업로드
+     */
+    @Operation(summary = "정보토크 사진 저장 api")
+    @PostMapping(value = "/upload/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadImages(@PathVariable("id") Long id,@RequestPart("imgUrl") List<MultipartFile> multipartFiles) {
         if (multipartFiles == null) {
             throw new IllegalArgumentException("사진이 없습니다");
         }
-        return infoTalkService.saveInfoTalk(dto, tags, multipartFiles);
+
+        return infoTalkService.uploadImages(id, multipartFiles);
     }
 
     /**
@@ -52,6 +60,7 @@ public class InfoTalkController {
     @Operation(summary = "정보토크 임시저장 api")
     @PostMapping("/tempSave")
     public ResponseEntity<?> tempSaveInfoTalk(@RequestBody @Valid InfoTalkDTO dto) {
+
         return infoTalkService.tempSaveInfoTalk(dto);
     }
 

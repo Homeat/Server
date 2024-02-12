@@ -62,7 +62,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 )
                 .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
                 .orderBy(infoTalk.id.desc())
-                .limit(pageable.getOffset() + 6)
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         return checkEndPage(pageable, results);
@@ -79,7 +79,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 )
                 .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
                 .orderBy(infoTalk.id.asc())
-                .limit(pageable.getOffset() + 6)
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         return checkEndPage(pageable, results);
@@ -97,7 +97,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 )
                 .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
                 .orderBy(infoTalk.love.desc(), infoTalk.id.desc())
-                .limit(pageable.getOffset()+ 6)
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         return checkEndPage(pageable, result);
@@ -114,7 +114,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 )
                 .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
                 .orderBy(infoTalk.view.desc(), infoTalk.id.desc())
-                .limit(pageable.getOffset() + 6)
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
         return checkEndPage(pageable, result);

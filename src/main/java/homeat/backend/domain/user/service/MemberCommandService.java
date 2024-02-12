@@ -12,6 +12,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -45,5 +49,10 @@ public class MemberCommandService {
         }
 
         return jwtUtil.createJwt(selectedMember.getId());
+    }
+
+    public LocalDateTime getJwtExpiredAt(String token) {
+        Date expiredAt = jwtUtil.getExpiredAt(token);
+        return LocalDateTime.ofInstant(expiredAt.toInstant(), ZoneId.systemDefault());
     }
 }

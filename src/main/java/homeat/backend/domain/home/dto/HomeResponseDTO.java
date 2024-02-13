@@ -15,9 +15,18 @@ public class HomeResponseDTO {
         private Long expense;
     }
 
-//    public static class HomeResultDTO {
-//
-//    }
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HomeResultDTO {
+        private String nickname;
+        private Long targetMoney;
+        private int lastWeekSavingPercent;
+        private Long usedMoney;
+        private int badgeCount;
+        private int usedPercent;
+    }
 
     @Builder
     @Getter
@@ -25,7 +34,7 @@ public class HomeResponseDTO {
     @AllArgsConstructor
     public static class CalendarResultDTO {
         private LocalDate date;
-        private Long todayJipbapPrice;
-        private Long todayOutPrice;
+        private int todayJipbapPricePercent;
+        private int todayOutPricePercent;
     }
 }

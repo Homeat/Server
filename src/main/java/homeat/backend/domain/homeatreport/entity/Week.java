@@ -40,4 +40,8 @@ public class Week extends BaseEntity {
     @Builder.Default
     private TierStatus tierStatus =TierStatus.홈잇스타터;
 
+    // 목표 금액 수정
+    public void updateGoalPrice(Long targetMoney) {
+        this.goal_price = targetMoney;
+    }
 }

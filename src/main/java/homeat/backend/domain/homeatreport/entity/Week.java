@@ -28,6 +28,8 @@ public class Week extends BaseEntity {
 
     private Long goal_price; // 이번주 목표 식비
 
+    private Long next_goal_price; // 다음주 목표 식비
+
     // WeekStatus(enum) : SUCCESS, FAIL, UNDO
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -54,12 +56,14 @@ public class Week extends BaseEntity {
     // tier_status setter
     public void setTierStatus(TierStatus tier_status) { this.tierStatus = tier_status; }
 
-    // finance data pk 지정 메서드
-
-
     // 목표 금액 수정
     public void updateGoalPrice(Long targetMoney) {
         this.goal_price = targetMoney;
     }
+
+    // Week goal price setter
+    public  void setGoalPrice(Long price) { this.goal_price = price; }
+
+    // finance data pk 지정 메서드
 
 }

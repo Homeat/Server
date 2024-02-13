@@ -45,7 +45,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.id.lt(lastFoodTalkId),
-                        nameEq(condition.getName()),
+                        search(condition.getSearch()),
                         tagEq(condition.getTag())
                 )
                 .orderBy(foodTalk.id.desc())
@@ -64,7 +64,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.id.gt(OldestFoodTalkId),
-                        nameEq(condition.getName()),
+                        search(condition.getSearch()),
                         tagEq(condition.getTag())
                 )
                 .orderBy(foodTalk.id.asc())
@@ -80,7 +80,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.love.lt(love).or(foodTalk.love.eq(love).and(foodTalk.id.lt(id))),
-                        nameEq(condition.getName()),
+                        search(condition.getSearch()),
                         tagEq(condition.getTag())
 
                 )
@@ -107,7 +107,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.view.lt(view).or(foodTalk.view.eq(view).and(foodTalk.id.lt(id))),
-                        nameEq(condition.getName()),
+                        search(condition.getSearch()),
                         tagEq(condition.getTag())
                 )
                 .orderBy(foodTalk.view.desc(), foodTalk.id.desc())
@@ -117,8 +117,8 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
         return checkEndPage(pageable, result);
     }
 
-    private BooleanExpression nameEq(String name) {
-        return hasText(name) ? foodTalk.name.eq(name) : null;
+    private BooleanExpression search(String search) {
+        return hasText(search) ? foodTalk.name.contains(search).or(foodTalk.memo.contains(search)) : null;
 
     }
     private BooleanExpression tagEq(String  tag) {

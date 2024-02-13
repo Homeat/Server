@@ -33,3 +33,10 @@ ocr:
   secret:
     key: ${ocr.secret.key}
   url: ${ocr.url}
+
+logging:
+  level:
+    com:
+      amazonaws:
+        util:
+          EC2MetadataUtils: ERROR

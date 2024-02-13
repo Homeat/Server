@@ -101,6 +101,21 @@ public class FoodTalkService {
             s3Service.fileDelete(foodPicture.getUrl());
         }
 
+        // 레시피 s3 삭제
+        if (foodTalk.getFoodRecipes() == null || foodTalk.getFoodRecipes().isEmpty()) {
+
+        } else {
+            for (FoodRecipe foodRecipe : foodTalk.getFoodRecipes()) {
+                if (foodRecipe.getFoodRecipePictures() == null || foodRecipe.getFoodRecipePictures().isEmpty()) {
+
+                } else {
+                    for (FoodRecipePicture foodRecipePicture : foodRecipe.getFoodRecipePictures()) {
+                        s3Service.fileDelete(foodRecipePicture.getUrl());
+                    }
+                }
+            }
+        }
+
 
 
         foodTalkRepository.delete(foodTalk);
@@ -189,7 +204,7 @@ public class FoodTalkService {
 
         } else {
             List<String> imgPaths = s3Service.upload(files);
-            System.out.println("IMG 경로들 : " + files);
+            System.out.println("IMG 경로들 : " + imgPaths);
 
             for (String imgUrl : imgPaths) {
                 FoodRecipePicture foodRecipePicture = FoodRecipePicture.builder()

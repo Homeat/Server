@@ -36,6 +36,4 @@ public class MemberInfo extends BaseEntity {
     private String phoneNumber;
 
     private String address;
-
-    private Long income;
 }

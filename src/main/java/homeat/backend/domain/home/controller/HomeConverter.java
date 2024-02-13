@@ -1,6 +1,5 @@
-package homeat.backend.domain.home.converter;
+package homeat.backend.domain.home.controller;
 
-import homeat.backend.domain.home.dto.HomeRequestDTO;
 import homeat.backend.domain.home.dto.HomeResponseDTO;
 import homeat.backend.domain.home.entity.DailyExpense;
 import homeat.backend.domain.homeatreport.entity.Week;
@@ -22,11 +21,11 @@ public class HomeConverter {
 //    }
 
     // 월별 데이터 entity -> dto
-    public static HomeResponseDTO.CalendarResultDTO toCalendarResult(DailyExpense expense) {
-        return HomeResponseDTO.CalendarResultDTO.builder()
-                .date(expense.getCreatedAt().toLocalDate())
-                .todayJipbapPrice(expense.getTodayJipbapPrice())
-                .todayOutPrice(expense.getTodayOutPrice())
-                .build();
-    }
+//    public static HomeResponseDTO.CalendarResultDTO toCalendarResult(DailyExpense expense) {
+//        return HomeResponseDTO.CalendarResultDTO.builder()
+//                .date(expense.getCreatedAt().toLocalDate())
+//                .todayJipbapPricePercent(expense.getTodayJipbapPrice())
+//                .todayOutPricePercent(expense.getTodayOutPrice())
+//                .build();
+//    }
 }

@@ -56,4 +56,10 @@ public class Week extends BaseEntity {
 
     // finance data pk 지정 메서드
 
+
+    // 목표 금액 수정
+    public void updateGoalPrice(Long targetMoney) {
+        this.goal_price = targetMoney;
+    }
+
 }

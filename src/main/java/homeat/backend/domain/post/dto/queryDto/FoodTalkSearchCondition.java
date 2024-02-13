@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 public class FoodTalkSearchCondition {
 
-    private String name;
+    private String search;
     private String tag;
 }

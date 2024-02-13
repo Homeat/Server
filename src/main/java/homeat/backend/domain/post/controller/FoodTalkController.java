@@ -92,7 +92,7 @@ public class FoodTalkController {
     /**
      * 무한 스크롤 최신순 조회
      */
-    @Operation(summary = "집밥토크 최신순 조회, lastFoodTalkId 보다 작은 6개 게시물을 보여줍니다.")
+    @Operation(summary = "집밥토크 최신순 조회 및 검색, lastFoodTalkId 보다 작은 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/latest")
     public ResponseEntity<?> getFoodTalkLatest(FoodTalkSearchCondition condition,@RequestParam Long lastFoodTalkId) {
         return foodTalkService.getFoodTalkLatest(condition,lastFoodTalkId);
@@ -101,7 +101,7 @@ public class FoodTalkController {
     /**
      * 무한 스크롤 오래된 순 조회
      */
-    @Operation(summary = "집밥토크 오래된 순 조회, lastFoodTalkId 보다 큰 6개 게시물을 보여줍니다.")
+    @Operation(summary = "집밥토크 오래된 순 조회 및 검색, lastFoodTalkId 보다 큰 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/oldest")
     public ResponseEntity<?> getFoodTalkOldest(FoodTalkSearchCondition condition,@RequestParam Long OldestFoodTalkId) {
         return foodTalkService.getFoodTalkOldest(condition,OldestFoodTalkId);
@@ -110,7 +110,7 @@ public class FoodTalkController {
     /**
      * 무한 스크롤 공감 순 조회
      */
-    @Operation(summary = "집밥토크 공감 순 조회, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
+    @Operation(summary = "집밥토크 공감 순 조회 및 검색, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/love")
     public ResponseEntity<?> getFoodTalkByLove(FoodTalkSearchCondition condition, @RequestParam Long id, @RequestParam int love) {
         return foodTalkService.getFoodTalkByLove(condition,id,love);
@@ -119,7 +119,7 @@ public class FoodTalkController {
     /**
      * 무한 스크롤 조회 순 조회
      */
-    @Operation(summary = "집밥토크 조회 순 조회, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
+    @Operation(summary = "집밥토크 조회 순 조회 및 검색, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/view")
     public ResponseEntity<?> getFoodTalkByView(FoodTalkSearchCondition condition,@RequestParam Long id,@RequestParam int view) {
         return foodTalkService.getFoodTalkByView(condition,id,view);

@@ -36,10 +36,13 @@ public class WeekGenerationService {
 
         // 2. 직전 week 엔티티의 목표 달성 여부 최신화
         // 직전 week 찾기
-        Optional<Week> optionalPreviousWeek = weekRepository.findById(newWeek.getId() - 2); // 새로 생성되는 것이 다음주 week 엔티티 이므로 -2
+        Optional<Week> optionalPreviousWeek = weekRepository.findById(newWeek.getId() - 1);
         if (optionalPreviousWeek.isPresent()) {
             Week previousWeek = optionalPreviousWeek.get();
             FinanceData previousFinanceData = previousWeek.getFinanceData();
+
+            // 새로운 week의 목표금액을 전 week 엔티티의 next_goal_price로 지정
+            newWeek.setGoalPrice(previousWeek.getNext_goal_price());
 
             Long previousExceedPrice = previousWeek.getExceed_price();
             int isSuccess;

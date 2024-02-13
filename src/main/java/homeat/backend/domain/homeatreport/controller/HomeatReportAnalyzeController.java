@@ -1,8 +1,12 @@
 package homeat.backend.domain.homeatreport.controller;
 
+import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeResponseDTO;
+import homeat.backend.domain.homeatreport.dto.ReportWeeklyResponseDTO;
 import homeat.backend.domain.homeatreport.service.HomeatReportAnalyzeService;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
+import homeat.backend.global.payload.ApiPayload;
+import homeat.backend.global.payload.CommonSuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -30,12 +34,12 @@ public class HomeatReportAnalyzeController {
      */
     @Operation(summary = "홈잇리포트 소비분석 상단의 날짜 조회 api")
     @GetMapping("/ofMonth")
-    public ResponseEntity<?> getMonthInput(
+    public ApiPayload<ReportMonthlyAnalyzeResponseDTO> getMonthInput(
             @RequestParam Integer input_year, Integer input_month,
             Authentication authentication
     ) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
-        return homeatReportAnalyzeService.getMonthlyAnalyze(input_year, input_month, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, homeatReportAnalyzeService.getMonthlyAnalyze(input_year, input_month, member));
     }
 
     /**
@@ -48,11 +52,11 @@ public class HomeatReportAnalyzeController {
      */
     @Operation(summary = "홈잇리포트 소비분석 하단의 날짜 조회 api")
     @GetMapping("/ofWeek")
-    public ResponseEntity<?> getWeekInput(
+    public ApiPayload<ReportWeeklyResponseDTO> getWeekInput(
             @RequestParam Integer input_year, Integer input_month, Integer input_day,
             Authentication authentication
     ) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
-        return homeatReportAnalyzeService.getWeeklyAnalyze(input_year, input_month, input_day, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, homeatReportAnalyzeService.getWeeklyAnalyze(input_year, input_month, input_day, member));
     }
 }

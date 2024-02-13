@@ -34,7 +34,7 @@ public class HomeatReportAnalyzeService {
     private final DailyExpenseRepo dailyExpenseRepository;
 
     // 소비분석 중 상단의 월별 분석
-    public ResponseEntity<ReportMonthlyAnalyzeResponseDTO> getMonthlyAnalyze(Integer input_year, Integer input_month, Member member) {
+    public ReportMonthlyAnalyzeResponseDTO getMonthlyAnalyze(Integer input_year, Integer input_month, Member member) {
 
         // input year과 month에 대한 FinanceDataList
         FinanceData inputFinanceData = financeDataRepository.findByMemberIdAndCreatedYearAndCreatedMonth(member.getId(), input_year, input_month);
@@ -78,11 +78,11 @@ public class HomeatReportAnalyzeService {
             }
         }
         ReportMonthlyAnalyzeResponseDTO reportMonthlyAnalyzeResponseDTO = new ReportMonthlyAnalyzeResponseDTO(input_month_jipbap_price, input_month_out_price, jipbap_ratio, out_ratio, save_percent);
-        return ResponseEntity.ok().body(reportMonthlyAnalyzeResponseDTO);
+        return reportMonthlyAnalyzeResponseDTO;
     }
 
     // 소비분석 중 하단의 주별 분석
-    public ResponseEntity<ReportWeeklyResponseDTO> getWeeklyAnalyze(Integer input_year, Integer input_month, Integer input_day, Member member) {
+    public ReportWeeklyResponseDTO getWeeklyAnalyze(Integer input_year, Integer input_month, Integer input_day, Member member) {
 
         MemberInfo memberInfo = memberInfoRepository.findMemberInfoByMemberId(member.getId()); // 특정 멤버의 memberInfo 엔티티
         LocalDate birth = memberInfo.getBirth();
@@ -140,7 +140,7 @@ public class HomeatReportAnalyzeService {
         }
 
         ReportWeeklyResponseDTO reportWeeklyResponseDTO = new ReportWeeklyResponseDTO(age_range_str, income, gender, member.getNickname(), week_jipbap_price-average_jipbap_price, week_out_price-average_out_price, average_jipbap_price, week_jipbap_price, average_out_price, week_out_price);
-        return ResponseEntity.ok().body(reportWeeklyResponseDTO);
+        return reportWeeklyResponseDTO;
     }
 
 

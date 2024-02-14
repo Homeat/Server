@@ -81,11 +81,12 @@ public class HomeController {
     /**
      * 지출 확인(해당 월 데이터) -> 하루 데이터를 리스트로 전송(목표 금액은 없음)
      */
-    @Operation(summary = "연월별 데이터 조회 api")
+    @Operation(summary = "연월별 데이터 조회 api"
+    , description = "기본값으로 오늘 날짜의 year, month를 받아옵니다.")
     @GetMapping("/calendar")
     public ResponseEntity<?> getCalendar(
-            @RequestParam("year") String year,
-            @RequestParam("month") String month,
+            @RequestParam(value = "year", defaultValue = "#{T(java.time.LocalDate).now().getYear()}") String year,
+            @RequestParam(value = "month", defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") String month,
             Authentication authentication) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
         return homeService.getCalendar(year, month, member);

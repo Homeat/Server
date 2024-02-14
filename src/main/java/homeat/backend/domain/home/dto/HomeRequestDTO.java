@@ -10,9 +10,9 @@ public class HomeRequestDTO {
 
     // 목표 금액
     @Getter
-    public static class TargetExpenseDTO {
+    public static class nextTargetExpenseDTO {
         @NotBlank
-        private Long targetExpense;
+        private Long nextTargetExpense;
     }
 
     // 영수증 등록

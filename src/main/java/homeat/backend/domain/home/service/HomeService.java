@@ -48,10 +48,10 @@ public class HomeService {
     private static final Logger logger = LoggerFactory.getLogger(HomeService.class);
 
     /**
-     *  목표 금액 수정
+     *  다음 주 목표 금액 수정
      */
     @Transactional
-    public ResponseEntity<?> updateTargetExpense(HomeRequestDTO.TargetExpenseDTO dto, Member member) {
+    public ResponseEntity<?> updateNextTargetExpense(HomeRequestDTO.nextTargetExpenseDTO dto, Member member) {
 
         // 최신 FinanceData 조회
         FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
@@ -61,9 +61,9 @@ public class HomeService {
         Week nextWeek = weekRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData)
                         .orElseThrow(() -> new NoSuchElementException("해당 회원의 Week가 존재하지 않습니다."));
 
-        nextWeek.updateGoalPrice(dto.getTargetExpense());
+        nextWeek.updateNextGoalPrice(dto.getNextTargetExpense());
 
-        return ResponseEntity.ok("목표금액 수정완료");
+        return ResponseEntity.ok("다음 주 목표금액 수정완료");
     }
 
     /**
@@ -75,11 +75,9 @@ public class HomeService {
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
 
         // 목표 식비 조회(이번 주, 다음 주 데이터 조회 후 이번 주 값만 추출)
-        List<Week> weeks = weekRepository.findTop2ByFinanceDataOrderByCreatedAtDesc(financeData);
-        if (weeks.size() < 2) {
-            throw new NoSuchElementException("해당 회원은 Week 데이터가 2개 이상 존재하지 않습니다.");
-        }
-        Long thisWeekGoalPrice = weeks.get(1).getGoal_price();
+        Week thisWeek = weekRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData)
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버는 Week가 존재하지 않습니다."));
+        Long thisWeekGoalPrice = thisWeek.getGoal_price();
 
         // 목표 식비가 0원 (default) -> nickname, 뱃지 개수만 반환
         HomeResponseDTO.HomeResultDTO.HomeResultDTOBuilder builder = HomeResponseDTO.HomeResultDTO.builder()

@@ -30,13 +30,13 @@ public class HomeController {
     /**
      * 목표 금액 수정 (수정하면 다음 주 목표식비에 반영)
      */
-    @Operation(summary = "홈 화면 목표 금액 수정 api")
-    @PatchMapping("/target-expense")
-    public ResponseEntity<?> updateTargetExpense(
-            @RequestBody HomeRequestDTO.TargetExpenseDTO dto,
+    @Operation(summary = "다음 주 목표 금액 수정 api, 완료")
+    @PatchMapping("/next-target-expense")
+    public ResponseEntity<?> updateNextTargetExpense(
+            @RequestBody HomeRequestDTO.nextTargetExpenseDTO dto,
             Authentication authentication) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
-        return homeService.updateTargetExpense(dto, member);
+        return homeService.updateNextTargetExpense(dto, member);
     }
 
     /**
@@ -44,6 +44,7 @@ public class HomeController {
      * 목표 금액 0 원 -> 닉네임, 현재 누적 뱃지 개수
      * 목표 금액 0 원 이상 -> 닉네임, 현재 누적 뱃지 개수, 목표금액, 지난 주(과거 사용 금액) 대비 이번 주 절약 퍼센트, 이번 주 사용 금액, 목표금액 대비 이번 주 사용 퍼센트 반환
      */
+    @Operation(summary = "홈 화면 조회 api, 완료")
     @GetMapping("/")
     public ResponseEntity<?> getHome(Authentication authentication) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));

@@ -2,9 +2,11 @@ package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
+import homeat.backend.domain.homeatreport.entity.Badge_img;
 import homeat.backend.domain.homeatreport.entity.TierStatus;
 import homeat.backend.domain.homeatreport.entity.Week;
 import homeat.backend.domain.homeatreport.entity.WeekStatus;
+import homeat.backend.domain.homeatreport.repository.BadgeImgRepository;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,6 +23,7 @@ public class WeekGenerationService {
 
     private final WeekRepository weekRepository;
     private final FinanceDataRepository financeDataRepository;
+    private final BadgeImgRepository badgeImgRepository;
 
     /**
      *  1. 매주 일요일에 week 엔티티 새로 생성
@@ -39,11 +42,12 @@ public class WeekGenerationService {
         Optional<Week> optionalPreviousWeek = weekRepository.findById(newWeek.getId() - 1);
         if (optionalPreviousWeek.isPresent()) {
             Week previousWeek = optionalPreviousWeek.get();
-            FinanceData previousFinanceData = previousWeek.getFinanceData();
+            FinanceData previousFinanceData = previousWeek.getFinanceData(); // 전주의 finaceData
 
             // 새로운 week의 목표금액을 전 week 엔티티의 next_goal_price로 지정
             newWeek.setGoalPrice(previousWeek.getNext_goal_price());
 
+            // 전주의 목표 달성여부 설정
             Long previousExceedPrice = previousWeek.getExceed_price();
             int isSuccess;
             if (previousExceedPrice <= 0) {
@@ -79,7 +83,14 @@ public class WeekGenerationService {
                 financeDataRepository.save(newFinanceData);
             }
 
-            // badge img pk 지정 메서드
+            // badge img 지정 메서드
+            Optional<Badge_img> optionalBadgeImg = badgeImgRepository.findBadge_imgById(previousFinanceData.getNum_homeat_badge());
+            if (optionalPreviousWeek.isPresent()) {
+                Badge_img badge_img = optionalBadgeImg.get();
+                previousWeek.setBadgeImg(badge_img);
+            } else {
+                throw new RuntimeException("BadgeImg 엔티티가 존재하지 않습니다.");
+            }
         }
     }
 

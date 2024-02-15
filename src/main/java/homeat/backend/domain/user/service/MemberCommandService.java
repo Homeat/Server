@@ -9,11 +9,14 @@ import homeat.backend.domain.user.handler.MemberHandler;
 import homeat.backend.domain.user.repository.MemberInfoRepository;
 import homeat.backend.domain.user.repository.MemberRepository;
 import homeat.backend.global.security.jwt.JwtUtil;
+import homeat.backend.global.service.MailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -27,6 +30,7 @@ public class MemberCommandService {
     private final MemberInfoRepository memberInfoRepository;
     private final BCryptPasswordEncoder encoder;
     private final JwtUtil jwtUtil;
+    private final MailService mailService;
 
     @Transactional
     public Member joinMember(MemberRequest.JoinDto request) {
@@ -68,5 +72,25 @@ public class MemberCommandService {
         MemberInfo newMemberInfo = MemberConverter.toMemberInfo(request, selectedMember);
 
         return memberInfoRepository.save(newMemberInfo);
+    }
+
+    @Transactional
+    public String sendCodeToEmail(MemberRequest.EmailVerifyDto request) {
+        String authCode;
+
+        try {
+            authCode = mailService.createCode();
+            String title = "홈잇 이메일 인증번호";
+            String content = String.format("홈잇 이메일 인증번호 입니다.\n%s", authCode);
+            mailService.sendEmail(request.getEmail(), title, content);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            throw new MemberHandler(MemberErrorStatus.MAIL_BAD_REQUEST);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            throw new MemberHandler(MemberErrorStatus.AUTH_CODE_ERROR);
+        }
+
+        return authCode;
     }
 }

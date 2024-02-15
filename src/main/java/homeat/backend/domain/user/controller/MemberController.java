@@ -8,6 +8,7 @@ import homeat.backend.domain.user.service.MemberCommandService;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
+import homeat.backend.global.service.MailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -55,5 +56,12 @@ public class MemberController {
     public ApiPayload<MemberResponse.CreateInfoResultDTO> createMypage(@RequestBody @Valid MemberRequest.CreateInfoDto request, Authentication authentication) {
         MemberInfo memberInfo = memberCommandService.saveMemberInfo(request, Long.parseLong(authentication.getName()));
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toCreateInfoResultDTO(memberInfo));
+    }
+
+    @Operation(summary = "회원가입시, 이메일 인증 요청 api")
+    @PostMapping("/email-verification")
+    public ApiPayload<MemberResponse.EmailVerifyDto> emailVerificationReq(@RequestBody @Valid MemberRequest.EmailVerifyDto request) {
+        String authCode = memberCommandService.sendCodeToEmail(request);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toEmailVerifyDTO(authCode));
     }
 }

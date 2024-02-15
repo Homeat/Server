@@ -53,4 +53,10 @@ public class MemberConverter {
                 .createdAt(LocalDateTime.now())
                 .build();
     }
+
+    public static MemberResponse.EmailVerifyDto toEmailVerifyDTO(String authCode) {
+        return MemberResponse.EmailVerifyDto.builder()
+                .authCode(authCode)
+                .build();
+    }
 }

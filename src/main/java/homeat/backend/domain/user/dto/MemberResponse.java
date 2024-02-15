@@ -44,4 +44,12 @@ public class MemberResponse {
         Long memberInfoId;
         LocalDateTime createdAt;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class EmailVerifyDto {
+        String authCode;
+    }
 }

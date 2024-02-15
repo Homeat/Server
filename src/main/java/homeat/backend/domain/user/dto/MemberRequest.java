@@ -51,4 +51,12 @@ public class MemberRequest {
         @Min(value = 0)
         Long income;
     }
+
+    @Getter
+    public static class EmailVerifyDto {
+        @NotBlank
+        @Email
+        @ExistEmail
+        String email;
+    }
 }

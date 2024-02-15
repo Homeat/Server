@@ -95,4 +95,14 @@ public class HomeController {
     /**
      * 지출 확인(일일 데이터) -> 해당 날짜 주의 목표 식비 - 해당 날짜 사용 금액
      */
+    @Operation(summary = "캘린더 특정 날짜 하루 데이터 조회 api, 완료")
+    @GetMapping("/calendar/daily")
+    public ResponseEntity<?> getCalendarDay(
+            @RequestParam("year") String year,
+            @RequestParam("month") String month,
+            @RequestParam("day") String day,
+            Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return homeService.getCalendarDay(year, month, day, member);
+    }
 }

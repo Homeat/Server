@@ -30,6 +30,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @Service
@@ -243,4 +246,50 @@ public class HomeService {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 캘린더 하루 지출 확인
+     */
+    public ResponseEntity<HomeResponseDTO.CalendarDayResultDTO> getCalendarDay(String year, String month, String day, Member member) {
+        // FinanceData 엔티티 조회
+        FinanceData financeData = financeDataRepository.findByMember_Id(member.getId())
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버에 대한 FinanceData가 존재하지 않습니다."));
+
+        // 선택 날짜의 주 계산
+        LocalDate targetDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
+        LocalDateTime startOfWeek = targetDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).atStartOfDay();
+        LocalDateTime endOfWeek = targetDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY)).atTime(23, 59, 59);
+
+        // Week 엔티티 조회
+        Week week = weekRepository.findFirstByFinanceDataAndCreatedAtBetween(financeData, startOfWeek, endOfWeek)
+                .orElseThrow(() -> new NoSuchElementException("해당 Week 데이터가 없습니다."));
+
+        // 일요일부터 선택 날짜까지의 DailyExpense 모두 조회
+        List<DailyExpense> dailyExpenses = dailyExpenseRepo.findDailyExpenseByMemberIdAndDateBetween(member.getId(), startOfWeek.toLocalDate(), targetDate);
+
+
+        long totalUsedPrice = 0L;
+        for (DailyExpense dailyExpense : dailyExpenses) {
+            totalUsedPrice += dailyExpense.getTodayJipbapPrice();
+            totalUsedPrice += dailyExpense.getTodayOutPrice();
+        }
+
+        // 총 사용 금액과 목표 금액
+        long remainingGoalPrice = week.getGoal_price() - totalUsedPrice;
+
+        // 해당 날짜의 DailyExpense 엔티티 조회
+        Optional<DailyExpense> todayExpenseOpt = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), targetDate);
+
+        // DailyExpense 존재하면 값 반환, 없으면 0
+        long todayJipbapPrice = todayExpenseOpt.map(DailyExpense::getTodayJipbapPrice).orElse(0L);
+        long todayOutPrice = todayExpenseOpt.map(DailyExpense::getTodayOutPrice).orElse(0L);
+
+        HomeResponseDTO.CalendarDayResultDTO result = HomeResponseDTO.CalendarDayResultDTO.builder()
+                .date(targetDate)
+                .todayJipbapPrice(todayJipbapPrice)
+                .todayOutPrice(todayOutPrice)
+                .remainingGoal(remainingGoalPrice)
+                .build();
+
+        return ResponseEntity.ok(result);
+    }
 }

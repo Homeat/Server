@@ -37,4 +37,15 @@ public class HomeResponseDTO {
         private int todayJipbapPricePercent;
         private int todayOutPricePercent;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CalendarDayResultDTO {
+        private LocalDate date;
+        private long todayJipbapPrice;
+        private long todayOutPrice;
+        private long remainingGoal;
+    }
 }

@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
@@ -216,14 +215,9 @@ public class HomeService {
      */
     public ResponseEntity<List<HomeResponseDTO.CalendarResultDTO>> getCalendar(String year, String month, Member member) {
 
-        // 해당 연, 월의 데이터 조회
-        Optional<FinanceData> financeDataOpt = financeDataRepository.findByMemberAndYearAndMonth(member, year, month);
-
-        if (financeDataOpt.isEmpty()) {
-            return ResponseEntity.ok(Collections.emptyList());
-        }
-
-        FinanceData financeData = financeDataOpt.get();
+        // FinanceData 조회(해당 연, 월의 데이터 조회)
+        FinanceData financeData = financeDataRepository.findByMemberAndYearAndMonth(member, year, month)
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
 
         // DailyExpense 조회
         List<DailyExpense> calendarData = dailyExpenseRepo.findByFinanceDataId(financeData.getId());
@@ -231,7 +225,7 @@ public class HomeService {
         // 조회된 데이터를 DTO로 변환
         List<HomeResponseDTO.CalendarResultDTO> result = new ArrayList<>();
         for (DailyExpense data : calendarData) {
-            long total = data.getTodayJipbapPrice() + data.getTodayJipbapPrice();
+            long total = data.getTodayOutPrice() + data.getTodayJipbapPrice();
             if (total != 0) {
                 int jipbapPricePercent = (int)((double)data.getTodayJipbapPrice() / total * 100);
                 int outPricePercent = 100 - jipbapPricePercent;

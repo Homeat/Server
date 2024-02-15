@@ -1,5 +1,6 @@
 package homeat.backend.global.service;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -66,6 +67,27 @@ public class S3Service  {
             }
         }
         return imgUrlList;
+    }
+
+    //파일 삭제
+    public void fileDelete(String fileUrl) {
+        try{
+            String fileKey = fileUrl;
+            String key = fileKey.substring(54); // 폴더/파일.확장자
+            final AmazonS3 s3 = AmazonS3ClientBuilder.standard().withRegion(region).build();
+
+            try {
+                s3.deleteObject(bucket, key);
+            } catch (AmazonServiceException e) {
+                System.err.println(e.getErrorMessage());
+                System.exit(1);
+            }
+
+            System.out.println(String.format("[%s] deletion complete", key));
+
+        } catch (Exception exception) {
+            throw new IllegalArgumentException("S3_DELETE_ERROR");
+        }
     }
 
     // 이미지파일명 중복 방지

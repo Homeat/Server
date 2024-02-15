@@ -1,5 +1,6 @@
 package homeat.backend.domain.homeatreport.entity;
 
+import com.amazonaws.services.s3.model.Tier;
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;
@@ -27,10 +28,48 @@ public class Week extends BaseEntity {
 
     private Long goal_price; // 이번주 목표 식비
 
+    private Long next_goal_price; // 다음주 목표 식비
+
     // WeekStatus(enum) : SUCCESS, FAIL, UNDO
     @Enumerated(EnumType.STRING)
-    private WeekStatus week_status; // 이번주 달성 여부
+    @Builder.Default
+    private WeekStatus week_status = WeekStatus.UNDO; // 이번주 달성 여부
 
-    private Long exceed_price; // 초과 금액
+    @Builder.Default
+    private Long exceed_price = 0L; // 초과 금액
+
+    // TierStatus(enum) : 홈잇스타터, 홈잇러버, 홈잇마스터
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private TierStatus tierStatus =TierStatus.홈잇스타터;
+
+    // ExceedPrice 업데이트 메서드
+    public void updateExceedPrice() {
+        this.exceed_price = this.goal_price - (financeData.getMonth_jipbap_price() + financeData.getMonth_out_price());
+    }
+
+    // week_status setter
+    public void setWeekStatus(WeekStatus week_status) {
+        this.week_status = week_status;
+    }
+
+    // tier_status setter
+    public void setTierStatus(TierStatus tier_status) { this.tierStatus = tier_status; }
+
+    // 목표 금액 수정
+    public void updateGoalPrice(Long targetMoney) {
+        this.goal_price = targetMoney;
+    }
+
+    // Week goal price setter
+    public  void setGoalPrice(Long price) { this.goal_price = price; }
+
+    // badgeImg id setter
+    public void setBadgeImg(Badge_img badge_img) { this.badge_img = badge_img; }
+
+    // exceed_price setter
+    public void setExceed_price(Long exceed_price) { this.exceed_price = exceed_price; }
+
+    // finance data pk 지정 메서드
 
 }

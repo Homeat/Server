@@ -33,17 +33,25 @@ public class InfoTalkController {
     /**
      * 정보토크 저장
      */
-    @Operation(summary = "정보토크 저장 api, , 스웨거 사용 X")
-    @PostMapping(value = "/save", consumes = {MediaType.APPLICATION_JSON_VALUE,
-            MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> saveInfoTalk(@RequestPart("content") InfoTalkDTO dto,
-                                          @RequestPart(value = "tags", required = false) List<String> tags,
-                                          @RequestPart("imgUrl") List<MultipartFile> multipartFiles) {
+    @Operation(summary = "정보토크 내용 저장 api")
+    @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> saveInfoTalk(@RequestBody InfoTalkDTO dto) {
 
+
+        return infoTalkService.saveInfoTalk(dto);
+    }
+
+    /**
+     * 정보토크 사진 업로드
+     */
+    @Operation(summary = "정보토크 사진 저장 api")
+    @PostMapping(value = "/upload/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadImages(@PathVariable("id") Long id,@RequestPart("imgUrl") List<MultipartFile> multipartFiles) {
         if (multipartFiles == null) {
             throw new IllegalArgumentException("사진이 없습니다");
         }
-        return infoTalkService.saveInfoTalk(dto, tags, multipartFiles);
+
+        return infoTalkService.uploadImages(id, multipartFiles);
     }
 
     /**
@@ -52,6 +60,7 @@ public class InfoTalkController {
     @Operation(summary = "정보토크 임시저장 api")
     @PostMapping("/tempSave")
     public ResponseEntity<?> tempSaveInfoTalk(@RequestBody @Valid InfoTalkDTO dto) {
+
         return infoTalkService.tempSaveInfoTalk(dto);
     }
 
@@ -86,7 +95,7 @@ public class InfoTalkController {
     /**
      * 무한 스크롤 최신순 조회
      */
-    @Operation(summary = "정보 최신순 조회, lastInfoTalkId 보다 작은 6개 게시물을 보여줍니다.")
+    @Operation(summary = "정보 최신순 조회 및 검색, lastInfoTalkId 보다 작은 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/latest")
     public ResponseEntity<?> getInfoTalkLatest(InfoTalkSearchCondition condition, @RequestParam Long lastInfoTalkId) {
         return infoTalkService.getInfoTalkLatest(condition,lastInfoTalkId);
@@ -95,7 +104,7 @@ public class InfoTalkController {
     /**
      * 무한 스크롤 오래된 순 조회
      */
-    @Operation(summary = "정보토크 오래된 순 조회, lastInfoTalkId 보다 큰 6개 게시물을 보여줍니다.")
+    @Operation(summary = "정보토크 오래된 순 조회 및 검색, lastInfoTalkId 보다 큰 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/oldest")
     public ResponseEntity<?> getInfoTalkOldest(InfoTalkSearchCondition condition,@RequestParam Long oldestInfoTalkId) {
         return infoTalkService.getInfoTalkOldest(condition,oldestInfoTalkId);
@@ -104,7 +113,7 @@ public class InfoTalkController {
     /**
      * 무한 스크롤 공감 순 조회
      */
-    @Operation(summary = "정보토크 공감 순 조회, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
+    @Operation(summary = "정보토크 공감 순 조회 및 검색, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/love")
     public ResponseEntity<?> getInfoTalkByLove(InfoTalkSearchCondition condition, @RequestParam Long id, @RequestParam int love) {
         return infoTalkService.getInfoTalkByLove(condition,id,love);
@@ -113,7 +122,7 @@ public class InfoTalkController {
     /**
      * 무한 스크롤 조회 순 조회
      */
-    @Operation(summary = "정보토크 조회 순 조회, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
+    @Operation(summary = "정보토크 조회 순 조회 및 검색, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/view")
     public ResponseEntity<?> getInfoTalkByView(InfoTalkSearchCondition condition,@RequestParam Long id,@RequestParam int view) {
         return infoTalkService.getInfoTalkByView(condition,id,view);

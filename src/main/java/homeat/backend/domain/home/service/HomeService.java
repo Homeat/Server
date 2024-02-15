@@ -53,7 +53,7 @@ public class HomeService {
      *  다음 주 목표 금액 수정
      */
     @Transactional
-    public ResponseEntity<?> updateNextTargetExpense(HomeRequestDTO.nextTargetExpenseDTO dto, Member member) {
+    public String updateNextTargetExpense(HomeRequestDTO.nextTargetExpenseDTO dto, Member member) {
 
         // 최신 FinanceData 조회
         FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
@@ -65,13 +65,13 @@ public class HomeService {
 
         nextWeek.updateNextGoalPrice(dto.getNextTargetExpense());
 
-        return ResponseEntity.ok("다음 주 목표금액 수정완료");
+        return "다음 주 목표금액 수정완료";
     }
 
     /**
      * 홈 화면 조회
      */
-    public ResponseEntity<HomeResponseDTO.HomeResultDTO> getHome(Member member) {
+    public HomeResponseDTO.HomeResultDTO getHome(Member member) {
         // 최근 월 데이터 조회
         FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
@@ -114,7 +114,7 @@ public class HomeService {
 
         HomeResponseDTO.HomeResultDTO result = builder.build();
 
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     /**
@@ -168,7 +168,7 @@ public class HomeService {
      * 지출 추가
      */
     @Transactional
-    public ResponseEntity<?> createReceipt(HomeRequestDTO.ReceiptDTO dto, Member member) {
+    public String createReceipt(HomeRequestDTO.ReceiptDTO dto, Member member) {
         try {
             // FinanceData 엔티티 조회
             FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
@@ -204,16 +204,16 @@ public class HomeService {
             financeDataRepository.save(financeData);
             dailyExpenseRepo.save(dailyExpense);
 
-            return ResponseEntity.ok("Receipt 저장 성공");
+            return "영수증 저장 성공";
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Receipt 저장 실패: " + e.getMessage());
+            throw new RuntimeException("영수증 저잘 실패 : " + e.getMessage());
         }
     }
 
     /**
      * 지출 확인
      */
-    public ResponseEntity<List<HomeResponseDTO.CalendarResultDTO>> getCalendar(String year, String month, Member member) {
+    public List<HomeResponseDTO.CalendarResultDTO> getCalendar(String year, String month, Member member) {
 
         // FinanceData 조회(해당 연, 월의 데이터 조회)
         FinanceData financeData = financeDataRepository.findByMemberAndYearAndMonth(member, year, month)
@@ -237,13 +237,13 @@ public class HomeService {
                 result.add(dto);
             }
         }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     /**
      * 캘린더 하루 지출 확인
      */
-    public ResponseEntity<HomeResponseDTO.CalendarDayResultDTO> getCalendarDay(String year, String month, String day, Member member) {
+    public HomeResponseDTO.CalendarDayResultDTO getCalendarDay(String year, String month, String day, Member member) {
         // FinanceData 엔티티 조회
         FinanceData financeData = financeDataRepository.findByMember_Id(member.getId())
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버에 대한 FinanceData가 존재하지 않습니다."));
@@ -284,6 +284,6 @@ public class HomeService {
                 .remainingGoal(remainingGoalPrice)
                 .build();
 
-        return ResponseEntity.ok(result);
+        return result;
     }
 }

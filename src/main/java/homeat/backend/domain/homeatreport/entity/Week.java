@@ -64,6 +64,12 @@ public class Week extends BaseEntity {
     // Week goal price setter
     public  void setGoalPrice(Long price) { this.goal_price = price; }
 
+    // badgeImg id setter
+    public void setBadgeImg(Badge_img badge_img) { this.badge_img = badge_img; }
+
+    // exceed_price setter
+    public void setExceed_price(Long exceed_price) { this.exceed_price = exceed_price; }
+
     // finance data pk 지정 메서드
 
 }

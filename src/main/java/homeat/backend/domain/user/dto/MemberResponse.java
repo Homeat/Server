@@ -35,4 +35,13 @@ public class MemberResponse {
         String email;
         String nickname;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CreateInfoResultDTO {
+        Long memberInfoId;
+        LocalDateTime createdAt;
+    }
 }

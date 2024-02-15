@@ -3,6 +3,7 @@ package homeat.backend.domain.user.controller;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.dto.MemberResponse;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.domain.user.service.MemberCommandService;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.payload.ApiPayload;
@@ -51,7 +52,8 @@ public class MemberController {
 
     @Operation(summary = "회원가입시, 부가 회원정보 추가 api")
     @PostMapping("/mypage")
-    public ApiPayload<?> createMypage(Authentication authentication) {
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    public ApiPayload<MemberResponse.CreateInfoResultDTO> createMypage(@RequestBody @Valid MemberRequest.CreateInfoDto request, Authentication authentication) {
+        MemberInfo memberInfo = memberCommandService.saveMemberInfo(request, Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toCreateInfoResultDTO(memberInfo));
     }
 }

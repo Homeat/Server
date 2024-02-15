@@ -3,8 +3,10 @@ package homeat.backend.domain.user.service;
 import homeat.backend.domain.user.controller.MemberConverter;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.domain.user.handler.MemberErrorStatus;
 import homeat.backend.domain.user.handler.MemberHandler;
+import homeat.backend.domain.user.repository.MemberInfoRepository;
 import homeat.backend.domain.user.repository.MemberRepository;
 import homeat.backend.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.util.Date;
 public class MemberCommandService {
 
     private final MemberRepository memberRepository;
+    private final MemberInfoRepository memberInfoRepository;
     private final BCryptPasswordEncoder encoder;
     private final JwtUtil jwtUtil;
 
@@ -54,5 +57,16 @@ public class MemberCommandService {
     public LocalDateTime getJwtExpiredAt(String token) {
         Date expiredAt = jwtUtil.getExpiredAt(token);
         return LocalDateTime.ofInstant(expiredAt.toInstant(), ZoneId.systemDefault());
+    }
+
+    @Transactional
+    public MemberInfo saveMemberInfo(MemberRequest.CreateInfoDto request, Long memberId) {
+        Member selectedMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> {
+                    throw new MemberHandler(MemberErrorStatus.MEMBER_NOT_FOUND);
+                });
+        MemberInfo newMemberInfo = MemberConverter.toMemberInfo(request, selectedMember);
+
+        return memberInfoRepository.save(newMemberInfo);
     }
 }

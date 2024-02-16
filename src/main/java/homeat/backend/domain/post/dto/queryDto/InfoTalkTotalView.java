@@ -18,6 +18,8 @@ public class InfoTalkTotalView {
 
     public InfoTalkTotalView(Long infoTalkId, LocalDateTime createdAt, LocalDateTime updatedAt, String title,
                              String content, String url, Integer love, Integer view, Integer commentNumber) {
+
+
         this.infoTalkId = infoTalkId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;

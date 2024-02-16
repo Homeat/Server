@@ -12,10 +12,14 @@ public class FoodTalkTotalView {
     private Long foodTalkId;
     private String  url;
     private String foodName;
+    private Integer view;
+    private Integer love;
 
-    public FoodTalkTotalView(Long foodTalkId, String url, String foodName) {
+    public FoodTalkTotalView(Long foodTalkId, String url, String foodName, Integer view, Integer love) {
         this.foodTalkId = foodTalkId;
         this.url = url;
         this.foodName = foodName;
+        this.view = view;
+        this.love = love;
     }
 }

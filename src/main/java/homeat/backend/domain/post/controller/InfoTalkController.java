@@ -117,4 +117,6 @@ public class InfoTalkController {
     public ResponseEntity<?> getInfoTalkByView(InfoTalkSearchCondition condition,@RequestParam Long id,@RequestParam int view) {
         return infoTalkService.getInfoTalkByView(condition,id,view);
     }
+
+
 }

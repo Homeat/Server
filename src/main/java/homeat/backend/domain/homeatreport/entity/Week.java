@@ -56,13 +56,19 @@ public class Week extends BaseEntity {
     // tier_status setter
     public void setTierStatus(TierStatus tier_status) { this.tierStatus = tier_status; }
 
-    // 목표 금액 수정
-    public void updateGoalPrice(Long targetMoney) {
-        this.goal_price = targetMoney;
+    // 다음 주 목표 금액 수정
+    public void updateNextGoalPrice(Long targetMoney) {
+        this.next_goal_price = targetMoney;
     }
 
     // Week goal price setter
     public  void setGoalPrice(Long price) { this.goal_price = price; }
+
+    // badgeImg id setter
+    public void setBadgeImg(Badge_img badge_img) { this.badge_img = badge_img; }
+
+    // exceed_price setter
+    public void setExceed_price(Long exceed_price) { this.exceed_price = exceed_price; }
 
     // finance data pk 지정 메서드
 

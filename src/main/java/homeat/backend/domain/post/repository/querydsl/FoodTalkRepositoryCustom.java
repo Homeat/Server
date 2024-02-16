@@ -19,4 +19,8 @@ public interface FoodTalkRepositoryCustom {
     Slice<FoodTalkTotalView> findByLoveLessThanOrderByLoveDesc(FoodTalkSearchCondition condition,Long id, int love, Pageable pageable);
 
     Slice<FoodTalkTotalView> findByViewLessThanOrderByViewDesc(FoodTalkSearchCondition condition,Long id, int view, Pageable pageable);
+
+    Long countTotalCommentNumber(Long foodTalkId);
+
+    Long countTotalReplyNumber(Long foodTalkCommentId);
 }

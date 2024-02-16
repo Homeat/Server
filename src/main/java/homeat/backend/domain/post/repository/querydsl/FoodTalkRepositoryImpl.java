@@ -2,6 +2,8 @@ package homeat.backend.domain.post.repository.querydsl;
 
 import static homeat.backend.domain.post.entity.QFoodPicture.foodPicture;
 import static homeat.backend.domain.post.entity.QFoodTalk.*;
+import static homeat.backend.domain.post.entity.QFoodTalkComment.foodTalkComment;
+import static homeat.backend.domain.post.entity.QFoodTalkReply.foodTalkReply;
 import static org.springframework.util.StringUtils.hasText;
 
 import com.querydsl.core.QueryResults;
@@ -11,6 +13,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
 import homeat.backend.domain.post.entity.FoodTalk;
+import homeat.backend.domain.post.entity.QFoodTalkComment;
+import homeat.backend.domain.post.entity.QFoodTalkReply;
 import homeat.backend.domain.post.entity.Tag;
 import java.util.ArrayList;
 import java.util.List;
@@ -139,6 +143,24 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
         }
 
         return checkEndPage(pageable, content);
+    }
+
+    @Override
+    public Long countTotalCommentNumber(Long foodTalkId) {
+        return queryFactory
+                .select(foodTalkComment.count())
+                .from(foodTalkComment)
+                .where(foodTalkComment.foodTalk.id.eq(foodTalkId))
+                .fetchOne();
+    }
+
+    @Override
+    public Long countTotalReplyNumber(Long foodTalkCommentId) {
+        return queryFactory
+                .select(foodTalkReply.count())
+                .from(foodTalkReply)
+                .where(foodTalkReply.foodTalkComment.id.eq(foodTalkCommentId))
+                .fetchOne();
     }
 
     private BooleanExpression search(String search) {

@@ -244,6 +244,13 @@ public class FoodTalkService {
 
         foodTalkCommentRepository.save(foodTalkComment);
 
+        int commentNum = foodTalkRepository.countTotalCommentNumber(dto.getId()).intValue();
+        int replyNum = foodTalkRepository.countTotalReplyNumber(foodTalkComment.getId()).intValue();
+
+
+
+        foodTalk.updateCommentSize(commentNum + replyNum);
+
         return ResponseEntity.ok().body(foodTalkComment);
 
 
@@ -262,6 +269,13 @@ public class FoodTalkService {
 
         foodTalkCommentRepository.delete(foodTalkComment);
 
+        FoodTalk foodTalk = foodTalkComment.getFoodTalk();
+
+        int commentNum = foodTalkRepository.countTotalCommentNumber(foodTalk.getId()).intValue();
+        int replyNum = foodTalkRepository.countTotalReplyNumber(commentId).intValue();
+
+        foodTalk.updateCommentSize(commentNum + replyNum);
+
         return ResponseEntity.ok(commentId + "번 댓글 삭제 완료");
     }
 
@@ -279,6 +293,15 @@ public class FoodTalkService {
 
         foodTalkReplyRepository.save(foodTalkReply);
 
+        FoodTalk foodTalk = foodTalkComment.getFoodTalk();
+
+        int commentNum = foodTalkRepository.countTotalCommentNumber(foodTalk.getId()).intValue();
+        int replyNum = foodTalkRepository.countTotalReplyNumber(foodTalkComment.getId()).intValue();
+
+        foodTalk.updateCommentSize(commentNum + replyNum);
+
+
+
         return ResponseEntity.ok().body(foodTalkReply);
     }
 
@@ -293,6 +316,13 @@ public class FoodTalkService {
         }
 
         foodTalkReplyRepository.delete(foodTalkReply);
+
+        FoodTalk foodTalk = foodTalkReply.getFoodTalkComment().getFoodTalk();
+
+        int commentNum = foodTalkRepository.countTotalCommentNumber(foodTalk.getId()).intValue();
+        int replyNum = foodTalkRepository.countTotalReplyNumber(foodTalkReply.getFoodTalkComment().getId()).intValue();
+
+        foodTalk.updateCommentSize(commentNum + replyNum);
 
         return ResponseEntity.ok(id + "번 댓글 삭제 완료");
     }

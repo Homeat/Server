@@ -1,9 +1,13 @@
 package homeat.backend.domain.post.repository.querydsl;
 
 import static homeat.backend.domain.post.entity.QFoodTalk.foodTalk;
+import static homeat.backend.domain.post.entity.QFoodTalkComment.foodTalkComment;
+import static homeat.backend.domain.post.entity.QFoodTalkReply.foodTalkReply;
 import static homeat.backend.domain.post.entity.QInfoHashTag.infoHashTag;
 import static homeat.backend.domain.post.entity.QInfoPicture.infoPicture;
 import static homeat.backend.domain.post.entity.QInfoTalk.infoTalk;
+import static homeat.backend.domain.post.entity.QInfoTalkComment.infoTalkComment;
+import static homeat.backend.domain.post.entity.QInfoTalkReply.infoTalkReply;
 import static org.springframework.util.StringUtils.hasText;
 
 import com.querydsl.core.QueryResults;
@@ -16,6 +20,8 @@ import homeat.backend.domain.post.entity.InfoTalk;
 import homeat.backend.domain.post.entity.QInfoHashTag;
 import homeat.backend.domain.post.entity.QInfoPicture;
 import homeat.backend.domain.post.entity.QInfoTalk;
+import homeat.backend.domain.post.entity.QInfoTalkComment;
+import homeat.backend.domain.post.entity.QInfoTalkReply;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -149,5 +155,23 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
         }
 
         return checkEndPage(pageable, content);
+    }
+
+    @Override
+    public Long countTotalCommentNumber(Long infoTalkId) {
+        return queryFactory
+                .select(infoTalkComment.count())
+                .from(infoTalkComment)
+                .where(infoTalkComment.infoTalk.id.eq(infoTalkId))
+                .fetchOne();
+    }
+
+    @Override
+    public Long countTotalReplyNumber(Long infoTalkCommentId) {
+        return queryFactory
+                .select(infoTalkReply.count())
+                .from(infoTalkReply)
+                .where(infoTalkReply.infoTalkComment.id.eq(infoTalkCommentId))
+                .fetchOne();
     }
 }

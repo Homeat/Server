@@ -1,16 +1,25 @@
 package homeat.backend.domain.post.service;
 
+import homeat.backend.domain.post.dto.CommentDTO;
 import homeat.backend.domain.post.dto.InfoHashTagDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.entity.FoodPicture;
+import homeat.backend.domain.post.entity.FoodTalk;
+import homeat.backend.domain.post.entity.FoodTalkComment;
+import homeat.backend.domain.post.entity.FoodTalkReply;
 import homeat.backend.domain.post.entity.InfoHashTag;
 import homeat.backend.domain.post.entity.InfoPicture;
 import homeat.backend.domain.post.entity.InfoTalk;
+import homeat.backend.domain.post.entity.InfoTalkComment;
+import homeat.backend.domain.post.entity.InfoTalkReply;
 import homeat.backend.domain.post.entity.Save;
 import homeat.backend.domain.post.repository.InfoHashTagRepository;
 import homeat.backend.domain.post.repository.InfoPictureRepository;
+import homeat.backend.domain.post.repository.InfoTalkCommentRepository;
+import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
+import homeat.backend.domain.user.entity.Member;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +39,8 @@ public class InfoTalkService {
     private final InfoTalkRepository infoTalkRepository;
     private final InfoPictureRepository infoPictureRepository;
     private final InfoHashTagRepository infoHashTagRepository;
+    private final InfoTalkCommentRepository infoTalkCommentRepository;
+    private final InfoTalkReplyRepository infoTalkReplyRepository;
     private final S3Service s3Service;
 
     // 정보토크 게시글 작성
@@ -157,4 +168,94 @@ public class InfoTalkService {
     }
 
 
+    @Transactional
+    public ResponseEntity<?> saveComment(CommentDTO dto, Member member) {
+
+        InfoTalk infoTalk = infoTalkRepository.findById(dto.getId())
+                .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 게시글을 찾을 수 없습니다."));
+
+        InfoTalkComment infoTalkComment = InfoTalkComment.builder()
+                .member(member)
+                .infoTalk(infoTalk)
+                .content(dto.getContent())
+                .build();
+
+        infoTalkCommentRepository.save(infoTalkComment);
+
+        int commentNum = infoTalkRepository.countTotalCommentNumber(dto.getId()).intValue();
+        int replyNum = infoTalkRepository.countTotalReplyNumber(infoTalkComment.getId()).intValue();
+
+
+
+        infoTalk.updateCommentSize(commentNum + replyNum);
+
+        return ResponseEntity.ok().body(infoTalkComment);
+    }
+
+    @Transactional
+    public ResponseEntity<?> deleteComment(Long commentId, Member member) {
+        InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException(commentId + " 번의 댓글을 찾을 수 없습니다."));
+
+        if (member != infoTalkComment.getMember()) {
+            throw new IllegalArgumentException("댓글 작성자가 달라 삭제할 수 없습니다");
+        }
+
+        infoTalkCommentRepository.delete(infoTalkComment);
+
+        InfoTalk infoTalk = infoTalkComment.getInfoTalk();
+
+        int commentNum = infoTalkRepository.countTotalCommentNumber(infoTalk.getId()).intValue();
+        int replyNum = infoTalkRepository.countTotalReplyNumber(commentId).intValue();
+
+        infoTalk.updateCommentSize(commentNum + replyNum);
+
+        return ResponseEntity.ok(commentId + "번 댓글 삭제 완료");
+    }
+
+    @Transactional
+    public ResponseEntity<?> saveReply(CommentDTO dto, Member member) {
+        InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(dto.getId())
+                .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 댓글을 찾을 수 없습니다."));
+
+        InfoTalkReply infoTalkReply = InfoTalkReply.builder()
+                .infoTalkComment(infoTalkComment)
+                .member(member)
+                .content(dto.getContent())
+                .build();
+
+        infoTalkReplyRepository.save(infoTalkReply);
+
+        InfoTalk infoTalk = infoTalkComment.getInfoTalk();
+
+        int commentNum = infoTalkRepository.countTotalCommentNumber(infoTalk.getId()).intValue();
+        int replyNum = infoTalkRepository.countTotalReplyNumber(infoTalkComment.getId()).intValue();
+
+        infoTalk.updateCommentSize(commentNum + replyNum);
+
+
+
+        return ResponseEntity.ok().body(infoTalkReply);
+    }
+
+    @Transactional
+    public ResponseEntity<?> deleteReply(Long id, Member member) {
+        InfoTalkReply infoTalkReply = infoTalkReplyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 댓글을 찾을 수 없습니다."));
+
+        if (member != infoTalkReply.getMember()) {
+            throw new IllegalArgumentException("댓글 작성자가 달라 삭제할 수 없습니다");
+        }
+
+        infoTalkReplyRepository.delete(infoTalkReply);
+
+        InfoTalk infoTalk = infoTalkReply.getInfoTalkComment().getInfoTalk();
+
+        int commentNum = infoTalkRepository.countTotalCommentNumber(infoTalk.getId()).intValue();
+        int replyNum = infoTalkRepository.countTotalReplyNumber(infoTalkReply.getInfoTalkComment().getId()).intValue();
+
+        infoTalk.updateCommentSize(commentNum + replyNum);
+
+        return ResponseEntity.ok(id + "번 댓글 삭제 완료");
+    }
 }

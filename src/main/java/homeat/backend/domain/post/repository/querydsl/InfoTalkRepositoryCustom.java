@@ -19,4 +19,8 @@ public interface InfoTalkRepositoryCustom {
     Slice<InfoTalkTotalView> findByLoveLessThanOrderByLoveDesc(InfoTalkSearchCondition condition,Long id, int love, Pageable pageable);
 
     Slice<InfoTalkTotalView> findByViewLessThanOrderByViewDesc(InfoTalkSearchCondition condition,Long id, int view, Pageable pageable);
+
+    Long countTotalCommentNumber(Long infoTalkId);
+
+    Long countTotalReplyNumber(Long infoTalkCommentId);
 }

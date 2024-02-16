@@ -1,16 +1,20 @@
 package homeat.backend.domain.post.controller;
 
+import homeat.backend.domain.post.dto.CommentDTO;
 import homeat.backend.domain.post.dto.InfoHashTagDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.service.InfoTalkService;
+import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.user.service.MemberQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -29,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class InfoTalkController {
 
     private final InfoTalkService infoTalkService;
+    private final MemberQueryService memberQueryService;
 
     /**
      * 정보토크 저장
@@ -116,6 +121,47 @@ public class InfoTalkController {
     @GetMapping("/posts/view")
     public ResponseEntity<?> getInfoTalkByView(InfoTalkSearchCondition condition,@RequestParam Long id,@RequestParam int view) {
         return infoTalkService.getInfoTalkByView(condition,id,view);
+    }
+
+    /**
+     * 댓글 작성
+     */
+    @Operation(summary = "정보토크 댓글 작성, id는 정보토크 게시물 id 입니다.")
+    @PostMapping("/comment/{id}")
+    public ResponseEntity<?> saveComment(@RequestBody @Valid CommentDTO dto, Authentication authentication) {
+
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return infoTalkService.saveComment(dto, member);
+    }
+
+    /**
+     * 댓글 삭제
+     */
+    @Operation(summary = "댓글 삭제 api입니다. id는 댓글 아이디입니다.")
+    @DeleteMapping("/comment/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable("commentId") Long commentId, Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return infoTalkService.deleteComment(commentId, member);
+    }
+
+    /**
+     * 대댓글 작성
+     */
+    @Operation(summary = "정보토크 대댓글 작성, id는 댓글 아이디입니다.")
+    @PostMapping("/reply/{id}")
+    public ResponseEntity<?> saveReply(@RequestBody @Valid CommentDTO dto, Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return infoTalkService.saveReply(dto, member);
+    }
+
+    /**
+     * 대댓글 삭제
+     */
+    @Operation(summary = "대댓글 삭제, id는 대댓글 아이디입니다")
+    @DeleteMapping("/reply/{id}")
+    public ResponseEntity<?> deleteReply(@PathVariable("id") Long id, Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return infoTalkService.deleteReply(id, member);
     }
 
 

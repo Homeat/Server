@@ -62,8 +62,9 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
 
         List<FoodTalkTotalView> content = new ArrayList<>();
         for (FoodTalk foodTalk : result.getResults()) {
-            content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
+          content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
                     foodTalk.getName(), foodTalk.getView(), foodTalk.getLove()));
+
         }
 
         return checkEndPage(pageable, content);
@@ -87,8 +88,9 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
 
         List<FoodTalkTotalView> content = new ArrayList<>();
         for (FoodTalk foodTalk : result.getResults()) {
-            content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
+          content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
                     foodTalk.getName(), foodTalk.getView(), foodTalk.getLove()));
+
         }
 
         return checkEndPage(pageable, content);
@@ -110,8 +112,10 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
 
         List<FoodTalkTotalView> content = new ArrayList<>();
         for (FoodTalk foodTalk : result.getResults()) {
-            content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
+          content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
                     foodTalk.getName(), foodTalk.getView(), foodTalk.getLove()));
+
+  
         }
 
         return checkEndPage(pageable, content);
@@ -142,8 +146,10 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
 
         List<FoodTalkTotalView> content = new ArrayList<>();
         for (FoodTalk foodTalk : result.getResults()) {
-            content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
+          content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
                     foodTalk.getName(), foodTalk.getView(), foodTalk.getLove()));
+          
+
         }
 
         return checkEndPage(pageable, content);

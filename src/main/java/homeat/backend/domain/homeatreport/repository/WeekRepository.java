@@ -6,12 +6,13 @@ import homeat.backend.domain.homeatreport.repository.querydsl.WeekRepositoryCust
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface WeekRepository extends JpaRepository<Week, Long>, WeekRepositoryCustom {
-    List<Week> findTop2ByFinanceDataOrderByCreatedAtDesc(FinanceData financeData);
     Optional<Week> findFirstByFinanceDataOrderByCreatedAtDesc(FinanceData financeData);
-
+    Optional<Week> findFirstByFinanceDataAndCreatedAtBetween(FinanceData financeData, LocalDateTime start, LocalDateTime end);
 }

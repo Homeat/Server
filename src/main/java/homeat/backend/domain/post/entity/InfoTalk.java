@@ -49,6 +49,8 @@ public class InfoTalk extends BaseEntity {
     private Integer view = 0;
     @Builder.Default
     private Integer commentNumber = 0;
+    @Builder.Default
+    private Boolean setLove = false;
 
     @Enumerated(EnumType.STRING)
     private Save save;
@@ -61,12 +63,29 @@ public class InfoTalk extends BaseEntity {
     @Builder.Default
     private List<InfoHashTag> infoHashTags = new ArrayList<>();
 
+    @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<InfoTalkComment> infoTalkComments = new ArrayList<>();
+
     public void update(String title, String content) {
+
         this.title = title;
         this.content = content;
     }
 
+    public void updateCommentSize(int nowNum) {
+        this.commentNumber = nowNum;
+    }
+
     public void plusView(int nowView) {
         this.view = nowView;
+    }
+
+    public void setLove(boolean nowState) {
+        this.setLove = nowState;
+    }
+
+    public void plusLove(int nowLove) {
+        this.love = nowLove;
     }
 }

@@ -54,9 +54,9 @@ public class Week extends BaseEntity {
     // tier_status setter
     public void setTierStatus(TierStatus tier_status) { this.tierStatus = tier_status; }
 
-    // 목표 금액 수정
-    public void updateGoalPrice(Long targetMoney) {
-        this.goal_price = targetMoney;
+    // 다음 주 목표 금액 수정
+    public void updateNextGoalPrice(Long targetMoney) {
+        this.next_goal_price = targetMoney;
     }
 
     // Week goal price setter

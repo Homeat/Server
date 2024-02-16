@@ -30,6 +30,8 @@ import java.io.File;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @Service
@@ -48,10 +50,10 @@ public class HomeService {
     private static final Logger logger = LoggerFactory.getLogger(HomeService.class);
 
     /**
-     *  목표 금액 수정
+     *  다음 주 목표 금액 수정
      */
     @Transactional
-    public ResponseEntity<?> updateTargetExpense(HomeRequestDTO.TargetExpenseDTO dto, Member member) {
+    public String updateNextTargetExpense(HomeRequestDTO.nextTargetExpenseDTO dto, Member member) {
 
         // 최신 FinanceData 조회
         FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
@@ -61,25 +63,23 @@ public class HomeService {
         Week nextWeek = weekRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData)
                         .orElseThrow(() -> new NoSuchElementException("해당 회원의 Week가 존재하지 않습니다."));
 
-        nextWeek.updateGoalPrice(dto.getTargetExpense());
+        nextWeek.updateNextGoalPrice(dto.getNextTargetExpense());
 
-        return ResponseEntity.ok("목표금액 수정완료");
+        return "다음 주 목표금액 수정완료";
     }
 
     /**
      * 홈 화면 조회
      */
-    public ResponseEntity<HomeResponseDTO.HomeResultDTO> getHome(Member member) {
+    public HomeResponseDTO.HomeResultDTO getHome(Member member) {
         // 최근 월 데이터 조회
         FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
 
         // 목표 식비 조회(이번 주, 다음 주 데이터 조회 후 이번 주 값만 추출)
-        List<Week> weeks = weekRepository.findTop2ByFinanceDataOrderByCreatedAtDesc(financeData);
-        if (weeks.size() < 2) {
-            throw new NoSuchElementException("해당 회원은 Week 데이터가 2개 이상 존재하지 않습니다.");
-        }
-        Long thisWeekGoalPrice = weeks.get(1).getGoal_price();
+        Week thisWeek = weekRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData)
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버는 Week가 존재하지 않습니다."));
+        Long thisWeekGoalPrice = thisWeek.getGoal_price();
 
         // 목표 식비가 0원 (default) -> nickname, 뱃지 개수만 반환
         HomeResponseDTO.HomeResultDTO.HomeResultDTOBuilder builder = HomeResponseDTO.HomeResultDTO.builder()
@@ -114,7 +114,7 @@ public class HomeService {
 
         HomeResponseDTO.HomeResultDTO result = builder.build();
 
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     /**
@@ -168,7 +168,7 @@ public class HomeService {
      * 지출 추가
      */
     @Transactional
-    public ResponseEntity<?> createReceipt(HomeRequestDTO.ReceiptDTO dto, Member member) {
+    public String createReceipt(HomeRequestDTO.ReceiptDTO dto, Member member) {
         try {
             // FinanceData 엔티티 조회
             FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
@@ -204,25 +204,20 @@ public class HomeService {
             financeDataRepository.save(financeData);
             dailyExpenseRepo.save(dailyExpense);
 
-            return ResponseEntity.ok("Receipt 저장 성공");
+            return "영수증 저장 성공";
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Receipt 저장 실패: " + e.getMessage());
+            throw new RuntimeException("영수증 저잘 실패 : " + e.getMessage());
         }
     }
 
     /**
      * 지출 확인
      */
-    public ResponseEntity<List<HomeResponseDTO.CalendarResultDTO>> getCalendar(String year, String month, Member member) {
+    public List<HomeResponseDTO.CalendarResultDTO> getCalendar(String year, String month, Member member) {
 
-        // 해당 연, 월의 데이터 조회
-        Optional<FinanceData> financeDataOpt = financeDataRepository.findByMemberAndYearAndMonth(member, year, month);
-
-        if (financeDataOpt.isEmpty()) {
-            return ResponseEntity.ok(Collections.emptyList());
-        }
-
-        FinanceData financeData = financeDataOpt.get();
+        // FinanceData 조회(해당 연, 월의 데이터 조회)
+        FinanceData financeData = financeDataRepository.findByMemberAndYearAndMonth(member, year, month)
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
 
         // DailyExpense 조회
         List<DailyExpense> calendarData = dailyExpenseRepo.findByFinanceDataId(financeData.getId());
@@ -230,7 +225,7 @@ public class HomeService {
         // 조회된 데이터를 DTO로 변환
         List<HomeResponseDTO.CalendarResultDTO> result = new ArrayList<>();
         for (DailyExpense data : calendarData) {
-            long total = data.getTodayJipbapPrice() + data.getTodayJipbapPrice();
+            long total = data.getTodayOutPrice() + data.getTodayJipbapPrice();
             if (total != 0) {
                 int jipbapPricePercent = (int)((double)data.getTodayJipbapPrice() / total * 100);
                 int outPricePercent = 100 - jipbapPricePercent;
@@ -242,7 +237,53 @@ public class HomeService {
                 result.add(dto);
             }
         }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
+    /**
+     * 캘린더 하루 지출 확인
+     */
+    public HomeResponseDTO.CalendarDayResultDTO getCalendarDay(String year, String month, String day, Member member) {
+        // FinanceData 엔티티 조회
+        FinanceData financeData = financeDataRepository.findByMember_Id(member.getId())
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버에 대한 FinanceData가 존재하지 않습니다."));
+
+        // 선택 날짜의 주 계산
+        LocalDate targetDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
+        LocalDateTime startOfWeek = targetDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).atStartOfDay();
+        LocalDateTime endOfWeek = targetDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY)).atTime(23, 59, 59);
+
+        // Week 엔티티 조회
+        Week week = weekRepository.findFirstByFinanceDataAndCreatedAtBetween(financeData, startOfWeek, endOfWeek)
+                .orElseThrow(() -> new NoSuchElementException("해당 Week 데이터가 없습니다."));
+
+        // 일요일부터 선택 날짜까지의 DailyExpense 모두 조회
+        List<DailyExpense> dailyExpenses = dailyExpenseRepo.findDailyExpenseByMemberIdAndDateBetween(member.getId(), startOfWeek.toLocalDate(), targetDate);
+
+
+        long totalUsedPrice = 0L;
+        for (DailyExpense dailyExpense : dailyExpenses) {
+            totalUsedPrice += dailyExpense.getTodayJipbapPrice();
+            totalUsedPrice += dailyExpense.getTodayOutPrice();
+        }
+
+        // 총 사용 금액과 목표 금액
+        long remainingGoalPrice = week.getGoal_price() - totalUsedPrice;
+
+        // 해당 날짜의 DailyExpense 엔티티 조회
+        Optional<DailyExpense> todayExpenseOpt = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), targetDate);
+
+        // DailyExpense 존재하면 값 반환, 없으면 0
+        long todayJipbapPrice = todayExpenseOpt.map(DailyExpense::getTodayJipbapPrice).orElse(0L);
+        long todayOutPrice = todayExpenseOpt.map(DailyExpense::getTodayOutPrice).orElse(0L);
+
+        HomeResponseDTO.CalendarDayResultDTO result = HomeResponseDTO.CalendarDayResultDTO.builder()
+                .date(targetDate)
+                .todayJipbapPrice(todayJipbapPrice)
+                .todayOutPrice(todayOutPrice)
+                .remainingGoal(remainingGoalPrice)
+                .build();
+
+        return result;
+    }
 }

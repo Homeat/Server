@@ -1,9 +1,7 @@
 package homeat.backend.domain.post.controller;
 
 import homeat.backend.domain.post.dto.CommentDTO;
-import homeat.backend.domain.post.dto.InfoHashTagDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
-import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.service.InfoTalkService;
 import homeat.backend.domain.user.entity.Member;

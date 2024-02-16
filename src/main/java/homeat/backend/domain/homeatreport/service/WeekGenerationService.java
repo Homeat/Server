@@ -47,6 +47,10 @@ public class WeekGenerationService {
             // 새로운 week의 목표금액을 전 week 엔티티의 next_goal_price로 지정
             newWeek.setGoalPrice(previousWeek.getNext_goal_price());
 
+            // 새로운 week의 다음주 목표금액을 nextWeek의 goal_price와 동일하게 저장.
+            // 목표금액 수정시에는 update로 변경
+            newWeek.setNextGoalPrice(previousWeek.getNext_goal_price());
+
             // 전주의 목표 달성여부 설정
             Long previousExceedPrice = previousWeek.getExceed_price();
             int isSuccess;

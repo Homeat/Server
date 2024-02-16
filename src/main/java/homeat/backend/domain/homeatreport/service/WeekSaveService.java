@@ -1,12 +1,18 @@
+/*
 package homeat.backend.domain.homeatreport.service;
 
+import homeat.backend.domain.home.entity.DailyExpense;
+import homeat.backend.domain.home.repository.DailyExpenseRepo;
 import homeat.backend.domain.homeatreport.entity.Week;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
+import homeat.backend.domain.user.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.PreUpdate;
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @Transactional
@@ -14,6 +20,11 @@ import javax.persistence.PreUpdate;
 public class WeekSaveService {
 
     private final WeekRepository weekRepository;
+    private final DailyExpenseRepo dailyExpenseRepository;
+
+    public void updateExceedPrice(Member member) {
+        List<DailyExpense> dailyExpenseList = dailyExpenseRepository.findDailyExpenseByMemberIdAndDateBetween(member.getId(), )
+    }
 
     public void updateStatuses(Week week) {
 
@@ -34,3 +45,4 @@ public class WeekSaveService {
     }
 
 }
+*/

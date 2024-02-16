@@ -2,10 +2,13 @@ package homeat.backend.domain.homeatreport.entity;
 
 import com.amazonaws.services.s3.model.Tier;
 import homeat.backend.domain.analyze.entity.FinanceData;
+import homeat.backend.domain.home.entity.DailyExpense;
+import homeat.backend.domain.home.repository.DailyExpenseRepo;
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -43,11 +46,6 @@ public class Week extends BaseEntity {
     @Builder.Default
     private TierStatus tierStatus =TierStatus.홈잇스타터;
 
-    // ExceedPrice 업데이트 메서드
-    public void updateExceedPrice() {
-        this.exceed_price = this.goal_price - (financeData.getMonth_jipbap_price() + financeData.getMonth_out_price());
-    }
-
     // week_status setter
     public void setWeekStatus(WeekStatus week_status) {
         this.week_status = week_status;
@@ -67,8 +65,8 @@ public class Week extends BaseEntity {
     // badgeImg id setter
     public void setBadgeImg(Badge_img badge_img) { this.badge_img = badge_img; }
 
-    // exceed_price setter
-    public void setExceed_price(Long exceed_price) { this.exceed_price = exceed_price; }
+    public void setNextGoalPrice(Long next_goal_price) { this.next_goal_price = next_goal_price; }
+
 
     // finance data pk 지정 메서드
 

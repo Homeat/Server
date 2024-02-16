@@ -1,16 +1,23 @@
 package homeat.backend.domain.post.service;
 
+import homeat.backend.domain.post.dto.CommentDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.FoodRecipe;
 import homeat.backend.domain.post.entity.FoodRecipePicture;
 import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.dto.FoodTalkDTO;
+import homeat.backend.domain.post.entity.FoodTalkComment;
+import homeat.backend.domain.post.entity.FoodTalkReply;
 import homeat.backend.domain.post.entity.Save;
 import homeat.backend.domain.post.repository.FoodPictureRepository;
 import homeat.backend.domain.post.repository.FoodRecipePictureRepository;
 import homeat.backend.domain.post.repository.FoodRecipeRepository;
+import homeat.backend.domain.post.repository.FoodTalkCommentRepository;
+import homeat.backend.domain.post.repository.FoodTalkReplyRepository;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
+import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.user.repository.MemberRepository;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,14 +40,18 @@ public class FoodTalkService {
     private final FoodPictureRepository foodPictureRepository;
     private final FoodRecipeRepository foodRecipeRepository;
     private final FoodRecipePictureRepository foodRecipePictureRepository;
+    private final FoodTalkCommentRepository foodTalkCommentRepository;
+    private final FoodTalkReplyRepository foodTalkReplyRepository;
+    private final MemberRepository memberRepository;
     private final S3Service s3Service;
 
 
     // 게시글 작성
     @Transactional
-    public ResponseEntity<?> saveFoodTalk(FoodTalkDTO dto) {
+    public ResponseEntity<?> saveFoodTalk(FoodTalkDTO dto, Member member) {
 
         FoodTalk foodTalk = FoodTalk.builder()
+                .member(member)
                 .name(dto.getName())
                 .memo(dto.getMemo())
                 .tag(dto.getTag())
@@ -91,11 +104,16 @@ public class FoodTalkService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteFoodTalk(Long id) {
+    public ResponseEntity<?> deleteFoodTalk(Long id, Member member) {
+
 
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+
+        if (member != foodTalk.getMember()) {
+            throw new IllegalArgumentException("작성자가 아니라서 삭제할 수 없습니다");
+        }
 
         for (FoodPicture foodPicture : foodTalk.getFoodPictures()) {
             s3Service.fileDelete(foodPicture.getUrl());
@@ -141,11 +159,12 @@ public class FoodTalkService {
     public ResponseEntity<?> getFoodTalk(Long id) {
 
 
-        FoodTalk response = foodTalkRepository.findByFoodTalkId(id);
+        FoodTalk foodTalk = foodTalkRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
 
-        response.plusView(response.getView() + 1);
+        foodTalk.plusView(foodTalk.getView() + 1);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(foodTalk);
     }
 
 
@@ -224,4 +243,71 @@ public class FoodTalkService {
     }
 
 
+    @Transactional
+    public ResponseEntity<?> saveComment(CommentDTO dto, Member member) {
+
+
+        FoodTalk foodTalk = foodTalkRepository.findById(dto.getId())
+                .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 게시글을 찾을 수 없습니다."));
+
+        FoodTalkComment foodTalkComment = FoodTalkComment.builder()
+                .member(member)
+                .foodTalk(foodTalk)
+                .content(dto.getContent())
+                .build();
+
+        foodTalkCommentRepository.save(foodTalkComment);
+
+        return ResponseEntity.ok().body(foodTalkComment);
+
+
+
+    }
+
+    @Transactional
+    public ResponseEntity<?> deleteComment(Long commentId, Member member) {
+
+        FoodTalkComment foodTalkComment = foodTalkCommentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException(commentId + " 번의 댓글을 찾을 수 없습니다."));
+
+        if (member != foodTalkComment.getMember()) {
+            throw new IllegalArgumentException("댓글 작성자가 달라 삭제할 수 없습니다");
+        }
+
+        foodTalkCommentRepository.delete(foodTalkComment);
+
+        return ResponseEntity.ok(commentId + "번 댓글 삭제 완료");
+    }
+
+    @Transactional
+    public ResponseEntity<?> saveReply(CommentDTO dto, Member member) {
+
+        FoodTalkComment foodTalkComment = foodTalkCommentRepository.findById(dto.getId())
+                .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 댓글을 찾을 수 없습니다."));
+
+        FoodTalkReply foodTalkReply = FoodTalkReply.builder()
+                .foodTalkComment(foodTalkComment)
+                .member(member)
+                .content(dto.getContent())
+                .build();
+
+        foodTalkReplyRepository.save(foodTalkReply);
+
+        return ResponseEntity.ok().body(foodTalkReply);
+    }
+
+    @Transactional
+    public ResponseEntity<?> deleteReply(Long id, Member member) {
+
+        FoodTalkReply foodTalkReply = foodTalkReplyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 댓글을 찾을 수 없습니다."));
+
+        if (member != foodTalkReply.getMember()) {
+            throw new IllegalArgumentException("댓글 작성자가 달라 삭제할 수 없습니다");
+        }
+
+        foodTalkReplyRepository.delete(foodTalkReply);
+
+        return ResponseEntity.ok(id + "번 댓글 삭제 완료");
+    }
 }

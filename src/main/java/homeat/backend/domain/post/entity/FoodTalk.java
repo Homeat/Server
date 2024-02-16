@@ -38,6 +38,7 @@ public class FoodTalk extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
+    @JsonIgnore
     private Member member;
 
     private String name;
@@ -66,7 +67,12 @@ public class FoodTalk extends BaseEntity {
     @Builder.Default
     private List<FoodRecipe> foodRecipes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "foodTalk", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<FoodTalkComment> foodTalkComments = new ArrayList<>();
+
     public void update(String name, String memo, Tag tag) {
+
         this.name = name;
         this.memo = memo;
         this.tag = tag;

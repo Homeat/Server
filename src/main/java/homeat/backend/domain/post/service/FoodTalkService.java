@@ -42,7 +42,6 @@ public class FoodTalkService {
     private final FoodRecipePictureRepository foodRecipePictureRepository;
     private final FoodTalkCommentRepository foodTalkCommentRepository;
     private final FoodTalkReplyRepository foodTalkReplyRepository;
-    private final MemberRepository memberRepository;
     private final S3Service s3Service;
 
 
@@ -88,19 +87,6 @@ public class FoodTalkService {
         if(imgPaths == null || imgPaths.isEmpty()){ //.isEmpty()도 되는지 확인해보기
             throw new IllegalArgumentException("사진 입력 오류입니다.");
         }
-    }
-    @Transactional
-    public ResponseEntity<?> tempSaveFoodTalk(FoodTalkDTO dto) {
-        FoodTalk foodTalk = FoodTalk.builder()
-                .name(dto.getName())
-                .memo(dto.getMemo())
-                .tag(dto.getTag())
-                .save(Save.임시저장)
-                .build();
-
-        foodTalkRepository.save(foodTalk);
-
-        return ResponseEntity.ok("집밥토크 임시저장완료");
     }
 
     @Transactional

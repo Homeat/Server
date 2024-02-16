@@ -4,11 +4,15 @@ import static homeat.backend.domain.post.entity.QFoodPicture.foodPicture;
 import static homeat.backend.domain.post.entity.QFoodTalk.*;
 import static org.springframework.util.StringUtils.hasText;
 
+import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
+import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
 import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.entity.Tag;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import org.springframework.data.domain.PageRequest;
@@ -39,9 +43,9 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
     }
 
     @Override
-    public Slice<FoodTalk> findByIdLessThanOrderByIdDesc(FoodTalkSearchCondition condition, Long lastFoodTalkId,
+    public Slice<FoodTalkTotalView> findByIdLessThanOrderByIdDesc(FoodTalkSearchCondition condition, Long lastFoodTalkId,
                                                          Pageable pageable) {
-        List<FoodTalk> results = queryFactory
+        QueryResults<FoodTalk> result = queryFactory
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.id.lt(lastFoodTalkId),
@@ -50,17 +54,22 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 )
                 .orderBy(foodTalk.id.desc())
                 .limit(pageable.getPageSize() + 1)
-                .fetch();
+                .fetchResults();
 
-        return checkEndPage(pageable, results);
+        List<FoodTalkTotalView> content = new ArrayList<>();
+        for (FoodTalk foodTalk : result.getResults()) {
+            content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(), foodTalk.getName()));
+        }
+
+        return checkEndPage(pageable, content);
 
     }
 
     @Override
-    public Slice<FoodTalk> findByIdGreaterThanOrderByIdAsc(FoodTalkSearchCondition condition, Long OldestFoodTalkId,
+    public Slice<FoodTalkTotalView> findByIdGreaterThanOrderByIdAsc(FoodTalkSearchCondition condition, Long OldestFoodTalkId,
                                                            Pageable pageable) {
 
-        List<FoodTalk> results = queryFactory
+        QueryResults<FoodTalk> result = queryFactory
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.id.gt(OldestFoodTalkId),
@@ -69,14 +78,19 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 )
                 .orderBy(foodTalk.id.asc())
                 .limit(pageable.getPageSize() + 1)
-                .fetch();
+                .fetchResults();
 
-        return checkEndPage(pageable, results);
+        List<FoodTalkTotalView> content = new ArrayList<>();
+        for (FoodTalk foodTalk : result.getResults()) {
+            content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(), foodTalk.getName()));
+        }
+
+        return checkEndPage(pageable, content);
     }
 
     @Override
-    public Slice<FoodTalk> findByLoveLessThanOrderByLoveDesc(FoodTalkSearchCondition condition ,Long id, int love, Pageable pageable) {
-        List<FoodTalk> result = queryFactory
+    public Slice<FoodTalkTotalView> findByLoveLessThanOrderByLoveDesc(FoodTalkSearchCondition condition ,Long id, int love, Pageable pageable) {
+        QueryResults<FoodTalk> result = queryFactory
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.love.lt(love).or(foodTalk.love.eq(love).and(foodTalk.id.lt(id))),
@@ -86,13 +100,18 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 )
                 .orderBy(foodTalk.love.desc(), foodTalk.id.desc())
                 .limit(pageable.getPageSize() + 1)
-                .fetch();
+                .fetchResults();
 
-        return checkEndPage(pageable, result);
+        List<FoodTalkTotalView> content = new ArrayList<>();
+        for (FoodTalk foodTalk : result.getResults()) {
+            content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(), foodTalk.getName()));
+        }
+
+        return checkEndPage(pageable, content);
 
     }
 
-    private Slice<FoodTalk> checkEndPage(Pageable pageable, List<FoodTalk> results) {
+    private Slice<FoodTalkTotalView> checkEndPage(Pageable pageable, List<FoodTalkTotalView> results) {
         boolean hasNext = false;
         if(results.size() > pageable.getPageSize()) {
             hasNext = true;
@@ -102,8 +121,8 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
     }
 
     @Override
-    public Slice<FoodTalk> findByViewLessThanOrderByViewDesc(FoodTalkSearchCondition condition,Long id, int view, Pageable pageable) {
-        List<FoodTalk> result = queryFactory
+    public Slice<FoodTalkTotalView> findByViewLessThanOrderByViewDesc(FoodTalkSearchCondition condition,Long id, int view, Pageable pageable) {
+        QueryResults<FoodTalk> result = queryFactory
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.view.lt(view).or(foodTalk.view.eq(view).and(foodTalk.id.lt(id))),
@@ -112,9 +131,14 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 )
                 .orderBy(foodTalk.view.desc(), foodTalk.id.desc())
                 .limit(pageable.getPageSize() + 1)
-                .fetch();
+                .fetchResults();
 
-        return checkEndPage(pageable, result);
+        List<FoodTalkTotalView> content = new ArrayList<>();
+        for (FoodTalk foodTalk : result.getResults()) {
+            content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(), foodTalk.getName()));
+        }
+
+        return checkEndPage(pageable, content);
     }
 
     private BooleanExpression search(String search) {

@@ -49,6 +49,8 @@ public class InfoTalk extends BaseEntity {
     private Integer view = 0;
     @Builder.Default
     private Integer commentNumber = 0;
+    @Builder.Default
+    private Boolean setLove = false;
 
     @Enumerated(EnumType.STRING)
     private Save save;
@@ -77,5 +79,13 @@ public class InfoTalk extends BaseEntity {
 
     public void plusView(int nowView) {
         this.view = nowView;
+    }
+
+    public void setLove(boolean nowState) {
+        this.setLove = nowState;
+    }
+
+    public void plusLove(int nowLove) {
+        this.love = nowLove;
     }
 }

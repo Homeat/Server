@@ -83,8 +83,9 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 게시글 1개 조회 api")
     @GetMapping("/{id}")
-    public ResponseEntity<?> getInfoTalk(@PathVariable("id") Long id) {
-        return infoTalkService.getInfoTalk(id);
+    public ResponseEntity<?> getInfoTalk(@PathVariable("id") Long id, Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return infoTalkService.getInfoTalk(id, member);
     }
 
     /**
@@ -162,6 +163,26 @@ public class InfoTalkController {
     public ResponseEntity<?> deleteReply(@PathVariable("id") Long id, Authentication authentication) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
         return infoTalkService.deleteReply(id, member);
+    }
+
+    /**
+     * 공감하기
+     */
+    @Operation(summary = "정보토크 게시물 공감하기 api입니다. id는 정보토크 게시물 id 입니다")
+    @PostMapping("/love/{id}")
+    public ResponseEntity<?> saveLove(@PathVariable("id") Long id, Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return infoTalkService.saveLove(id, member);
+    }
+
+    /**
+     * 공감 취소하기
+     */
+    @Operation(summary = "정보토크 게시물 공감 취소하기, id는 정보토크 게시물 id 입니다")
+    @DeleteMapping("/love/{id}")
+    public ResponseEntity<?> deleteLove(@PathVariable("id") Long id, Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return infoTalkService.deleteLove(id, member);
     }
 
 

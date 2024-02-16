@@ -56,6 +56,9 @@ public class FoodTalk extends BaseEntity {
     @Builder.Default
     private Integer commentNumber = 0;
 
+    @Builder.Default
+    private Boolean setLove = false;
+
     @Enumerated(EnumType.STRING)
     private Save save;
 
@@ -84,6 +87,14 @@ public class FoodTalk extends BaseEntity {
 
     public void plusView(int nowView) {
         this.view = nowView;
+    }
+
+    public void plusLove(int nowLove) {
+        this.love = nowLove;
+    }
+
+    public void setLove(boolean nowState) {
+        this.setLove = nowState;
     }
 
 

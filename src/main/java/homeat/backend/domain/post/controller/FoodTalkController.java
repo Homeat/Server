@@ -84,8 +84,9 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시글 1개 조회 api")
     @GetMapping("{id}")
-    public ResponseEntity<?> getFoodTalk(@PathVariable("id") Long id) {
-        return foodTalkService.getFoodTalk(id);
+    public ResponseEntity<?> getFoodTalk(@PathVariable("id") Long id, Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return foodTalkService.getFoodTalk(id, member);
     }
 
     /**
@@ -177,5 +178,25 @@ public class FoodTalkController {
     public ResponseEntity<?> deleteReply(@PathVariable("id") Long id, Authentication authentication) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
         return foodTalkService.deleteReply(id, member);
+    }
+
+    /**
+     * 공감하기
+     */
+    @Operation(summary = "집밥토크 게시물 공감하기 api입니다. id는 집밥토크 게시물 id 입니다")
+    @PostMapping("/love/{id}")
+    public ResponseEntity<?> saveLove(@PathVariable("id") Long id, Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return foodTalkService.saveLove(id, member);
+    }
+
+    /**
+     * 공감 취소하기
+     */
+    @Operation(summary = "집밥토크 게시물 공감 취소하기, id는 집밥토크 게시물 id 입니다")
+    @DeleteMapping("/love/{id}")
+    public ResponseEntity<?> deleteLove(@PathVariable("id") Long id, Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return foodTalkService.deleteLove(id, member);
     }
 }

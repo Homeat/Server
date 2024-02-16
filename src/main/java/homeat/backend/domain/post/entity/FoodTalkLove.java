@@ -2,7 +2,6 @@ package homeat.backend.domain.post.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.domain.user.entity.Member;
-import homeat.backend.global.common.domain.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -22,21 +21,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class InfoTalkReply extends BaseEntity {
+public class FoodTalkLove {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "infotalk_reply_id")
+    @Column(name = "foodtalk_love_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "infotalk_comment_id")
+    @JoinColumn(name = "foodtalk_id")
     @JsonIgnore
-    private InfoTalkComment infoTalkComment;
+    private FoodTalk foodTalk;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     @JsonIgnore
     private Member member;
-
-    private String content;
 }

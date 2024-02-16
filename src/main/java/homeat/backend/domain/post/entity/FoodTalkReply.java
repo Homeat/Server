@@ -35,7 +35,6 @@ public class FoodTalkReply extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    @JsonIgnore
     private Member member;
 
     private String content;

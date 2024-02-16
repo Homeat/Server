@@ -35,7 +35,6 @@ public class InfoTalkComment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "infotalk_id")
-    @JsonIgnore
     private InfoTalk infoTalk;
 
     @ManyToOne(fetch = FetchType.LAZY)

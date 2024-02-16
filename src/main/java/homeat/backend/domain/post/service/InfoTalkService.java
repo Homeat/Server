@@ -49,12 +49,13 @@ public class InfoTalkService {
 
     // 정보토크 게시글 작성
     @Transactional
-    public ResponseEntity<?> saveInfoTalk(InfoTalkDTO dto) {
+    public ResponseEntity<?> saveInfoTalk(InfoTalkDTO dto, Member member) {
 
         InfoTalk infoTalk = InfoTalk.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .save(Save.저장)
+                .member(member)
                 .build();
 
         infoTalkRepository.save(infoTalk);
@@ -103,10 +104,14 @@ public class InfoTalkService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteInfoTalk(Long id) {
+    public ResponseEntity<?> deleteInfoTalk(Long id, Member member) {
 
         InfoTalk infoTalk = infoTalkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+
+        if (member != infoTalk.getMember()) {
+            throw new IllegalArgumentException("작성자가 아니라서 삭제할 수 없습니다");
+        }
 
         for (InfoPicture infoPicture : infoTalk.getInfoPictures()) {
             s3Service.fileDelete(infoPicture.getUrl());

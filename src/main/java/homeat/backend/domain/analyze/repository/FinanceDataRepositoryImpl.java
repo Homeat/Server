@@ -82,7 +82,7 @@ public class FinanceDataRepositoryImpl implements FinanceDataRepositoryCustom{
         QFinanceData financeData = QFinanceData.financeData;
 
         // 문자열로 된 년과 월을 합쳐서 'YYYY-MM' 형태의 문자열을 만듭니다.
-        String yearMonthString = year + "-" + month;
+        String yearMonthString = year + "-" + (month.length() == 1 ? "0" + month : month);
 
         // 'createdAt' 필드의 년과 월을 'YYYY-MM' 형태의 문자열로 변환합니다.
         StringExpression formattedDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, '%Y-%m')", financeData.createdAt);

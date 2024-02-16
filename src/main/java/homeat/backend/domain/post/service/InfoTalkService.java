@@ -87,19 +87,6 @@ public class InfoTalkService {
         }
     }
 
-    public ResponseEntity<?> tempSaveInfoTalk(InfoTalkDTO dto) {
-        InfoTalk infoTalk = InfoTalk.builder()
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .save(Save.임시저장)
-                .build();
-
-        infoTalkRepository.save(infoTalk);
-
-
-        return ResponseEntity.ok("정보토크 임시저장완료");
-    }
-
     @Transactional
     public ResponseEntity<?> deleteInfoTalk(Long id) {
 

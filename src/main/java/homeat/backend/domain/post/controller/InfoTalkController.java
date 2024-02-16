@@ -54,16 +54,6 @@ public class InfoTalkController {
         return infoTalkService.uploadImages(id, multipartFiles);
     }
 
-    /**
-     * 정보토크 임시저장
-     */
-    @Operation(summary = "정보토크 임시저장 api")
-    @PostMapping("/tempSave")
-    public ResponseEntity<?> tempSaveInfoTalk(@RequestBody @Valid InfoTalkDTO dto) {
-
-        return infoTalkService.tempSaveInfoTalk(dto);
-    }
-
 
     /**
      * 정보토크 삭제

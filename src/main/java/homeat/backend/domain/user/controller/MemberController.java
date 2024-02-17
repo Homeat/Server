@@ -8,13 +8,14 @@ import homeat.backend.domain.user.service.MemberCommandService;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
-import homeat.backend.global.service.MailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -78,6 +79,13 @@ public class MemberController {
     @PatchMapping("/mypage")
     public ApiPayload<?> updateInfo(@RequestBody @Valid MemberRequest.UpdateInfoDto request, Authentication authentication) {
         memberCommandService.updateInfo(request, Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "프로필 사진 수정 api")
+    @PatchMapping(value = "/mypage/profileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiPayload<?> updateProfileImg(@RequestParam("profileImg") MultipartFile multipartProfileImg, Authentication authentication) {
+        memberCommandService.updateProfileImg(multipartProfileImg, Long.parseLong(authentication.getName()));
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 }

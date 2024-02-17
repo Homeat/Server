@@ -47,8 +47,10 @@ public class MemberController {
     @Operation(summary = "회원정보 api")
     @GetMapping("/mypage")
     public ApiPayload<MemberResponse.MyPageResultDTO> mypage(Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toMyPageResultDTO(member));
+        Long memberId = Long.parseLong(authentication.getName());
+        Member member = memberQueryService.mypageMember(memberId);
+        MemberInfo memberInfo = memberQueryService.mypageMemberInfo(memberId);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toMyPageResultDTO(member, memberInfo));
     }
 
     @Operation(summary = "회원가입시, 부가 회원정보 추가 api")

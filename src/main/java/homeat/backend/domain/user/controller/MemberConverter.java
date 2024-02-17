@@ -40,10 +40,13 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponse.MyPageResultDTO toMyPageResultDTO(Member member) {
+    public static MemberResponse.MyPageResultDTO toMyPageResultDTO(Member member, MemberInfo memberInfo) {
         return MemberResponse.MyPageResultDTO.builder()
                 .email(member.getEmail())
                 .nickname(member.getNickname())
+                .gender(memberInfo.getGender())
+                .birth(memberInfo.getBirth())
+                .income(memberInfo.getIncome())
                 .build();
     }
 

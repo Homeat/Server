@@ -69,7 +69,7 @@ public class MemberController {
 
     @Operation(summary = "비밀번호 변경 api")
     @PatchMapping("/mypage/password")
-    public ApiPayload<?> updateInfoPassword(@RequestBody @Valid MemberRequest.UpdatePasswordDto request, Authentication authentication) {
+    public ApiPayload<?> updatePassword(@RequestBody @Valid MemberRequest.UpdatePasswordDto request, Authentication authentication) {
         memberCommandService.updatePassword(request, Long.parseLong(authentication.getName()));
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }

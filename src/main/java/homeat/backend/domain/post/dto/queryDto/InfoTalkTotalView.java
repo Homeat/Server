@@ -13,10 +13,13 @@ public class InfoTalkTotalView {
     private String content;
     private String url;
     private Integer love;
+    private Integer view;
     private Integer commentNumber;
 
     public InfoTalkTotalView(Long infoTalkId, LocalDateTime createdAt, LocalDateTime updatedAt, String title,
-                             String content, String url, Integer love, Integer commentNumber) {
+                             String content, String url, Integer love, Integer view, Integer commentNumber) {
+
+
         this.infoTalkId = infoTalkId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -24,6 +27,7 @@ public class InfoTalkTotalView {
         this.content = content;
         this.url = url;
         this.love = love;
+        this.view = view;
         this.commentNumber = commentNumber;
     }
 }

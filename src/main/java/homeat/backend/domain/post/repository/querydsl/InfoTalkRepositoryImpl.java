@@ -78,7 +78,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
         for (InfoTalk infoTalk : result.getResults()) {
             content.add(new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
                     infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                    infoTalk.getLove(), infoTalk.getCommentNumber()));
+                    infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber()));
         }
 
         return checkEndPage(pageable, content);
@@ -102,7 +102,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
         for (InfoTalk infoTalk : result.getResults()) {
             content.add(new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
                     infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                    infoTalk.getLove(), infoTalk.getCommentNumber()));
+                    infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber()));
         }
 
         return checkEndPage(pageable, content);
@@ -127,7 +127,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
         for (InfoTalk infoTalk : result.getResults()) {
             content.add(new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
                     infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                    infoTalk.getLove(), infoTalk.getCommentNumber()));
+                    infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber()));
         }
 
         return checkEndPage(pageable, content);
@@ -151,7 +151,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
         for (InfoTalk infoTalk : result.getResults()) {
             content.add(new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
                     infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                    infoTalk.getLove(), infoTalk.getCommentNumber()));
+                    infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber()));
         }
 
         return checkEndPage(pageable, content);

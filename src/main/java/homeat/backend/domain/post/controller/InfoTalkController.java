@@ -1,9 +1,7 @@
 package homeat.backend.domain.post.controller;
 
 import homeat.backend.domain.post.dto.CommentDTO;
-import homeat.backend.domain.post.dto.InfoHashTagDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
-import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.service.InfoTalkService;
 import homeat.backend.domain.user.entity.Member;
@@ -40,10 +38,11 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 내용 저장 api")
     @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> saveInfoTalk(@RequestBody InfoTalkDTO dto) {
+    public ResponseEntity<?> saveInfoTalk(@RequestBody InfoTalkDTO dto, Authentication authentication) {
 
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
 
-        return infoTalkService.saveInfoTalk(dto);
+        return infoTalkService.saveInfoTalk(dto, member);
     }
 
     /**
@@ -65,8 +64,9 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 삭제 api")
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<?> deleteInfoTalk(@PathVariable("id") Long id) {
-        return infoTalkService.deleteInfoTalk(id);
+    public ResponseEntity<?> deleteInfoTalk(@PathVariable("id") Long id, Authentication authentication) {
+        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        return infoTalkService.deleteInfoTalk(id, member);
     }
 
     /**

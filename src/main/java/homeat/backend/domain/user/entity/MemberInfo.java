@@ -38,4 +38,8 @@ public class MemberInfo extends BaseEntity {
     private String address;
 
     private Long income;
+
+    public void updateIncome(Long income) {
+        this.income = income;
+    }
 }

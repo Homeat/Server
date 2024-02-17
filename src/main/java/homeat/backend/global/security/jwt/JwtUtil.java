@@ -24,7 +24,7 @@ public class JwtUtil {
 
     @Value("${jwt.secret.key}")
     private String secretKey;
-    private final Long expiredMs = 1000 * 60 * 60L;
+    private final Long expiredMs = 1000 * 60 * 60 * 24 * 365L;
     private final MemberRepository memberRepository;
 
     public JwtUtil(MemberRepository memberRepository) {

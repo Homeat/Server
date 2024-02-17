@@ -23,7 +23,8 @@ public class Member extends BaseEntity {
 
     private String nickname;
 
-    private String profileImgUrl;
+    @Builder.Default
+    private String profileImgUrl = "https://homeat-dev-s3.s3.ap-northeast-2.amazonaws.com/homeat/default/default_icon.png";
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
@@ -33,4 +34,20 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "member_status")
     private MemberStatus status = MemberStatus.ACTIVE;
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateProfileImgUrl(String profileImgUrl) {
+        this.profileImgUrl = profileImgUrl;
+    }
 }

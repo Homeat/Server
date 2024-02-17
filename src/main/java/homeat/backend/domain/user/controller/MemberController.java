@@ -88,4 +88,11 @@ public class MemberController {
         memberCommandService.updateProfileImg(multipartProfileImg, Long.parseLong(authentication.getName()));
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
+
+    @Operation(summary = "프로필 사진 삭제 api")
+    @PatchMapping("/mypage/profileImg/delete")
+    public ApiPayload<?> deleteProfileImg(Authentication authentication) {
+        memberCommandService.deleteProfileImg(Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
 }

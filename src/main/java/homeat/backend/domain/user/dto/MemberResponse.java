@@ -36,6 +36,7 @@ public class MemberResponse {
     public static class MyPageResultDTO {
         String email;
         String nickname;
+        String profileImgUrl;
         Gender gender;
         LocalDate birth;
         Long income;

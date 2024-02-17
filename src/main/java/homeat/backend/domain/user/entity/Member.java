@@ -23,7 +23,8 @@ public class Member extends BaseEntity {
 
     private String nickname;
 
-    private String profileImgUrl;
+    @Builder.Default
+    private String profileImgUrl = "https://homeat-dev-s3.s3.ap-northeast-2.amazonaws.com/homeat/default/default_icon.png";
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

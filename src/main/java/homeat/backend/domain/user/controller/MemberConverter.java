@@ -44,6 +44,7 @@ public class MemberConverter {
         return MemberResponse.MyPageResultDTO.builder()
                 .email(member.getEmail())
                 .nickname(member.getNickname())
+                .profileImgUrl(member.getProfileImgUrl())
                 .gender(memberInfo.getGender())
                 .birth(memberInfo.getBirth())
                 .income(memberInfo.getIncome())

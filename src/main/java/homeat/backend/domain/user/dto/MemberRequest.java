@@ -4,6 +4,7 @@ import homeat.backend.domain.user.annotation.ExistEmail;
 import homeat.backend.domain.user.annotation.ExistNickname;
 import homeat.backend.domain.user.annotation.ValidEnum;
 import homeat.backend.domain.user.entity.Gender;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -43,6 +44,7 @@ public class MemberRequest {
 
     @Getter
     public static class CreateInfoDto {
+        @Schema(example = "MALE, FEMALE (둘 중 하나, 대문자 필수)")
         Gender gender;
 
         @Past

@@ -50,6 +50,9 @@ public class MemberRequest {
 
         @Min(value = 0)
         Long income;
+
+        @Min(value = 0)
+        Long goalPrice;
     }
 
     @Getter

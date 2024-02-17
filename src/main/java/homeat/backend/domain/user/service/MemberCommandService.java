@@ -1,5 +1,9 @@
 package homeat.backend.domain.user.service;
 
+import homeat.backend.domain.analyze.entity.FinanceData;
+import homeat.backend.domain.analyze.repository.FinanceDataRepository;
+import homeat.backend.domain.homeatreport.entity.Week;
+import homeat.backend.domain.homeatreport.repository.WeekRepository;
 import homeat.backend.domain.user.controller.MemberConverter;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.entity.Member;
@@ -28,6 +32,8 @@ public class MemberCommandService {
 
     private final MemberRepository memberRepository;
     private final MemberInfoRepository memberInfoRepository;
+    private final FinanceDataRepository financeDataRepository;
+    private final WeekRepository weekRepository;
     private final BCryptPasswordEncoder encoder;
     private final JwtUtil jwtUtil;
     private final MailService mailService;
@@ -70,6 +76,18 @@ public class MemberCommandService {
                     throw new MemberHandler(MemberErrorStatus.MEMBER_NOT_FOUND);
                 });
         MemberInfo newMemberInfo = MemberConverter.toMemberInfo(request, selectedMember);
+
+        FinanceData newFinanceData = FinanceData.builder()
+                .member(selectedMember)
+                .build();
+        financeDataRepository.save(newFinanceData);
+
+        Week newWeek = Week.builder()
+                .financeData(newFinanceData)
+                .goal_price(request.getGoalPrice())
+                .next_goal_price(request.getGoalPrice())
+                .build();
+        weekRepository.save(newWeek);
 
         return memberInfoRepository.save(newMemberInfo);
     }

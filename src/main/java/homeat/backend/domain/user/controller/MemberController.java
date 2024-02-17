@@ -57,7 +57,7 @@ public class MemberController {
     @PostMapping("/mypage")
     public ApiPayload<MemberResponse.CreateInfoResultDTO> createMypage(@RequestBody @Valid MemberRequest.CreateInfoDto request, Authentication authentication) {
         MemberInfo memberInfo = memberCommandService.saveMemberInfo(request, Long.parseLong(authentication.getName()));
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toCreateInfoResultDTO(memberInfo));
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toCreateInfoResultDTO(memberInfo));
     }
 
     @Operation(summary = "회원가입시, 이메일 인증 요청 api")
@@ -65,5 +65,12 @@ public class MemberController {
     public ApiPayload<MemberResponse.EmailVerifyDto> emailVerificationReq(@RequestBody @Valid MemberRequest.EmailVerifyDto request) {
         String authCode = memberCommandService.sendCodeToEmail(request);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toEmailVerifyDTO(authCode));
+    }
+
+    @Operation(summary = "비밀번호 변경 api")
+    @PatchMapping("/mypage/password")
+    public ApiPayload<?> updateInfoPassword(@RequestBody @Valid MemberRequest.UpdatePasswordDto request, Authentication authentication) {
+        memberCommandService.updatePassword(request, Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 }

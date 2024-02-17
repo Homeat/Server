@@ -33,4 +33,8 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "member_status")
     private MemberStatus status = MemberStatus.ACTIVE;
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }

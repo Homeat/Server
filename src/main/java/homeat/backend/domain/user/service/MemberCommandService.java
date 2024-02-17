@@ -111,4 +111,16 @@ public class MemberCommandService {
 
         return authCode;
     }
+
+    @Transactional
+    public void updatePassword(MemberRequest.UpdatePasswordDto request, Long memberId) {
+        Member selectedMember = memberRepository.findById(memberId).orElseThrow();
+
+        if (!encoder.matches(request.getOriginPassword(), selectedMember.getPassword())) {
+            throw new MemberHandler(MemberErrorStatus.INVALID_PASSWORD);
+        }
+
+        selectedMember.updatePassword(encoder.encode(request.getNewPassword()));
+    }
+
 }

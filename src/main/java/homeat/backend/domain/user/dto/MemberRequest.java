@@ -62,4 +62,13 @@ public class MemberRequest {
         @ExistEmail
         String email;
     }
+
+    @Getter
+    public static class UpdatePasswordDto {
+        @NotBlank
+        String originPassword;
+
+        @NotBlank
+        String newPassword;
+    }
 }

@@ -73,4 +73,11 @@ public class MemberController {
         memberCommandService.updatePassword(request, Long.parseLong(authentication.getName()));
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
+
+    @Operation(summary = "회원정보 수정 api")
+    @PatchMapping("/mypage")
+    public ApiPayload<?> updateInfo(@RequestBody @Valid MemberRequest.UpdateInfoDto request, Authentication authentication) {
+        memberCommandService.updateInfo(request, Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
 }

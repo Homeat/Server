@@ -7,11 +7,9 @@ import homeat.backend.domain.user.entity.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 public class MemberRequest {
@@ -72,5 +70,22 @@ public class MemberRequest {
 
         @NotBlank
         String newPassword;
+    }
+
+    @Getter
+    public static class UpdateInfoDto {
+        @Nullable
+        @Email
+        @Schema(example = "null 가능, 필요한 항목만 넣으면 됨, 아래 income도 동일")
+        String email;
+
+        @Nullable
+        @ExistNickname
+        @Schema(example = "null 가능, 필요한 항목만 넣으면 됨, 아래 income도 동일")
+        String nickname;
+
+        @Nullable
+        @Min(value = 0)
+        Long income;
     }
 }

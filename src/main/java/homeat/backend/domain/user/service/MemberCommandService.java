@@ -123,4 +123,13 @@ public class MemberCommandService {
         selectedMember.updatePassword(encoder.encode(request.getNewPassword()));
     }
 
+    @Transactional
+    public void updateInfo(MemberRequest.UpdateInfoDto request, Long memberId) {
+        Member selectedMember = memberRepository.findById(memberId).orElseThrow();
+        MemberInfo selectedMemberInfo = memberInfoRepository.findMemberInfoByMemberId(memberId);
+
+        if (request.getEmail() != null) selectedMember.updateEmail(request.getEmail());
+        if (request.getNickname() != null) selectedMember.updateNickname(request.getNickname());
+        if (request.getIncome() != null) selectedMemberInfo.updateIncome(request.getIncome());
+    }
 }

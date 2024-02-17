@@ -154,4 +154,16 @@ public class MemberCommandService {
         }
         selectedMember.updateProfileImgUrl("https://homeat-dev-s3.s3.ap-northeast-2.amazonaws.com/homeat/default/default_icon.png");
     }
+
+    @Transactional
+    public void withdraw(Long memberId) {
+        Member selectedMember = memberRepository.findById(memberId).orElseThrow();
+        selectedMember.withdraw();
+    }
+
+    @Transactional
+    public void reactivate(Long memberId) {
+        Member selectedMember = memberRepository.findById(memberId).orElseThrow();
+        selectedMember.reactivate();
+    }
 }

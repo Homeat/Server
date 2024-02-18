@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface FinanceDataRepository extends JpaRepository<FinanceData, Long>, FinanceDataRepositoryCustom {
     Optional<FinanceData> findByMember_Id(Long member_id);
+
+    Optional<FinanceData> findTopByMember_IdOrderByCreatedAtDesc(Long member_id);
 }

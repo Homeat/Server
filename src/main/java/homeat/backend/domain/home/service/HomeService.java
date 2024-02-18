@@ -122,6 +122,13 @@ public class HomeService {
      */
     @Transactional
     public Long processReceiptAndSaveExpense(MultipartFile file) throws IOException {
+        // 파일 확장자 예외처리
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+        if (!fileUtil.isSupportedExtension(extension)) {
+            throw new IllegalAccessError(extension + " 확장자는 지원하지 않습니다. jpg, png, pdf 등만 가능");
+        }
+
         // MultiparFile -> File
         File convertedFile = fileUtil.convertMultiPartToFile(file);
 

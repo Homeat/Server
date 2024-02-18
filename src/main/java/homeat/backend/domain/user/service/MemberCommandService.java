@@ -67,6 +67,11 @@ public class MemberCommandService {
         return jwtUtil.createJwt(selectedMember.getId());
     }
 
+    @Transactional
+    public String loginMember(Long memberId) {
+        return jwtUtil.createJwt(memberId);
+    }
+
     public LocalDateTime getJwtExpiredAt(String token) {
         Date expiredAt = jwtUtil.getExpiredAt(token);
         return LocalDateTime.ofInstant(expiredAt.toInstant(), ZoneId.systemDefault());
@@ -140,11 +145,30 @@ public class MemberCommandService {
     public void updateProfileImg(MultipartFile multipartProfileImg, Long memberId) {
         Member selectedMember = memberRepository.findById(memberId).orElseThrow();
         String newProfileImgUrl = s3Service.uploadProfileImg(multipartProfileImg);
-
         if (!selectedMember.getProfileImgUrl().equals("https://homeat-dev-s3.s3.ap-northeast-2.amazonaws.com/homeat/default/default_icon.png")) {
             s3Service.fileDelete(selectedMember.getProfileImgUrl());
         }
-
         selectedMember.updateProfileImgUrl(newProfileImgUrl);
+    }
+
+    @Transactional
+    public void deleteProfileImg(Long memberId) {
+        Member selectedMember = memberRepository.findById(memberId).orElseThrow();
+        if (!selectedMember.getProfileImgUrl().equals("https://homeat-dev-s3.s3.ap-northeast-2.amazonaws.com/homeat/default/default_icon.png")) {
+            s3Service.fileDelete(selectedMember.getProfileImgUrl());
+        }
+        selectedMember.updateProfileImgUrl("https://homeat-dev-s3.s3.ap-northeast-2.amazonaws.com/homeat/default/default_icon.png");
+    }
+
+    @Transactional
+    public void withdraw(Long memberId) {
+        Member selectedMember = memberRepository.findById(memberId).orElseThrow();
+        selectedMember.withdraw();
+    }
+
+    @Transactional
+    public void reactivate(Long memberId) {
+        Member selectedMember = memberRepository.findById(memberId).orElseThrow();
+        selectedMember.reactivate();
     }
 }

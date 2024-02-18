@@ -12,6 +12,12 @@ spring:
       hibernate:
         format_sql: true
         highlight_sql: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 128MB
+      max-request-size: 128MB
+
 ## s3설정
 cloud:
   aws:
@@ -49,6 +55,7 @@ mail:
         connectiontimeout: 5000
         timeout: 5000
         writetimeout: 5000
+
 
 logging:
   level:

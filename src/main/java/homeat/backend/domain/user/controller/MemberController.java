@@ -34,7 +34,8 @@ public class MemberController {
     @PostMapping("/join")
     public ApiPayload<MemberResponse.JoinResultDTO> create(@RequestBody @Valid MemberRequest.JoinDto request) {
         Member member = memberCommandService.joinMember(request);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member));
+        String token = memberCommandService.loginMember(member.getId());
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member, token));
     }
 
     @Operation(summary = "로그인 api")
@@ -86,6 +87,27 @@ public class MemberController {
     @PatchMapping(value = "/mypage/profileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiPayload<?> updateProfileImg(@RequestParam("profileImg") MultipartFile multipartProfileImg, Authentication authentication) {
         memberCommandService.updateProfileImg(multipartProfileImg, Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "프로필 사진 삭제 api")
+    @PatchMapping("/mypage/profileImg/delete")
+    public ApiPayload<?> deleteProfileImg(Authentication authentication) {
+        memberCommandService.deleteProfileImg(Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "회원탈퇴(비활성) api")
+    @PatchMapping("/mypage/withdraw")
+    public ApiPayload<?> withdrawal(Authentication authentication) {
+        memberCommandService.withdraw(Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "회원 재활성 api")
+    @PatchMapping("/mypage/reactivate")
+    public ApiPayload<?> reactivate(Authentication authentication) {
+        memberCommandService.reactivate(Long.parseLong(authentication.getName()));
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 }

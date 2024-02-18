@@ -201,6 +201,7 @@ public class HomeService {
 
             // receipt 추출
             Receipt receipt = Receipt.builder()
+                    .dailyExpense(dailyExpense)
                     .expense(dto.getMoney())
                     .costType(dto.getType())
                     .memo(dto.getMemo())

@@ -67,6 +67,11 @@ public class MemberCommandService {
         return jwtUtil.createJwt(selectedMember.getId());
     }
 
+    @Transactional
+    public String loginMember(Long memberId) {
+        return jwtUtil.createJwt(memberId);
+    }
+
     public LocalDateTime getJwtExpiredAt(String token) {
         Date expiredAt = jwtUtil.getExpiredAt(token);
         return LocalDateTime.ofInstant(expiredAt.toInstant(), ZoneId.systemDefault());

@@ -17,6 +17,15 @@ public class AddressService {
 
     private final AddressRepository addressRepository;
 
+    public AddressResponse.NeighborhoodResultDTO getAddress(Double x, Double y) {
+        Object[] result = addressRepository.findOrderByPoint(x, y, 1, 0).get(0);
+        return AddressResponse.NeighborhoodResultDTO.builder()
+                .addressId((BigInteger) result[0])
+                .fullNm((String) result[1])
+                .emdNm((String) result[2])
+                .build();
+    }
+
     public List<AddressResponse.NeighborhoodResultDTO> getNegiborhood(Double x, Double y, int page) {
         List<Object[]> neighborhoods = addressRepository.findOrderByPoint(x, y, 20, page * 20);
         return neighborhoods.stream()

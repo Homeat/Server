@@ -116,15 +116,21 @@ public class MemberController {
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
+    @Operation(summary = "동네 조회 api")
+    @GetMapping("/address")
+    public ApiPayload<AddressResponse.NeighborhoodResultDTO> address(@RequestParam("latitude") Double x,
+                                                                     @RequestParam("logitude") Double y) {
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, addressService.getAddress(x, y));
+    }
+
     @Operation(summary = "주변 동네 조회 api")
     @GetMapping("/address/neighborhood")
     public ApiPayload<MemberResponse.GetNeighborhoodResultDTO> neighborhood(@RequestParam("latitude") Double x,
-                                      @RequestParam("logitude") Double y,
-                                      @RequestParam("page") int page) {
+                                                                            @RequestParam("logitude") Double y,
+                                                                            @RequestParam("page") int page) {
+
         List<AddressResponse.NeighborhoodResultDTO> neighborhoods = addressService.getNegiborhood(x, y, page);
         Long totalColumnCount = addressService.getTotalCount();
-
-
 
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberResponse.GetNeighborhoodResultDTO.builder()
                         .totalColumnCount(totalColumnCount)

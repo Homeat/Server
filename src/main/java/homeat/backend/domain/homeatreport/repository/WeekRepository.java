@@ -17,4 +17,6 @@ public interface WeekRepository extends JpaRepository<Week, Long>, WeekRepositor
     Optional<Week> findFirstByFinanceDataAndCreatedAtBetween(FinanceData financeData, LocalDateTime start, LocalDateTime end);
 
     Optional<Week> findTopByFinanceDataOrderByIdDesc(FinanceData financeData);
+
+    Optional<Week> findTopByFinanceDataOrderByFinanceDataIdDesc(FinanceData financeData);
 }

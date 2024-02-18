@@ -267,15 +267,12 @@ public class HomeService {
         // 일요일부터 선택 날짜까지의 DailyExpense 모두 조회
         List<DailyExpense> dailyExpenses = dailyExpenseRepo.findDailyExpenseByMemberIdAndDateBetween(member.getId(), startOfWeek.toLocalDate(), targetDate);
 
-
         long totalUsedPrice = 0L;
         for (DailyExpense dailyExpense : dailyExpenses) {
             totalUsedPrice += dailyExpense.getTodayJipbapPrice();
             totalUsedPrice += dailyExpense.getTodayOutPrice();
         }
 
-        // 총 사용 금액과 목표 금액
-        long remainingGoalPrice = week.getGoal_price() - totalUsedPrice;
 
         // 해당 날짜의 DailyExpense 엔티티 조회
         Optional<DailyExpense> todayExpenseOpt = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), targetDate);
@@ -283,6 +280,12 @@ public class HomeService {
         // DailyExpense 존재하면 값 반환, 없으면 0
         long todayJipbapPrice = todayExpenseOpt.map(DailyExpense::getTodayJipbapPrice).orElse(0L);
         long todayOutPrice = todayExpenseOpt.map(DailyExpense::getTodayOutPrice).orElse(0L);
+
+        // 오늘 날짜는 반영이 안될 수 있으므로
+        totalUsedPrice += todayJipbapPrice + todayOutPrice;
+
+        // 총 사용 금액과 목표 금액
+        long remainingGoalPrice = week.getGoal_price() - totalUsedPrice;
 
         HomeResponseDTO.CalendarDayResultDTO result = HomeResponseDTO.CalendarDayResultDTO.builder()
                 .date(targetDate)

@@ -22,10 +22,11 @@ public class HomeResponseDTO {
     public static class HomeResultDTO {
         private String nickname;
         private Long targetMoney;
-        private int lastWeekSavingPercent;
-        private Long usedMoney;
+        private int beforeSavingPercent;
+        private Long remainingMoney;
         private int badgeCount;
-        private int usedPercent;
+        private int remainingPercent;
+        private int beforeWeek;
     }
 
     @Builder

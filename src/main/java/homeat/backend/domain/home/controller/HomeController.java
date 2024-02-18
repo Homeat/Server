@@ -64,11 +64,10 @@ public class HomeController {
      */
     @Operation(summary = "영수증 추출(ocr) API, 완료")
     @PostMapping(value = "/receipt", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<String> processReceipt(@RequestParam("file") MultipartFile file) {
+    public ApiPayload<Long> processReceipt(@RequestParam("file") MultipartFile file) {
         try {
             Long totalExpense = homeService.processReceiptAndSaveExpense(file);
-            String message = "총 금액이 저장됐습니다 : " + totalExpense;
-            return ApiPayload.onSuccess(CommonSuccessStatus.OK, message);
+            return ApiPayload.onSuccess(CommonSuccessStatus.OK, totalExpense);
         } catch (IOException e) {
             logger.error("영수증 처리 에러 발생", e);
             return ApiPayload.onFailure(CommonErrorStatus.INTERNAL_SERVER_ERROR.getCode(), "영수증 처리 에러", null);

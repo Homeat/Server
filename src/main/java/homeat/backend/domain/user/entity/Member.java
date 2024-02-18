@@ -50,4 +50,12 @@ public class Member extends BaseEntity {
     public void updateProfileImgUrl(String profileImgUrl) {
         this.profileImgUrl = profileImgUrl;
     }
+
+    public void withdraw() {
+        this.status = MemberStatus.INACTIVE;
+    }
+
+    public void reactivate() {
+        this.status = MemberStatus.ACTIVE;
+    }
 }

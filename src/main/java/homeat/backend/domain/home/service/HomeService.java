@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
-import homeat.backend.domain.home.controller.HomeConverter;
 import homeat.backend.domain.home.dto.HomeRequestDTO;
 import homeat.backend.domain.home.dto.HomeResponseDTO;
 import homeat.backend.domain.home.entity.CostType;
@@ -20,8 +19,6 @@ import homeat.backend.domain.user.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -90,26 +87,38 @@ public class HomeService {
         if(thisWeekGoalPrice > 0) {
             LocalDate today = LocalDate.now();
             // 예외처리(저번 주 존재하지 않는 경우)
-            LocalDate lastMonday = today.minusWeeks(1).with(DayOfWeek.MONDAY);
-            LocalDate lastSunday = lastMonday.plusDays(6);
-            LocalDate thisMonday = today.with(DayOfWeek.MONDAY);
+            LocalDate lastSunday = today.minusWeeks(1).with(DayOfWeek.SUNDAY);
+            LocalDate lastSaturday = lastSunday.plusDays(6);
+            LocalDate thisSunday = today.with(DayOfWeek.SUNDAY);
 
-            Long lastWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(lastMonday, lastSunday);
-            Long thisWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(thisMonday, today);
+            // 저번 주, 이번 주 사용 금액
+            Long lastWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday);
+            Long thisWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today);
+
+            // 저번 주 금액이 0원 예외처리
+            int beforeWeek = 1;
+            while (lastWeekTotal == 0) {
+                beforeWeek += 1;
+                lastSunday = lastSunday.minusWeeks(1);
+                lastSaturday = lastSunday.plusDays(6);
+                lastWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday);
+            }
 
             // 전주 대비 이번 주 절약 퍼센트
             int thisWeekSavingPercent = (lastWeekTotal != null && thisWeekTotal != null && lastWeekTotal != 0) ? (int) ((double) (lastWeekTotal - thisWeekTotal) / lastWeekTotal * 100) : 0;
+
             // 목표 금액에 대한 이번 주 남은 사용 퍼센트
-            int usedPercent = 100;
+            int remainingPercent = 100;
             if (thisWeekTotal != null) {
-                usedPercent = (int) (usedPercent - (double) thisWeekTotal / thisWeekGoalPrice * 100);
+                remainingPercent = (int) (remainingPercent - (double) thisWeekTotal / thisWeekGoalPrice * 100);
             }
 
             // 목표 금액 & 전주 대비 이번 주 절약 퍼센트 & 사용 금액 & 목표 금액 대비 사용 금액 퍼센트
             builder.targetMoney(thisWeekGoalPrice)
-                    .lastWeekSavingPercent(thisWeekSavingPercent)
-                    .usedMoney(thisWeekTotal)
-                    .usedPercent(usedPercent);
+                    .beforeSavingPercent(thisWeekSavingPercent)
+                    .remainingMoney(thisWeekGoalPrice - thisWeekTotal)
+                    .remainingPercent(remainingPercent)
+                    .beforeWeek(beforeWeek);
         }
 
         HomeResponseDTO.HomeResultDTO result = builder.build();

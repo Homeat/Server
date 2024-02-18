@@ -32,10 +32,9 @@ public class WeekGenerationService {
      */
 
     // 회원가입 시점이 일요일 00시 00분인 경우 예외처리 필요
-    @Scheduled(cron = "0 0 0 * * SUN")
+    @Scheduled(cron = "* 0 0 * * SUN")
     public void generateNewWeek() {
-        Week newWeek = Week.builder().build(); // 1. 매주 일요일에 week 엔티티 새로 생성
-        weekRepository.save(newWeek);
+        Week newWeek = Week.builder().build(); // 1. 매주 일요일에 week 엔티티 새로 생성(일요일에 새로 시작하는 주)
 
         // 2. 직전 week 엔티티의 목표 달성 여부 최신화
         // 직전 week 찾기
@@ -95,7 +94,9 @@ public class WeekGenerationService {
             } else {
                 throw new RuntimeException("BadgeImg 엔티티가 존재하지 않습니다.");
             }
+
         }
+        weekRepository.save(newWeek);
     }
 
 }

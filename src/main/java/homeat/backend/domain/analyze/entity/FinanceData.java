@@ -39,4 +39,6 @@ public class FinanceData extends BaseEntity {
     public void addOutPrice(long price) {
         this.month_out_price += price;
     }
+
+    public void setNumHomeatBadge(Long num_badge) { this.num_homeat_badge = num_badge; }
 }

@@ -4,6 +4,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.analyze.entity.QFinanceData;
 import homeat.backend.domain.homeatreport.entity.QWeek;
 import homeat.backend.domain.homeatreport.entity.Week;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
@@ -34,6 +35,7 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
 
     @Override
     public Slice<Week> findWeekByMemberIdAsc(Long member_id, Long lastWeekId, Pageable pageable) {
+
         QWeek qWeek = QWeek.week;
         QFinanceData qFinanceData = QFinanceData.financeData;
         List<Week> resultWeeks = queryFactory.selectFrom(qWeek)

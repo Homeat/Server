@@ -15,4 +15,8 @@ import java.util.Optional;
 public interface WeekRepository extends JpaRepository<Week, Long>, WeekRepositoryCustom {
     Optional<Week> findFirstByFinanceDataOrderByCreatedAtDesc(FinanceData financeData);
     Optional<Week> findFirstByFinanceDataAndCreatedAtBetween(FinanceData financeData, LocalDateTime start, LocalDateTime end);
+
+    Optional<Week> findTopByFinanceDataOrderByIdDesc(FinanceData financeData);
+
+    Optional<Week> findTopByFinanceDataOrderByFinanceDataIdDesc(FinanceData financeData);
 }

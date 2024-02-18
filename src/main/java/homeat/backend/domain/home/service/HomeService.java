@@ -13,8 +13,10 @@ import homeat.backend.domain.home.repository.DailyExpenseRepo;
 import homeat.backend.domain.home.repository.ReceiptRepo;
 import homeat.backend.domain.home.service.ocr.FileUtil;
 import homeat.backend.domain.home.service.ocr.OCRService;
+import homeat.backend.domain.homeatreport.entity.QWeek;
 import homeat.backend.domain.homeatreport.entity.Week;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
+import homeat.backend.domain.homeatreport.service.WeekSaveService;
 import homeat.backend.domain.user.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.PreUpdate;
 import java.io.File;
 import java.io.IOException;
 import java.time.DayOfWeek;
@@ -30,6 +33,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+
+import static homeat.backend.domain.homeatreport.entity.QWeek.week;
 
 @Service
 @Transactional(readOnly = true)
@@ -43,6 +48,8 @@ public class HomeService {
 
     private final OCRService ocrService;
     private final FileUtil fileUtil;
+
+    private final WeekSaveService weekSaveService;
 
     private static final Logger logger = LoggerFactory.getLogger(HomeService.class);
 
@@ -221,6 +228,13 @@ public class HomeService {
 
             receiptRepo.save(receipt);
 
+            /**
+             * exceed_price update
+             */
+            Week week = weekRepository.findTopByFinanceDataOrderByFinanceDataIdDesc(financeData)
+                    .orElseThrow(() -> new NoSuchElementException("조회할 수 있는 Current Week가 없습니다."));
+            weekSaveService.saveWeek(week);
+
             financeDataRepository.save(financeData);
 
             return "영수증 저장 성공";
@@ -307,5 +321,17 @@ public class HomeService {
                 .build();
 
         return result;
+    }
+
+
+    /**
+     * week 엔티티의 exceed_price 업데이트
+     */
+    @PreUpdate
+    public void updateExceedPrice(FinanceData financeData) {
+        Week currentWeek = weekRepository.findTopByFinanceDataOrderByFinanceDataIdDesc(financeData)
+                .orElseThrow(() -> new NoSuchElementException("No CURRENT week found"));
+
+        weekSaveService.saveWeek(currentWeek);
     }
 }

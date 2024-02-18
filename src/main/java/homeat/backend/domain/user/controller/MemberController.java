@@ -117,7 +117,7 @@ public class MemberController {
     }
 
     @Operation(summary = "주변 동네 조회 api")
-    @GetMapping("/neighborhood")
+    @GetMapping("/address/neighborhood")
     public ApiPayload<MemberResponse.GetNeighborhoodResultDTO> neighborhood(@RequestParam("latitude") Double x,
                                       @RequestParam("logitude") Double y,
                                       @RequestParam("page") int page) {

@@ -26,8 +26,9 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponse.JoinResultDTO toJoinResultDTO(Member member) {
+    public static MemberResponse.JoinResultDTO toJoinResultDTO(Member member, String token) {
         return MemberResponse.JoinResultDTO.builder()
+                .token(token)
                 .memberId(member.getId())
                 .createdAt(LocalDateTime.now())
                 .build();

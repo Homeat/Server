@@ -1,9 +1,12 @@
 package homeat.backend.domain.user.controller;
 
+import homeat.backend.domain.user.dto.AddressResponse;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.dto.MemberResponse;
+import homeat.backend.domain.user.entity.Address;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.entity.MemberInfo;
+import homeat.backend.domain.user.service.AddressService;
 import homeat.backend.domain.user.service.MemberCommandService;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.payload.ApiPayload;
@@ -19,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +33,7 @@ public class MemberController {
 
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
+    private final AddressService addressService;
 
     @Operation(summary = "회원가입 api")
     @PostMapping("/join")
@@ -109,5 +114,22 @@ public class MemberController {
     public ApiPayload<?> reactivate(Authentication authentication) {
         memberCommandService.reactivate(Long.parseLong(authentication.getName()));
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "주변 동네 조회 api")
+    @GetMapping("/neighborhood")
+    public ApiPayload<MemberResponse.GetNeighborhoodResultDTO> neighborhood(@RequestParam("latitude") Double x,
+                                      @RequestParam("logitude") Double y,
+                                      @RequestParam("page") int page) {
+        List<AddressResponse.NeighborhoodResultDTO> neighborhoods = addressService.getNegiborhood(x, y, page);
+        Long totalColumnCount = addressService.getTotalCount();
+
+
+
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberResponse.GetNeighborhoodResultDTO.builder()
+                        .totalColumnCount(totalColumnCount)
+                        .totlaPageNum((totalColumnCount / 20) + 1)
+                        .neighborhoods(neighborhoods)
+                        .build());
     }
 }

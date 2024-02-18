@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class MemberResponse {
 
@@ -58,5 +59,15 @@ public class MemberResponse {
     @AllArgsConstructor
     public static class EmailVerifyDto {
         String authCode;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class GetNeighborhoodResultDTO {
+        Long totalColumnCount;
+        Long totlaPageNum;
+        List<AddressResponse.NeighborhoodResultDTO> neighborhoods;
     }
 }

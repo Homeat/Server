@@ -5,6 +5,7 @@ import lombok.*;
 import org.locationtech.jts.geom.Point;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
 @Getter
@@ -24,5 +25,11 @@ public class Address extends BaseEntity {
 
     private String emd_nm;
 
-    private Point coord;
+    @Column(precision = 9, scale = 6)
+    private BigDecimal x_coord;
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal y_coord;
+
+    private Point point;
 }

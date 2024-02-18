@@ -41,6 +41,9 @@ public class HomeatReportAnalyzeService {
         Long input_month_jipbap_price = inputFinanceData.getMonth_jipbap_price();
         Long input_month_out_price = inputFinanceData.getMonth_out_price();
 
+        /**
+         * 외식/배달 비용 퍼센트
+         */
         double total = input_month_jipbap_price + input_month_out_price; // 총합 계산
         double jipbap_ratio = (input_month_jipbap_price / total) * 100.0; // 집밥 가격 비율 계산
         double out_ratio = (input_month_out_price / total) * 100.0; // 외식/배달 가격 비율 계산
@@ -64,6 +67,9 @@ public class HomeatReportAnalyzeService {
 
             previousFinanceData = financeDataRepository.findByMemberIdAndCreatedYearAndCreatedMonth(member.getId(), previous_year, previous_month);
 
+            /**
+             * 전달 대비 절약 퍼센트
+             */
             // previousFinanceData가 존재하고 지출 합이 0이 아닌 경우, save_percent 계산 후 루프 탈출
             if (previousFinanceData != null && (previousFinanceData.getMonth_jipbap_price() + previousFinanceData.getMonth_out_price()) != 0) {
                 calc_percent = 1 - (double)((input_month_jipbap_price + input_month_out_price) / (previousFinanceData.getMonth_jipbap_price() + previousFinanceData.getMonth_out_price()));

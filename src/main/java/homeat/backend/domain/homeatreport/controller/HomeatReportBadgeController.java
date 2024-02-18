@@ -45,25 +45,13 @@ public class HomeatReportBadgeController {
 
     @Operation(summary = "홈잇리포트 주별조회 하단의 주별 뱃지데이터 표시 api")
     @GetMapping("/Badge")
-    public ApiPayload<List<ReportBadgeResponseDTO>> getHomeatBadge(
+    public ResponseEntity<?> getHomeatBadgeController(
             @RequestParam Long lastWeekId,
             Authentication authentication
     ) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
 
-        Slice<Week> weekSlice = homeatReportBadgeService.getHomeatBadge(member, lastWeekId);
-
-        List<ReportBadgeResponseDTO> responseDTOList = weekSlice.stream()
-                .map(week -> new ReportBadgeResponseDTO(
-                        week.getId(),
-                        week.getGoal_price(),
-                        week.getExceed_price(),
-                        week.getWeek_status(),
-                        week.getBadge_img().getImage_url()
-                ))
-                .collect(Collectors.toList());
-
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, responseDTOList);
+        return homeatReportBadgeService.getHomeatBadge(member, lastWeekId);
     }
 
 }

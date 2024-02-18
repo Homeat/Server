@@ -8,10 +8,7 @@ import homeat.backend.domain.homeatreport.entity.WeekStatus;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
 import homeat.backend.domain.user.entity.Member;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -59,11 +57,23 @@ public class HomeatReportBadgeService {
         return reportBadgeResponseDTOList;
     }*/
 
-    public Slice<Week> getHomeatBadge(Member member, Long lastWeekId) {
+    public ResponseEntity<?> getHomeatBadge(Member member, Long lastWeekId) {
 
         Pageable pageable = PageRequest.of(0, 9);
+        Slice<Week> weekPage = weekRepository.findWeekByMemberIdAsc(member.getId(), lastWeekId, pageable);
 
-        return weekRepository.findWeekByMemberIdAsc(member.getId(), lastWeekId, pageable);
+
+        List<ReportBadgeResponseDTO> reportBadgeResponseDTOList = weekPage.getContent().stream()
+                .map(week -> new ReportBadgeResponseDTO(
+                        week.getId(),
+                        week.getGoal_price(),
+                        week.getExceed_price(),
+                        week.getWeek_status(),
+                        week.getBadge_img().getImage_url()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok().body(weekRepository.findWeekByMemberIdAsc(member.getId(), lastWeekId, pageable));
     }
 
 

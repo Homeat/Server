@@ -206,6 +206,18 @@ public class HomeService {
                             .todayOutPrice(0)
                             .build());
 
+            // finance, daily 실시간 반영(receipt 추가되는)
+            if(dto.getType() == CostType.장보기) {
+                financeData.addJipbapPrice(dto.getMoney());
+                dailyExpense.addJipbapPrice(dto.getMoney());
+            } else if (dto.getType() == CostType.배달비 || dto.getType() == CostType.외식비) {
+                financeData.addOutPrice(dto.getMoney());
+                dailyExpense.addOutPrice(dto.getMoney());
+            }
+
+            dailyExpenseRepo.save(dailyExpense);
+
+
             // receipt 추출
             Receipt receipt = Receipt.builder()
                     .dailyExpense(dailyExpense)
@@ -216,15 +228,6 @@ public class HomeService {
 
             receiptRepo.save(receipt);
 
-            // finance, daily 실시간 반영(receipt 추가되는)
-            if(dto.getType() == CostType.장보기) {
-                financeData.addJipbapPrice(dto.getMoney());
-                dailyExpense.addJipbapPrice(dto.getMoney());
-            } else if (dto.getType() == CostType.배달비 || dto.getType() == CostType.외식비) {
-                financeData.addOutPrice(dto.getMoney());
-                dailyExpense.addOutPrice(dto.getMoney());
-            }
-
             /**
              * exceed_price update
              */
@@ -233,7 +236,6 @@ public class HomeService {
             weekSaveService.saveWeek(week);
 
             financeDataRepository.save(financeData);
-            dailyExpenseRepo.save(dailyExpense);
 
             return "영수증 저장 성공";
         } catch (Exception e) {

@@ -88,4 +88,25 @@ public class MemberController {
         memberCommandService.updateProfileImg(multipartProfileImg, Long.parseLong(authentication.getName()));
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
+
+    @Operation(summary = "프로필 사진 삭제 api")
+    @PatchMapping("/mypage/profileImg/delete")
+    public ApiPayload<?> deleteProfileImg(Authentication authentication) {
+        memberCommandService.deleteProfileImg(Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "회원탈퇴(비활성) api")
+    @PatchMapping("/mypage/withdraw")
+    public ApiPayload<?> withdrawal(Authentication authentication) {
+        memberCommandService.withdraw(Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "회원 재활성 api")
+    @PatchMapping("/mypage/reactivate")
+    public ApiPayload<?> reactivate(Authentication authentication) {
+        memberCommandService.reactivate(Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
 }

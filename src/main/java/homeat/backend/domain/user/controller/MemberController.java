@@ -34,7 +34,8 @@ public class MemberController {
     @PostMapping("/join")
     public ApiPayload<MemberResponse.JoinResultDTO> create(@RequestBody @Valid MemberRequest.JoinDto request) {
         Member member = memberCommandService.joinMember(request);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member));
+        String token = memberCommandService.loginMember(member.getId());
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member, token));
     }
 
     @Operation(summary = "로그인 api")

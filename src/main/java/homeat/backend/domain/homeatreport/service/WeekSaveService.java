@@ -46,14 +46,9 @@ public class WeekSaveService {
         Long exceedPrice = accumulatePrice() - week.getGoal_price();
         week.updateExceedPrice(exceedPrice);
 
+        System.out.println("exceed price here");
         // week 엔티티 저장
         weekRepository.save(week);
-    }
-
-    // updatedAt이 수정될 때마다 호출되는 메서드
-    @PreUpdate
-    public void updateWeekOnUpdate(Week week) {
-        saveWeek(week);
     }
 
 }

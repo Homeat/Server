@@ -14,7 +14,7 @@ public class FileUtil {
 
     // 영수증 이미지 파일 확장자
     public boolean isSupportedExtension(String extenstion) {
-        return Arrays.asList("jpg", "jpeg,", "png", "pdf", "tiff").contains(extenstion);
+        return Arrays.asList("jpg", "jpeg", "png", "pdf", "tiff").contains(extenstion);
     }
 
     /**

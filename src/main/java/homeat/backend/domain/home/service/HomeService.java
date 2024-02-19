@@ -96,10 +96,7 @@ public class HomeService {
 
         int badgeCount = thisMonthFinanceData.getNum_homeat_badge().intValue();
         badgeCount = Math.min(badgeCount, 9);
-        if (badgeCount == 0) badgeCount = 1;
-
-        Optional<Badge_img> badge_imgOptional = badgeImgRepository.findBadge_imgById((long) badgeCount);
-        Badge_img badgeImg = badge_imgOptional.orElseThrow(() -> new NoSuchElementException("해당 ID에 뱃지 이미지가 없습니다."));
+        Badge_img badgeImg = badgeImgRepository.findBadge_imgById((long) badgeCount);
 
         // 목표 식비가 0원 (default) -> nickname, 뱃지 개수만 반환
         HomeResponseDTO.HomeResultDTO.HomeResultDTOBuilder builder = HomeResponseDTO.HomeResultDTO.builder()

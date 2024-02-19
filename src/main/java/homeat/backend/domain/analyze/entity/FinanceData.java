@@ -30,7 +30,7 @@ public class FinanceData extends BaseEntity {
     private Long month_out_price = 0L; // 이번달 배달/외식 비용
 
     @Builder.Default
-    private Long num_homeat_badge = 0L; // 홈잇뱃지 개수
+    private Long num_homeat_badge = 1L; // 홈잇뱃지 개수
 
     public void addJipbapPrice(long price) {
         this.month_jipbap_price += price;
@@ -40,5 +40,11 @@ public class FinanceData extends BaseEntity {
         this.month_out_price += price;
     }
 
-    public void setNumHomeatBadge(Long num_badge) { this.num_homeat_badge = num_badge; }
+    public void setNumHomeatBadge(Long num_badge) {
+        if (num_badge <= 9) {
+            this.num_homeat_badge = num_badge;
+        } else {
+            this.num_homeat_badge = 9L;
+        }
+    }
 }

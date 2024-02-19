@@ -55,6 +55,7 @@ public class MonthService {
 
                 FinanceData financeData = FinanceData.builder()
                         .member(member)
+                        .num_homeat_badge(numHomeatBadge)
                         .build();
 
                 FinanceData savedfinanceData = financeDataRepository.save(financeData);

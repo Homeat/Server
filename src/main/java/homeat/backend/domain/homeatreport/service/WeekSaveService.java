@@ -19,29 +19,9 @@ public class WeekSaveService {
     private final WeekRepository weekRepository;
     private final DailyExpenseRepo dailyExpenseRepository;
 
-    public Long accumulatePrice() {
-
-        LocalDate today = LocalDate.now();
-        DayOfWeek todayOfWeek = today.getDayOfWeek();
-
-        LocalDate recentSunday;
-        if (todayOfWeek == DayOfWeek.SUNDAY) {
-            recentSunday = today;
-            System.out.println("최근 일요일: "+recentSunday);
-        } else {
-            recentSunday = today.minusDays(todayOfWeek.getValue());
-            System.out.println("최근 일요일: "+recentSunday);
-        }
-
-        // 가장 최근의 일요일부터 오늘까지의 DailyExpense list
-//        return dailyExpenseRepository.sumPricesBetweenDates(recentSunday, today);
-        return 0L;
-    }
-
-
-    public void saveWeek(Week week) {
+    public void saveWeek(Week week, Long accumulateExpense) {
         // week 엔티티의 exceedPrice 업데이트
-        Long exceedPrice = accumulatePrice() - week.getGoal_price();
+        Long exceedPrice = accumulateExpense - week.getGoal_price();
         week.updateExceedPrice(exceedPrice);
 
         System.out.println("exceed price here");

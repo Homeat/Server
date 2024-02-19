@@ -110,7 +110,7 @@ public class HomeService {
 
             if (beforeMonthFinanceData != null) {
                 lastWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, beforeMonthFinanceData);
-                thisWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today, thisMonthFinanceData);
+                thisWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today, beforeMonthFinanceData);
             }
 
             if (thisWeekTotal == null) {
@@ -306,14 +306,27 @@ public class HomeService {
      * 캘린더 하루 지출 확인
      */
     public HomeResponseDTO.CalendarDayResultDTO getCalendarDay(String year, String month, String day, Member member) {
-        // FinanceData 엔티티 조회
-        FinanceData financeData = financeDataRepository.findByMember_Id(member.getId())
-                .orElseThrow(() -> new NoSuchElementException("해당 멤버에 대한 FinanceData가 존재하지 않습니다."));
+        LocalDateTime startDateTime = LocalDateTime.of(Integer.parseInt(year), Integer.parseInt(month), 1, 0, 0);
+        LocalDateTime endDateTime = startDateTime.plusMonths(2).minusSeconds(1);
 
+        // FinanceData 엔티티 조회
+        List<FinanceData> financeDataList = financeDataRepository.findByMember_IdAndCreatedAtBetween(member.getId(), startDateTime, endDateTime);
+        if (financeDataList.size() == 0) {
+            return HomeResponseDTO.CalendarDayResultDTO.builder()
+                    .message("조회할 수 없는 날짜입니다.")
+                    .build();
+        }
         // 선택 날짜의 주 계산
         LocalDate targetDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
         LocalDateTime startOfWeek = targetDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).atStartOfDay();
         LocalDateTime endOfWeek = targetDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY)).atTime(23, 59, 59);
+
+        FinanceData financeData;
+        if (startOfWeek.getMonth() != endOfWeek.getMonth()) {
+            financeData = financeDataList.size() > 1 ? financeDataList.get(1) : financeDataList.get(0);
+        } else {
+            financeData = financeDataList.get(0);
+        }
 
         // Week 엔티티 조회
         Week week = weekRepository.findFirstByFinanceDataAndCreatedAtBetween(financeData, startOfWeek, endOfWeek)
@@ -347,6 +360,7 @@ public class HomeService {
                 .todayJipbapPrice(todayJipbapPrice)
                 .todayOutPrice(todayOutPrice)
                 .remainingGoal(remainingGoalPrice)
+                .message("")
                 .build();
 
         return result;

@@ -34,13 +34,13 @@ public class FinanceDataRepositoryImpl implements FinanceDataRepositoryCustom{
                 .fetchOne();
     }
 
-//
-//    /**
-//     * '회원가입 시 row 추가 + 매달 1일 row 추가' 에 대한 예외처리
-//     */
-//    @Override
-//    public Optional<FinanceData> findByMemberAndCreatedAt(Member member, LocalDate date) {
-//        QFinanceData financeData = QFinanceData.financeData;
+
+    /**
+     * '회원가입 시 row 추가 + 매달 1일 row 추가' 에 대한 예외처리
+     */
+    @Override
+    public Optional<FinanceData> findByMemberAndCreatedAt(Member member, LocalDate date) {
+        QFinanceData financeData = QFinanceData.financeData;
 //
 //        StringExpression formattedDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, '%Y-%m-%d')", financeData.createdAt);
 //        String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -49,18 +49,18 @@ public class FinanceDataRepositoryImpl implements FinanceDataRepositoryCustom{
 //                .where(financeData.member.eq(member)
 //                        .and(formattedDate.eq(dateString)))
 //                .fetchOne();
-//
-//        LocalDateTime startOfDay = date.atStartOfDay();
-//        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
-//
-//        FinanceData foundFinanceData = queryFactory.selectFrom(financeData)
-//                .where(financeData.member.eq(member)
-//                        .and(financeData.createdAt.between(startOfDay, endOfDay)))
-//                .fetchOne();
-//
-//
-//        return Optional.ofNullable(foundFinanceData);
-//    }
+
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        FinanceData foundFinanceData = queryFactory.selectFrom(financeData)
+                .where(financeData.member.eq(member)
+                        .and(financeData.createdAt.between(startOfDay, endOfDay)))
+                .fetchOne();
+
+
+        return Optional.ofNullable(foundFinanceData);
+    }
 
     /**
      * 해당 멤버의 가장 최근 finance(월) 객체 조회

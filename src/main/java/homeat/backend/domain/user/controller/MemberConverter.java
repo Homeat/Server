@@ -1,6 +1,6 @@
 package homeat.backend.domain.user.controller;
 
-import homeat.backend.domain.user.dto.AddressResponse;
+import homeat.backend.domain.address.dto.AddressResponse;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.dto.MemberResponse;
 import homeat.backend.domain.user.entity.Member;

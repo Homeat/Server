@@ -1,5 +1,6 @@
 package homeat.backend.domain.user.dto;
 
+import homeat.backend.domain.address.dto.AddressResponse;
 import homeat.backend.domain.user.entity.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,15 +61,5 @@ public class MemberResponse {
     @AllArgsConstructor
     public static class EmailVerifyDto {
         String authCode;
-    }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class GetNeighborhoodResultDTO {
-        Long totalColumnCount;
-        Long totlaPageNum;
-        List<AddressResponse.NeighborhoodResultDTO> neighborhoods;
     }
 }

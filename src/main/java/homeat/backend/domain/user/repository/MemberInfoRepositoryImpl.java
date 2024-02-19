@@ -16,13 +16,13 @@ public class MemberInfoRepositoryImpl implements MemberInfoRepositoryCustom {
 
     public MemberInfoRepositoryImpl(EntityManager em) { this.queryFactory = new JPAQueryFactory(em); }
 
-    @Override
-    public MemberInfo findMemberInfoByMemberId(Long member_id) {
-        QMemberInfo qMemberInfo = memberInfo;
-        // QueryDSL을 사용하여 멤버 정보 조회
-        return queryFactory.selectFrom(memberInfo)
-                .where(memberInfo.member.id.eq(member_id))
-                .fetchOne();
-    }
+//    @Override
+//    public MemberInfo findMemberInfoByMemberId(Long member_id) {
+//        QMemberInfo qMemberInfo = memberInfo;
+//        // QueryDSL을 사용하여 멤버 정보 조회
+//        return queryFactory.selectFrom(memberInfo)
+//                .where(memberInfo.member.id.eq(member_id))
+//                .fetchOne();
+//    }
 
 }

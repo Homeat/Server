@@ -37,9 +37,6 @@ public class WeekSaveService {
         return dailyExpenseRepository.sumPricesBetweenDates(recentSunday, today);
     }
 
-    public void updateStatuses(Week week) {
-
-    }
 
     public void saveWeek(Week week) {
         // week 엔티티의 exceedPrice 업데이트

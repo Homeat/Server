@@ -33,7 +33,5 @@ public class InfoPicture extends BaseEntity {
     @JsonIgnore
     private InfoTalk infoTalk;
 
-
-
     private String url;
 }

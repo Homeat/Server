@@ -13,8 +13,10 @@ import homeat.backend.domain.home.repository.DailyExpenseRepo;
 import homeat.backend.domain.home.repository.ReceiptRepo;
 import homeat.backend.domain.home.service.ocr.FileUtil;
 import homeat.backend.domain.home.service.ocr.OCRService;
+import homeat.backend.domain.homeatreport.entity.Badge_img;
 import homeat.backend.domain.homeatreport.entity.QWeek;
 import homeat.backend.domain.homeatreport.entity.Week;
+import homeat.backend.domain.homeatreport.repository.BadgeImgRepository;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
 import homeat.backend.domain.homeatreport.service.WeekSaveService;
 import homeat.backend.domain.user.entity.Member;
@@ -45,6 +47,7 @@ public class HomeService {
     private final ReceiptRepo receiptRepo;
     private final WeekRepository weekRepository;
     private final FinanceDataRepository financeDataRepository;
+    private final BadgeImgRepository badgeImgRepository;
 
     private final OCRService ocrService;
     private final FileUtil fileUtil;
@@ -91,9 +94,15 @@ public class HomeService {
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 Week가 존재하지 않습니다."));
         Long thisWeekGoalPrice = thisWeek.getGoal_price();
 
+        int badgeCount = thisMonthFinanceData.getNum_homeat_badge().intValue();
+        badgeCount = Math.min(badgeCount, 9);
+        Optional<Badge_img> badge_imgOptional = badgeImgRepository.findBadge_imgById((long) badgeCount);
+        Badge_img badgeImg = badge_imgOptional.orElseThrow(() -> new NoSuchElementException("해당 ID에 뱃지 이미지가 없습니다."));
+        System.out.println("badge url : " + badgeImg.getImage_url());
+
         // 목표 식비가 0원 (default) -> nickname, 뱃지 개수만 반환
         HomeResponseDTO.HomeResultDTO.HomeResultDTOBuilder builder = HomeResponseDTO.HomeResultDTO.builder()
-                .badgeCount(thisMonthFinanceData.getNum_homeat_badge().intValue())
+                .badgeImgUrl(badgeImg.getImage_url())
                 .nickname(member.getNickname());
 
         // 목표 식비가 0원이 아닐 경우

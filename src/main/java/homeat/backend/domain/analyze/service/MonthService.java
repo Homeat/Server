@@ -36,6 +36,7 @@ public class MonthService {
     public void createMonthlyFinanceData() {
         List<Member> members = memberRepository.findAll();
         LocalDate today = LocalDate.now();
+        LocalDate lastMonth = today.minusMonths(1);
 
         members.forEach(member -> {
             Optional<FinanceData> existingFinanceData =
@@ -43,6 +44,15 @@ public class MonthService {
 
             // 회원가입 날짜가 1일 경우 예외처리
             if (existingFinanceData.isEmpty()) {
+
+                Optional<FinanceData> lastMonthFinanceData =
+                        financeDataRepository.findByMemberAndCreatedAt(member, lastMonth);
+
+                Long numHomeatBadge = 0L;
+                if (lastMonthFinanceData.isPresent()) {
+                    numHomeatBadge = lastMonthFinanceData.get().getNum_homeat_badge();
+                }
+
                 FinanceData financeData = FinanceData.builder()
                         .member(member)
                         .build();

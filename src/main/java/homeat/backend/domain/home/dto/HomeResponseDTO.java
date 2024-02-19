@@ -24,7 +24,7 @@ public class HomeResponseDTO {
         private Long targetMoney;
         private int beforeSavingPercent;
         private Long remainingMoney;
-        private int badgeCount;
+        private String badgeImgUrl;
         private int remainingPercent;
         private int beforeWeek;
         private String message;

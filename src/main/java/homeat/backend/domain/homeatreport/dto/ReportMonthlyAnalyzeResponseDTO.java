@@ -13,8 +13,8 @@ public class ReportMonthlyAnalyzeResponseDTO {
 
     private Long month_jipbap_price;
     private Long month_out_price;
-    private double jipbap_ratio;
-    private double out_ratio;
+    private int jipbap_ratio;
+    private int out_ratio;
     private String save_percent;
 
 }

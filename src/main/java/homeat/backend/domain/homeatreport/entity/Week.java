@@ -44,7 +44,7 @@ public class Week extends BaseEntity {
     // TierStatus(enum) : 홈잇스타터, 홈잇러버, 홈잇마스터
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private TierStatus tierStatus =TierStatus.홈잇스타터;
+    private TierStatus tierStatus = TierStatus.홈잇스타터;
 
     // week_status setter
     public void setWeekStatus(WeekStatus week_status) {

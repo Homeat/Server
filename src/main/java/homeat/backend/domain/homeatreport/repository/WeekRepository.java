@@ -18,5 +18,4 @@ public interface WeekRepository extends JpaRepository<Week, Long>, WeekRepositor
 
     Optional<Week> findTopByFinanceDataOrderByIdDesc(FinanceData financeData);
 
-    Optional<Week> findTopByFinanceDataOrderByFinanceDataIdDesc(FinanceData financeData);
 }

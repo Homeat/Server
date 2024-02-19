@@ -48,6 +48,9 @@ public class HomeatReportAnalyzeService {
         double jipbap_ratio = (input_month_jipbap_price / total) * 100.0; // 집밥 가격 비율 계산
         double out_ratio = (input_month_out_price / total) * 100.0; // 외식/배달 가격 비율 계산
 
+        int jipbap_ratio_int = (int)Math.round(jipbap_ratio);
+        int out_ratio_int = (int)Math.round(out_ratio);
+
         FinanceData previousFinanceData = null;
 
         Integer previous_year = input_year;
@@ -83,7 +86,7 @@ public class HomeatReportAnalyzeService {
                 break;
             }
         }
-        ReportMonthlyAnalyzeResponseDTO reportMonthlyAnalyzeResponseDTO = new ReportMonthlyAnalyzeResponseDTO(input_month_jipbap_price, input_month_out_price, jipbap_ratio, out_ratio, save_percent);
+        ReportMonthlyAnalyzeResponseDTO reportMonthlyAnalyzeResponseDTO = new ReportMonthlyAnalyzeResponseDTO(input_month_jipbap_price, input_month_out_price, jipbap_ratio_int, out_ratio_int, save_percent);
         return reportMonthlyAnalyzeResponseDTO;
     }
 

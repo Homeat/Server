@@ -37,6 +37,15 @@ public class AddressService {
                 .collect(Collectors.toList());
     }
 
+    public AddressResponse.NeighborhoodResultDTO getAddressInfoById(Long addressId) {
+        Object[] result = addressRepository.findByIdCustom(addressId).get(0);
+        return AddressResponse.NeighborhoodResultDTO.builder()
+                .addressId((BigInteger) result[0])
+                .fullNm((String) result[1])
+                .emdNm((String) result[2])
+                .build();
+    }
+
     public Long getTotalCount() {
         return addressRepository.count();
     }

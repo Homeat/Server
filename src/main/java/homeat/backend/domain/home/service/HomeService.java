@@ -110,7 +110,7 @@ public class HomeService {
 
             if (beforeMonthFinanceData != null) {
                 lastWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, beforeMonthFinanceData);
-                thisWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today, thisMonthFinanceData);
+                thisWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today, beforeMonthFinanceData);
             }
 
             if (thisWeekTotal == null) {

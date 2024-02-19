@@ -100,7 +100,6 @@ public class HomeService {
 
         Optional<Badge_img> badge_imgOptional = badgeImgRepository.findBadge_imgById((long) badgeCount);
         Badge_img badgeImg = badge_imgOptional.orElseThrow(() -> new NoSuchElementException("해당 ID에 뱃지 이미지가 없습니다."));
-        System.out.println("badge url : " + badgeImg.getImage_url());
 
         // 목표 식비가 0원 (default) -> nickname, 뱃지 개수만 반환
         HomeResponseDTO.HomeResultDTO.HomeResultDTOBuilder builder = HomeResponseDTO.HomeResultDTO.builder()

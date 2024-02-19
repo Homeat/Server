@@ -77,17 +77,23 @@ public class HomeService {
      */
     public HomeResponseDTO.HomeResultDTO getHome(Member member) {
         // 최근 월 데이터 조회
-        FinanceData financeData = financeDataRepository.findLatestFinanceDataIdByMember(member)
-                .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
+        List<FinanceData> financeDataList = financeDataRepository.findTop2ByMemberOrderByCreatedAtDesc(member);
+        if (financeDataList.isEmpty()) {
+            throw new NoSuchElementException("해당 멤버는 월 데이터가 없습니다. 목표 식비 등 부가 정보를 입력하세요.");
+        }
 
-        // 목표 식비 조회(이번 주, 다음 주 데이터 조회 후 이번 주 값만 추출)
-        Week thisWeek = weekRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData)
+        // 이번 달과 저번 달 데이터
+        FinanceData thisMonthFinanceData = financeDataList.get(0);
+        FinanceData beforeMonthFinanceData = financeDataList.size() > 1 ? financeDataList.get(1) : null;
+
+        // 이번 주 목표 식비 조회
+        Week thisWeek = weekRepository.findFirstByFinanceDataOrderByCreatedAtDesc(thisMonthFinanceData)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 Week가 존재하지 않습니다."));
         Long thisWeekGoalPrice = thisWeek.getGoal_price();
 
         // 목표 식비가 0원 (default) -> nickname, 뱃지 개수만 반환
         HomeResponseDTO.HomeResultDTO.HomeResultDTOBuilder builder = HomeResponseDTO.HomeResultDTO.builder()
-                .badgeCount(financeData.getNum_homeat_badge().intValue())
+                .badgeCount(thisMonthFinanceData.getNum_homeat_badge().intValue())
                 .nickname(member.getNickname());
 
         // 목표 식비가 0원이 아닐 경우
@@ -99,8 +105,13 @@ public class HomeService {
             LocalDate thisSunday = today.minusWeeks(1).with(DayOfWeek.SUNDAY);
 
             // 저번 주, 이번 주 사용 금액
-            Long lastWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday);
-            Long thisWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today);
+            Long lastWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, thisMonthFinanceData);
+            Long thisWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today, thisMonthFinanceData);
+
+            if (beforeMonthFinanceData != null) {
+                lastWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, beforeMonthFinanceData);
+                thisWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today, thisMonthFinanceData);
+            }
 
             if (thisWeekTotal == null) {
                 thisWeekTotal = 0L;
@@ -112,7 +123,11 @@ public class HomeService {
                 beforeWeek += 1;
                 lastSunday = lastSunday.minusWeeks(1);
                 lastSaturday = lastSunday.plusDays(6);
-                lastWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday);
+
+                Long beforeMonthTotal = beforeMonthFinanceData != null ? dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, beforeMonthFinanceData) : 0L;
+                Long thisMonthTotal = thisMonthFinanceData != null ? dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, thisMonthFinanceData) : 0L;
+
+                lastWeekTotal = beforeMonthTotal + thisMonthTotal;
 
                 if (beforeWeek > 4) {
                     break;

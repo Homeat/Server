@@ -57,7 +57,8 @@ public class MemberController {
         Long memberId = Long.parseLong(authentication.getName());
         Member member = memberQueryService.mypageMember(memberId);
         MemberInfo memberInfo = memberQueryService.mypageMemberInfo(memberId);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toMyPageResultDTO(member, memberInfo));
+        AddressResponse.NeighborhoodResultDTO addressInfo = addressService.getAddressInfoById(memberInfo.getAddress());
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toMyPageResultDTO(member, memberInfo, addressInfo));
     }
 
     @Operation(summary = "회원가입시, 부가 회원정보 추가 api")

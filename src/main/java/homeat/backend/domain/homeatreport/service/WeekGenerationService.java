@@ -59,8 +59,6 @@ public class WeekGenerationService {
 
         Week newWeek = Week.builder().build(); // 1. 매주 일요일에 week 엔티티 새로 생성(일요일에 새로 시작하는 주)
 
-        System.out.println("check1");
-
         // 2. 직전 week 엔티티의 목표 달성 여부 최신화
         // 직전 week 찾기
         Week previousWeek = weekRepository.findTopByFinanceDataOrderByIdDesc(financeData)
@@ -82,14 +80,10 @@ public class WeekGenerationService {
         int isSuccess;
         if (previousExceedPrice <= 0) {
 
-            System.out.println("check3");
-
             previousWeek.setWeekStatus(WeekStatus.SUCCESS);
             isSuccess = 1;
         }
         else {
-
-            System.out.println("check4");
 
             previousWeek.setWeekStatus(WeekStatus.FAIL);
             isSuccess = 0;
@@ -101,11 +95,7 @@ public class WeekGenerationService {
         // 일주일 전과 비교하여 월(month)이 바뀐 경우에 대하여
         if (now.getMonthValue() != now.minusWeeks(1).getMonthValue()) {
 
-            System.out.println("check5");
-
             if (isSuccess == 1) { // 직전 week에서 목표 달성인 경우
-
-                System.out.println("check6");
 
                 badge_num = previousFinanceData.getNum_homeat_badge() + 1; // badge 개수 1개 추가
 
@@ -114,17 +104,11 @@ public class WeekGenerationService {
                 // 2. 홈잇 티어 지정 메서드
                 if (badge_num <= 5 ) {
 
-                    System.out.println("check7");
-
                     previousWeek.setTierStatus(TierStatus.홈잇스타터);
                 } else if (badge_num <= 10) {
 
-                    System.out.println("check8");
-
                     previousWeek.setTierStatus(TierStatus.홈잇러버);
                 } else {
-
-                    System.out.println("check9");
 
                     previousWeek.setTierStatus(TierStatus.홈잇마스터);
                 }
@@ -134,14 +118,10 @@ public class WeekGenerationService {
             }
             else { // 직전 week에서 목표 달성 실패인 경우
 
-                System.out.println("check10");
-
                 badge_num = previousFinanceData.getNum_homeat_badge(); // badge 개수 그대로
 
                 System.out.println("badge num: "+badge_num);
             }
-
-            System.out.println("check11");
 
             FinanceData newFinanceData = FinanceData.builder()
                     .num_homeat_badge(badge_num)
@@ -158,42 +138,22 @@ public class WeekGenerationService {
         }
         else { // 일주일 전과 비교하여 월(month)이 동일한 경우
 
-            System.out.println("check12");
-
             if (isSuccess == 1) {
-
-                System.out.println("check13");
 
                 badge_num = previousFinanceData.getNum_homeat_badge() + 1;
 
-                System.out.println("badge num: "+badge_num);
-
                 if (badge_num <= 5 ) {
-
-                    System.out.println("check14");
-
                     previousWeek.setTierStatus(TierStatus.홈잇스타터);
                 } else if (badge_num <= 10) {
-
-                    System.out.println("check15");
-
                     previousWeek.setTierStatus(TierStatus.홈잇러버);
                 } else {
-
-                    System.out.println("check16");
-
                     previousWeek.setTierStatus(TierStatus.홈잇마스터);
                 }
 
                 weekRepository.save(previousWeek);
             }
             else { // 직전 week에서 목표 달성 실패인 경우
-
-                System.out.println("check17");
-
                 badge_num = previousFinanceData.getNum_homeat_badge(); // badge 개수 그대로
-
-                System.out.println("badge num: "+badge_num);
             }
 
             previousFinanceData.setNumHomeatBadge(badge_num);
@@ -208,10 +168,10 @@ public class WeekGenerationService {
         }
 
         // badge img 지정 메서드
-        /*Optional<Badge_img> optionalBadgeImg = badgeImgRepository.findBadge_imgById(previousFinanceData.getNum_homeat_badge());
-        Badge_img badgeImg = optionalBadgeImg.orElseThrow(() -> new RuntimeException("BadgeImg 엔티티가 존재하지 않습니다."));
+        Badge_img badgeImg = badgeImgRepository.findBadge_imgById(previousFinanceData.getNum_homeat_badge())
+                .orElseThrow(() -> new RuntimeException("BadgeImg 엔티티가 존재하지 않습니다."));
         previousWeek.setBadgeImg(badgeImg);
-        weekRepository.save(previousWeek);*/
+        weekRepository.save(previousWeek);
 
     }
 

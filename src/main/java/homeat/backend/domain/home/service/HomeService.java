@@ -97,7 +97,6 @@ public class HomeService {
         int badgeCount = thisMonthFinanceData.getNum_homeat_badge().intValue();
         badgeCount = Math.min(badgeCount, 9);
         Badge_img badgeImg = badgeImgRepository.findBadge_imgById((long) badgeCount);
-        System.out.println("badge url : " + badgeImg.getImage_url());
 
         // 목표 식비가 0원 (default) -> nickname, 뱃지 개수만 반환
         HomeResponseDTO.HomeResultDTO.HomeResultDTOBuilder builder = HomeResponseDTO.HomeResultDTO.builder()
@@ -290,7 +289,7 @@ public class HomeService {
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
 
         // DailyExpense 조회
-        List<DailyExpense> calendarData = dailyExpenseRepo.findByFinanceDataId(financeData.getId());
+        List<DailyExpense> calendarData = dailyExpenseRepo.findByFinanceDataIdOrderByCreatedAtAsc(financeData.getId());
 
         // 조회된 데이터를 DTO로 변환
         List<HomeResponseDTO.CalendarResultDTO> result = new ArrayList<>();

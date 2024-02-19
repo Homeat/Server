@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 
+import java.util.Optional;
+
 import static homeat.backend.domain.user.entity.QMemberInfo.memberInfo;
 
 @Repository
@@ -17,12 +19,12 @@ public class MemberInfoRepositoryImpl implements MemberInfoRepositoryCustom {
     public MemberInfoRepositoryImpl(EntityManager em) { this.queryFactory = new JPAQueryFactory(em); }
 
     @Override
-    public MemberInfo findMemberInfoByMemberId(Long member_id) {
+    public Optional<MemberInfo> findMemberInfoByMemberIdOptional(Long member_id) {
         QMemberInfo qMemberInfo = memberInfo;
         // QueryDSL을 사용하여 멤버 정보 조회
-        return queryFactory.selectFrom(memberInfo)
+        return Optional.ofNullable(queryFactory.selectFrom(memberInfo)
                 .where(memberInfo.member.id.eq(member_id))
-                .fetchOne();
+                .fetchOne());
     }
 
 }

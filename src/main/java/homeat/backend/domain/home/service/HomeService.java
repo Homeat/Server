@@ -269,7 +269,9 @@ public class HomeService {
              */
             Week week = weekRepository.findTopByFinanceDataOrderByIdDesc(financeData)
                     .orElseThrow(() -> new NoSuchElementException("조회할 수 있는 Current Week가 없습니다."));
-            weekSaveService.saveWeek(week);
+            Long accumulateExpense = accumulatePrice(financeData);
+
+            weekSaveService.saveWeek(week, accumulateExpense);
 
             financeDataRepository.save(financeData);
 
@@ -372,5 +374,27 @@ public class HomeService {
 
         return result;
     }
+
+    /**
+     *  사용자 누적 지출 금액 계산(일요일 ~ 오늘)
+     */
+    public Long accumulatePrice(FinanceData financeData) {
+
+        LocalDate today = LocalDate.now();
+        DayOfWeek todayOfWeek = today.getDayOfWeek();
+
+        LocalDate recentSunday;
+        if (todayOfWeek == DayOfWeek.SUNDAY) {
+            recentSunday = today;
+            System.out.println("최근 일요일: "+recentSunday);
+        } else {
+            recentSunday = today.minusDays(todayOfWeek.getValue());
+            System.out.println("최근 일요일: "+recentSunday);
+        }
+
+        // 가장 최근의 일요일부터 오늘까지의 DailyExpense list
+        return dailyExpenseRepo.sumPricesBetweenDates(recentSunday, today, financeData);
+    }
+
 
 }

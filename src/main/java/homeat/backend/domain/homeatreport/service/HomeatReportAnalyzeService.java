@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @Transactional(readOnly = true)
@@ -93,7 +94,9 @@ public class HomeatReportAnalyzeService {
     // 소비분석 중 하단의 주별 분석
     public ReportWeeklyResponseDTO getWeeklyAnalyze(Integer input_year, Integer input_month, Integer input_day, Member member) {
 
-        MemberInfo memberInfo = memberInfoRepository.findMemberInfoByMemberId(member.getId()); // 특정 멤버의 memberInfo 엔티티
+        MemberInfo memberInfo = memberInfoRepository.findMemberInfoByMemberIdOptional(member.getId()) // 특정 멤버의 memberInfo 엔티티
+                .orElseThrow(() -> new NoSuchElementException("조회된 memberInfo가 없습니다."));
+        System.out.println("member name: " + memberInfo.getMember().getNickname());
         LocalDate birth = memberInfo.getBirth();
         Integer birth_year = birth.getYear();
         Integer birth_month = birth.getMonthValue();
@@ -110,6 +113,7 @@ public class HomeatReportAnalyzeService {
 
         // 만 나이 계산
         Integer age = period.getYears(); // 특정 멤버의 나이
+        System.out.println("age: "+age);
 
         String age_range_str = age_range_calc(age); // 연령대
         Integer[] ageRange = new Integer[2];
@@ -128,10 +132,28 @@ public class HomeatReportAnalyzeService {
             ageRange[1] = ageQuotient * 10 + 9;
         }
 
-        Gender gender = memberInfo.getGender(); // 특정 멤버의 성별
-        Long income = memberInfo.getIncome(); // 특정 멤버의 수입
+        Integer[] birth_range = new Integer[2];
+        birth_range[0] = currentDate.getYear() - ageRange[1] + 1;
+        birth_range[1] = currentDate.getYear() - ageRange[0] + 1;
 
-        List<Member> members = memberRepository.findMemberByCriteria(ageRange, gender, income); // 특정 멤버의 연령대, 성별, 수입이 비슷한 멤버들
+        Gender gender = memberInfo.getGender(); // 특정 멤버의 성별
+        String gender_kor = "";
+        if (gender == Gender.MALE) {
+            gender_kor = "남성";
+        } else if (gender == Gender.FEMALE) {
+            gender_kor = "여성";
+        } else {
+            gender_kor = " ";
+        }
+        Long income = memberInfo.getIncome(); // 특정 멤버의 수입
+        String income_str = "소득 "+(income/100)+"만원 이하";
+
+        List<Member> members = memberRepository.findMemberByCriteria(birth_range, gender, income)
+                .orElseThrow(() -> new NoSuchElementException("비교할 회원이 존재하지 않습니다.")); // 특정 멤버의 연령대, 성별, 수입이 비슷한 멤버들
+
+        System.out.println("birth rance: "+birth_range[0]+"~"+birth_range[1]);
+        System.out.println("income: "+income);
+        System.out.println("조건 충족 멤버 수: "+members.size());
 
         WeekOfDayReturn weekOfDay = WeekOfMonth(input_year, input_month, input_day);
         LocalDate startDayOfWeek = weekOfDay.getStartOfWeek();
@@ -148,7 +170,7 @@ public class HomeatReportAnalyzeService {
             week_out_price += dailyExpense.getTodayOutPrice();
         }
 
-        ReportWeeklyResponseDTO reportWeeklyResponseDTO = new ReportWeeklyResponseDTO(age_range_str, income, gender, member.getNickname(), week_jipbap_price-average_jipbap_price, week_out_price-average_out_price, average_jipbap_price, week_jipbap_price, average_out_price, week_out_price);
+        ReportWeeklyResponseDTO reportWeeklyResponseDTO = new ReportWeeklyResponseDTO(age_range_str, income_str, gender_kor, member.getNickname(), week_jipbap_price-average_jipbap_price, week_out_price-average_out_price, average_jipbap_price, week_jipbap_price, average_out_price, week_out_price);
         return reportWeeklyResponseDTO;
     }
 
@@ -238,7 +260,9 @@ public class HomeatReportAnalyzeService {
                 jipbap_prices += dailyExpense.getTodayJipbapPrice();
             }
         }
-        jipbap_prices = jipbap_prices/ members.size();
+        if (members.size() != 0) {
+            jipbap_prices = jipbap_prices / members.size();
+        }
         return jipbap_prices;
     }
 
@@ -254,7 +278,9 @@ public class HomeatReportAnalyzeService {
                 out_prices += dailyExpense.getTodayOutPrice();
             }
         }
-        out_prices = out_prices/ members.size();
+        if (members.size() != 0 ) {
+            out_prices = out_prices / members.size();
+        }
         return out_prices;
     }
 

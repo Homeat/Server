@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MemberInfoRepository extends JpaRepository<MemberInfo, Long>, MemberInfoRepositoryCustom {
+
+    MemberInfo findMemberInfoByMemberId(Long memberId);
 }

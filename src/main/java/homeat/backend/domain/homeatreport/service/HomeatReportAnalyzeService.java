@@ -146,7 +146,7 @@ public class HomeatReportAnalyzeService {
             gender_kor = " ";
         }
         Long income = memberInfo.getIncome(); // 특정 멤버의 수입
-        String income_str = "소득 "+(income/100)+"만원 이하";
+        String income_str = "소득 "+(income/10000)+"만원 이하";
 
         List<Member> members = memberRepository.findMemberByCriteria(birth_range, gender, income)
                 .orElseThrow(() -> new NoSuchElementException("비교할 회원이 존재하지 않습니다.")); // 특정 멤버의 연령대, 성별, 수입이 비슷한 멤버들
@@ -160,7 +160,9 @@ public class HomeatReportAnalyzeService {
         LocalDate endDayOfWeek = weekOfDay.getEndOfWeek();
 
         Long average_jipbap_price = getDailyExpenseJipbapPrice(members, startDayOfWeek, endDayOfWeek);
+        System.out.println("average 집밥: "+average_jipbap_price);
         Long average_out_price = getDailyExpenseOutPrice(members, startDayOfWeek, endDayOfWeek);
+        System.out.println("average 외식: "+average_out_price);
 
         Long week_jipbap_price = 0L;
         Long week_out_price = 0L;

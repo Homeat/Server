@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface DailyExpenseRepo extends JpaRepository<DailyExpense, Long>, DailyExpenseRepoCST {
-    List<DailyExpense> findByFinanceDataId(Long financeDataId);
+    List<DailyExpense> findByFinanceDataIdOrderByCreatedAtAsc(Long financeDataId);
 }

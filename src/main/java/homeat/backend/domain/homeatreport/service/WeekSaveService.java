@@ -1,7 +1,5 @@
 package homeat.backend.domain.homeatreport.service;
 
-import homeat.backend.domain.analyze.entity.FinanceData;
-import homeat.backend.domain.analyze.repository.FinanceDataRepository;
 import homeat.backend.domain.home.repository.DailyExpenseRepo;
 import homeat.backend.domain.homeatreport.entity.Week;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
@@ -20,10 +18,8 @@ public class WeekSaveService {
 
     private final WeekRepository weekRepository;
     private final DailyExpenseRepo dailyExpenseRepository;
-    private final FinanceDataRepository financeDataRepository;
 
-    /*
-    public Long accumulatePrice(FinanceData financeData) {
+    public Long accumulatePrice() {
 
         LocalDate today = LocalDate.now();
         DayOfWeek todayOfWeek = today.getDayOfWeek();
@@ -38,13 +34,14 @@ public class WeekSaveService {
         }
 
         // 가장 최근의 일요일부터 오늘까지의 DailyExpense list
-        return dailyExpenseRepository.sumPricesBetweenDatesByFinanceData(financeData.getId(),recentSunday, today);
+//        return dailyExpenseRepository.sumPricesBetweenDates(recentSunday, today);
+        return 0L;
     }
-*/
 
-    public void saveWeek(Week week, Long accumulateExpense) {
+
+    public void saveWeek(Week week) {
         // week 엔티티의 exceedPrice 업데이트
-        Long exceedPrice = accumulateExpense - week.getGoal_price();
+        Long exceedPrice = accumulatePrice() - week.getGoal_price();
         week.updateExceedPrice(exceedPrice);
 
         System.out.println("exceed price here");

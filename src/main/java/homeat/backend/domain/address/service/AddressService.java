@@ -1,7 +1,7 @@
-package homeat.backend.domain.user.service;
+package homeat.backend.domain.address.service;
 
-import homeat.backend.domain.user.dto.AddressResponse;
-import homeat.backend.domain.user.repository.AddressRepository;
+import homeat.backend.domain.address.dto.AddressResponse;
+import homeat.backend.domain.address.repository.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

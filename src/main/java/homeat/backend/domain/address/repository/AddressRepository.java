@@ -1,6 +1,6 @@
-package homeat.backend.domain.user.repository;
+package homeat.backend.domain.address.repository;
 
-import homeat.backend.domain.user.entity.Address;
+import homeat.backend.domain.address.entity.Address;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

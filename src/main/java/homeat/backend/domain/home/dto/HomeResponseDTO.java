@@ -27,6 +27,7 @@ public class HomeResponseDTO {
         private int badgeCount;
         private int remainingPercent;
         private int beforeWeek;
+        private String message;
     }
 
     @Builder

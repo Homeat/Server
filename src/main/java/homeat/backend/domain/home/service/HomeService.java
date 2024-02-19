@@ -94,30 +94,37 @@ public class HomeService {
         if(thisWeekGoalPrice > 0) {
             LocalDate today = LocalDate.now();
             // 예외처리(저번 주 존재하지 않는 경우)
-            LocalDate lastSunday = today.minusWeeks(1).with(DayOfWeek.SUNDAY);
+            LocalDate lastSunday = today.minusWeeks(2).with(DayOfWeek.SUNDAY);
             LocalDate lastSaturday = lastSunday.plusDays(6);
-            LocalDate thisSunday = today.with(DayOfWeek.SUNDAY);
+            LocalDate thisSunday = today.minusWeeks(1).with(DayOfWeek.SUNDAY);
 
             // 저번 주, 이번 주 사용 금액
             Long lastWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday);
             Long thisWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today);
 
+            if (thisWeekTotal == null) {
+                thisWeekTotal = 0L;
+            }
+
             // 저번 주 금액이 0원 예외처리
             int beforeWeek = 1;
-            while (lastWeekTotal == 0) {
+            while (lastWeekTotal == null || lastWeekTotal == 0) {
                 beforeWeek += 1;
                 lastSunday = lastSunday.minusWeeks(1);
                 lastSaturday = lastSunday.plusDays(6);
                 lastWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday);
+
+                if (beforeWeek > 4) {
+                    break;
+                }
             }
 
             // 전주 대비 이번 주 절약 퍼센트
             int thisWeekSavingPercent = (lastWeekTotal != null && thisWeekTotal != null && lastWeekTotal != 0) ? (int) ((double) (lastWeekTotal - thisWeekTotal) / lastWeekTotal * 100) : 0;
-
             // 목표 금액에 대한 이번 주 남은 사용 퍼센트
             int remainingPercent = 100;
             if (thisWeekTotal != null) {
-                remainingPercent = (int) (remainingPercent - (double) thisWeekTotal / thisWeekGoalPrice * 100);
+                remainingPercent = Math.max(0, (int) (remainingPercent - (double) thisWeekTotal / thisWeekGoalPrice * 100));
             }
 
             // 목표 금액 & 전주 대비 이번 주 절약 퍼센트 & 사용 금액 & 목표 금액 대비 사용 금액 퍼센트
@@ -125,7 +132,12 @@ public class HomeService {
                     .beforeSavingPercent(thisWeekSavingPercent)
                     .remainingMoney(thisWeekGoalPrice - thisWeekTotal)
                     .remainingPercent(remainingPercent)
-                    .beforeWeek(beforeWeek);
+                    .beforeWeek(beforeWeek)
+                    .message("");
+
+            if (beforeWeek > 4) {
+                builder.message("비교할 과거 데이터가 존재하지 않습니다.");
+            }
         }
 
         HomeResponseDTO.HomeResultDTO result = builder.build();

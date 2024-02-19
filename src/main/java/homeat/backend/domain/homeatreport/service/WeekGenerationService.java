@@ -30,7 +30,7 @@ public class WeekGenerationService {
     private final BadgeImgRepository badgeImgRepository;
     private final MemberRepository memberRepository;
 
-    @Scheduled(cron = "30 55 2 * * TUE")
+    @Scheduled(cron = "20 7 7 * * TUE")
     public void generateNewWeekMembers() {
         List<Member> members = memberRepository.findAll();
         System.out.println("members: "+members.size());
@@ -168,11 +168,15 @@ public class WeekGenerationService {
         }
 
         // badge img 지정 메서드
-        Badge_img badgeImg = badgeImgRepository.findBadge_imgById(previousFinanceData.getNum_homeat_badge())
-                .orElseThrow(() -> new RuntimeException("BadgeImg 엔티티가 존재하지 않습니다."));
-        previousWeek.setBadgeImg(badgeImg);
-        weekRepository.save(previousWeek);
-
+        Badge_img badgeImg = badgeImgRepository.findBadge_imgById(previousFinanceData.getNum_homeat_badge());
+        if (badgeImg == null) {
+            Badge_img firstBadge = badgeImgRepository.findBadge_imgById(1L);
+            previousWeek.setBadgeImg(firstBadge); // 회원가입한 달이라 previousFinanceData가 없는 경우
+            weekRepository.save(previousWeek);
+        } else {
+            previousWeek.setBadgeImg(badgeImg);
+            weekRepository.save(previousWeek);
+        }
     }
 
 }

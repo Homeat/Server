@@ -139,6 +139,7 @@ public class MemberCommandService {
         if (request.getEmail() != null) selectedMember.updateEmail(request.getEmail());
         if (request.getNickname() != null) selectedMember.updateNickname(request.getNickname());
         if (request.getIncome() != null) selectedMemberInfo.updateIncome(request.getIncome());
+        if (request.getAddressId() != null) selectedMemberInfo.updateAddress(request.getAddressId());
     }
 
     @Transactional

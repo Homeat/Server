@@ -258,7 +258,7 @@ public class HomeService {
             /**
              * exceed_price update
              */
-            Week week = weekRepository.findTopByFinanceDataOrderByFinanceDataIdDesc(financeData)
+            Week week = weekRepository.findTopByFinanceDataOrderByIdDesc(financeData)
                     .orElseThrow(() -> new NoSuchElementException("조회할 수 있는 Current Week가 없습니다."));
             weekSaveService.saveWeek(week);
 
@@ -364,15 +364,4 @@ public class HomeService {
         return result;
     }
 
-
-    /**
-     * week 엔티티의 exceed_price 업데이트
-     */
-    @PreUpdate
-    public void updateExceedPrice(FinanceData financeData) {
-        Week currentWeek = weekRepository.findTopByFinanceDataOrderByFinanceDataIdDesc(financeData)
-                .orElseThrow(() -> new NoSuchElementException("No CURRENT week found"));
-
-        weekSaveService.saveWeek(currentWeek);
-    }
 }

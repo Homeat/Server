@@ -1,12 +1,11 @@
 package homeat.backend.domain.user.controller;
 
-import homeat.backend.domain.user.dto.AddressResponse;
+import homeat.backend.domain.address.dto.AddressResponse;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.dto.MemberResponse;
-import homeat.backend.domain.user.entity.Address;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.entity.MemberInfo;
-import homeat.backend.domain.user.service.AddressService;
+import homeat.backend.domain.address.service.AddressService;
 import homeat.backend.domain.user.service.MemberCommandService;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.payload.ApiPayload;
@@ -57,7 +56,8 @@ public class MemberController {
         Long memberId = Long.parseLong(authentication.getName());
         Member member = memberQueryService.mypageMember(memberId);
         MemberInfo memberInfo = memberQueryService.mypageMemberInfo(memberId);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toMyPageResultDTO(member, memberInfo));
+        AddressResponse.NeighborhoodResultDTO addressInfo = addressService.getAddressInfoById(memberInfo.getAddress());
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toMyPageResultDTO(member, memberInfo, addressInfo));
     }
 
     @Operation(summary = "회원가입시, 부가 회원정보 추가 api")
@@ -114,28 +114,5 @@ public class MemberController {
     public ApiPayload<?> reactivate(Authentication authentication) {
         memberCommandService.reactivate(Long.parseLong(authentication.getName()));
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
-    }
-
-    @Operation(summary = "동네 조회 api")
-    @GetMapping("/address")
-    public ApiPayload<AddressResponse.NeighborhoodResultDTO> address(@RequestParam("latitude") Double x,
-                                                                     @RequestParam("logitude") Double y) {
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, addressService.getAddress(x, y));
-    }
-
-    @Operation(summary = "주변 동네 조회 api")
-    @GetMapping("/address/neighborhood")
-    public ApiPayload<MemberResponse.GetNeighborhoodResultDTO> neighborhood(@RequestParam("latitude") Double x,
-                                                                            @RequestParam("logitude") Double y,
-                                                                            @RequestParam("page") int page) {
-
-        List<AddressResponse.NeighborhoodResultDTO> neighborhoods = addressService.getNegiborhood(x, y, page);
-        Long totalColumnCount = addressService.getTotalCount();
-
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberResponse.GetNeighborhoodResultDTO.builder()
-                        .totalColumnCount(totalColumnCount)
-                        .totlaPageNum((totalColumnCount / 20) + 1)
-                        .neighborhoods(neighborhoods)
-                        .build());
     }
 }

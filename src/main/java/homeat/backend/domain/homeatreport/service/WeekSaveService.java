@@ -38,9 +38,6 @@ public class WeekSaveService {
         return 0L;
     }
 
-    public void updateStatuses(Week week) {
-
-    }
 
     public void saveWeek(Week week) {
         // week 엔티티의 exceedPrice 업데이트

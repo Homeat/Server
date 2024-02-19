@@ -69,6 +69,9 @@ public class Week extends BaseEntity {
 
     public void updateExceedPrice(Long exceed_price) { this.exceed_price = exceed_price; }
 
+    public void updateFinanceData(FinanceData financeData) {
+        this.financeData = financeData;
+    }
     // finance data pk 지정 메서드
 
 }

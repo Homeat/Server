@@ -37,6 +37,17 @@ public class AddressService {
                 .collect(Collectors.toList());
     }
 
+    public List<AddressResponse.NeighborhoodResultDTO> getNegiborhoodWithKeyword(Double x, Double y, String keyword, int page) {
+        List<Object[]> neighborhoods = addressRepository.findByKeywordOrderByPoint(x, y, keyword, 20, page * 20);
+        return neighborhoods.stream()
+                .map(result -> AddressResponse.NeighborhoodResultDTO.builder()
+                        .addressId((BigInteger) result[0])
+                        .fullNm((String) result[1])
+                        .emdNm((String) result[2])
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     public AddressResponse.NeighborhoodResultDTO getAddressInfoById(Long addressId) {
         Object[] result = addressRepository.findByIdCustom(addressId).get(0);
         return AddressResponse.NeighborhoodResultDTO.builder()
@@ -48,5 +59,9 @@ public class AddressService {
 
     public Long getTotalCount() {
         return addressRepository.count();
+    }
+
+    public Long getTotalCountByKeyword(String keyword) {
+        return addressRepository.countByKeyword(keyword).get(0);
     }
 }

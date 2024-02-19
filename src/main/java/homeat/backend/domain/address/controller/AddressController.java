@@ -46,4 +46,20 @@ public class AddressController {
                 .neighborhoods(neighborhoods)
                 .build());
     }
+
+    @Operation(summary = "키워드 활용해서 주변 동네 조회 api")
+    @GetMapping("/neighboorhood/keyword")
+    public ApiPayload<AddressResponse.GetNeighborhoodResultDTO> address(@RequestParam("latitude") Double x,
+                                                                        @RequestParam("logitude") Double y,
+                                                                        @RequestParam("keyword") String keyword,
+                                                                        @RequestParam("page") int page) {
+        List<AddressResponse.NeighborhoodResultDTO> neighborhoods = addressService.getNegiborhoodWithKeyword(x, y, keyword, page);
+        Long totalColumnCount = addressService.getTotalCountByKeyword(keyword);
+
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, AddressResponse.GetNeighborhoodResultDTO.builder()
+                .totalColumnCount(totalColumnCount)
+                .totlaPageNum((totalColumnCount / 20) + 1)
+                .neighborhoods(neighborhoods)
+                .build());
+    }
 }

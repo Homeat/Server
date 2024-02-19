@@ -35,9 +35,13 @@ public class MemberInfo extends BaseEntity {
 
     private String phoneNumber;
 
-    private String address;
+    private Long address;
 
     private Long income;
+
+    public void updateAddress(Long address) {
+        this.address = address;
+    }
 
     public void updateIncome(Long income) {
         this.income = income;

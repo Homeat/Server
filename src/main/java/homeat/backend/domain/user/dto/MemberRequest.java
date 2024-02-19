@@ -49,6 +49,9 @@ public class MemberRequest {
         LocalDate birth;
 
         @Min(value = 0)
+        Long adderessId;
+
+        @Min(value = 0)
         Long income;
 
         @Min(value = 0)
@@ -84,6 +87,10 @@ public class MemberRequest {
         @ExistNickname
         @Schema(example = "null 가능, 필요한 항목만 넣으면 됨, 아래 income도 동일")
         String nickname;
+
+        @Nullable
+        @Min(value = 0)
+        Long addressId;
 
         @Nullable
         @Min(value = 0)

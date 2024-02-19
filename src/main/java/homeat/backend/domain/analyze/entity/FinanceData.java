@@ -40,5 +40,11 @@ public class FinanceData extends BaseEntity {
         this.month_out_price += price;
     }
 
-    public void setNumHomeatBadge(Long num_badge) { this.num_homeat_badge = num_badge; }
+    public void setNumHomeatBadge(Long num_badge) {
+        if (num_badge <= 9) {
+            this.num_homeat_badge = num_badge;
+        } else {
+            this.num_homeat_badge = 9L;
+        }
+    }
 }

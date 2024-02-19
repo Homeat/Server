@@ -30,7 +30,7 @@ public class WeekGenerationService {
     private final BadgeImgRepository badgeImgRepository;
     private final MemberRepository memberRepository;
 
-    @Scheduled(cron = "10 55 7 * * TUE")
+    @Scheduled(cron = "0 0 0 * * SUN")
     public void generateNewWeekMembers() {
         List<Member> members = memberRepository.findAll();
         System.out.println("members: "+members.size());

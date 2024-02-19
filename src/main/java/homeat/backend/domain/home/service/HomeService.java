@@ -245,7 +245,9 @@ public class HomeService {
              */
             Week week = weekRepository.findTopByFinanceDataOrderByIdDesc(financeData)
                     .orElseThrow(() -> new NoSuchElementException("조회할 수 있는 Current Week가 없습니다."));
-            weekSaveService.saveWeek(week);
+            //Long accumulateExpense = weekSaveService.accumulatePrice(financeData);
+
+            //weekSaveService.saveWeek(week, accumulateExpense);
 
             financeDataRepository.save(financeData);
 

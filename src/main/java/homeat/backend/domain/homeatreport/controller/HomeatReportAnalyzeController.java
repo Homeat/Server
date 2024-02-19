@@ -34,11 +34,15 @@ public class HomeatReportAnalyzeController {
     @Operation(summary = "홈잇리포트 소비분석 상단의 날짜 조회 api")
     @GetMapping("/ofMonth")
     public ApiPayload<ReportMonthlyAnalyzeResponseDTO> getMonthInput(
-            @RequestParam Integer input_year, Integer input_month,
+            @RequestParam String input_year, String input_month,
             Authentication authentication
     ) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, homeatReportAnalyzeService.getMonthlyAnalyze(input_year, input_month, member));
+
+        Integer year = Integer.parseInt(input_year);
+        Integer month = Integer.parseInt(input_month);
+
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, homeatReportAnalyzeService.getMonthlyAnalyze(year, month, member));
     }
 
     /**
@@ -52,10 +56,14 @@ public class HomeatReportAnalyzeController {
     @Operation(summary = "홈잇리포트 소비분석 하단의 날짜 조회 api")
     @GetMapping("/ofWeek")
     public ApiPayload<ReportWeeklyResponseDTO> getWeekInput(
-            @RequestParam Integer input_year, Integer input_month, Integer input_day,
+            @RequestParam String input_year, String input_month, String input_day,
             Authentication authentication
     ) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, homeatReportAnalyzeService.getWeeklyAnalyze(input_year, input_month, input_day, member));
+
+        Integer year = Integer.parseInt(input_year);
+        Integer month = Integer.parseInt(input_month);
+        Integer day = Integer.parseInt(input_day);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, homeatReportAnalyzeService.getWeeklyAnalyze(year, month, day, member));
     }
 }

@@ -30,7 +30,7 @@ public class WeekGenerationService {
     private final BadgeImgRepository badgeImgRepository;
     private final MemberRepository memberRepository;
 
-    @Scheduled(cron = "0 0 0 * * SUN")
+    @Scheduled(cron = "0 45 17 * * MON")
     public void generateNewWeekMembers() {
         List<Member> members = memberRepository.findAll();
         System.out.println("members: "+members.size());
@@ -40,7 +40,8 @@ public class WeekGenerationService {
             if (optionalFinanceData.isPresent()) {
                 FinanceData financeData = optionalFinanceData.get();
                 generateNewWeek(financeData);
-            } else {
+            }
+            else {
                 System.out.println("FinanceData for member " + member.getId() + " not found");
             }
         }
@@ -62,7 +63,7 @@ public class WeekGenerationService {
 
         // 2. 직전 week 엔티티의 목표 달성 여부 최신화
         // 직전 week 찾기
-        Week previousWeek = weekRepository.findTopByFinanceDataOrderByFinanceDataIdDesc(financeData)
+        Week previousWeek = weekRepository.findTopByFinanceDataOrderByIdDesc(financeData)
                 .orElseThrow(() -> new NoSuchElementException("No previous week found"));
 
         System.out.println("previousWeek pk: " + previousWeek.getId());
@@ -85,7 +86,8 @@ public class WeekGenerationService {
 
             previousWeek.setWeekStatus(WeekStatus.SUCCESS);
             isSuccess = 1;
-        } else {
+        }
+        else {
 
             System.out.println("check4");
 
@@ -106,6 +108,9 @@ public class WeekGenerationService {
                 System.out.println("check6");
 
                 badge_num = previousFinanceData.getNum_homeat_badge() + 1; // badge 개수 1개 추가
+
+                System.out.println("badge num: "+badge_num);
+
                 // 2. 홈잇 티어 지정 메서드
                 if (badge_num <= 5 ) {
 
@@ -123,11 +128,17 @@ public class WeekGenerationService {
 
                     previousWeek.setTierStatus(TierStatus.홈잇마스터);
                 }
-            } else { // 직전 week에서 목표 달성 실패인 경우
+
+                weekRepository.save(previousWeek);
+                weekRepository.flush();
+            }
+            else { // 직전 week에서 목표 달성 실패인 경우
 
                 System.out.println("check10");
 
                 badge_num = previousFinanceData.getNum_homeat_badge(); // badge 개수 그대로
+
+                System.out.println("badge num: "+badge_num);
             }
 
             System.out.println("check11");
@@ -144,7 +155,8 @@ public class WeekGenerationService {
                     .build();
             weekRepository.save(newWeek);
 
-        } else { // 일주일 전과 비교하여 월(month)이 동일한 경우
+        }
+        else { // 일주일 전과 비교하여 월(month)이 동일한 경우
 
             System.out.println("check12");
 
@@ -153,6 +165,9 @@ public class WeekGenerationService {
                 System.out.println("check13");
 
                 badge_num = previousFinanceData.getNum_homeat_badge() + 1;
+
+                System.out.println("badge num: "+badge_num);
+
                 if (badge_num <= 5 ) {
 
                     System.out.println("check14");
@@ -169,11 +184,16 @@ public class WeekGenerationService {
 
                     previousWeek.setTierStatus(TierStatus.홈잇마스터);
                 }
-            } else { // 직전 week에서 목표 달성 실패인 경우
+
+                weekRepository.save(previousWeek);
+            }
+            else { // 직전 week에서 목표 달성 실패인 경우
 
                 System.out.println("check17");
 
                 badge_num = previousFinanceData.getNum_homeat_badge(); // badge 개수 그대로
+
+                System.out.println("badge num: "+badge_num);
             }
 
             previousFinanceData.setNumHomeatBadge(badge_num);

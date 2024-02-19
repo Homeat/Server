@@ -3,6 +3,7 @@ package homeat.backend.domain.home.repository.querydsl;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.entity.QFinanceData;
 import homeat.backend.domain.home.entity.DailyExpense;
 import homeat.backend.domain.home.entity.QDailyExpense;
@@ -26,20 +27,18 @@ public class DailyExpenseRepoImpl implements DailyExpenseRepoCST{
      * 주간 지출 금액 조회
      */
     @Override
-    public Long sumPricesBetweenDates(LocalDate startDate, LocalDate endDate) {
+    public Long sumPricesBetweenDates(LocalDate startDate, LocalDate endDate, FinanceData financeData) {
 
         QDailyExpense dailyExpense = QDailyExpense.dailyExpense;
 
-        return queryFactory
+        Long sum = queryFactory
                 .select(dailyExpense.todayJipbapPrice.add(dailyExpense.todayOutPrice).sum())
                 .from(dailyExpense)
-                .where(dailyExpense.createdAt.year().goe(startDate.getYear())
-                        .and(dailyExpense.createdAt.month().goe(startDate.getMonthValue())
-                                .and(dailyExpense.createdAt.dayOfMonth().goe(startDate.getDayOfMonth())))
-                        .and(dailyExpense.createdAt.year().loe(endDate.getYear())
-                                .and(dailyExpense.createdAt.month().loe(endDate.getMonthValue())
-                                        .and(dailyExpense.createdAt.dayOfMonth().loe(endDate.getDayOfMonth())))))
+                .where(dailyExpense.createdAt.between(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay().minusNanos(1))
+                        .and(dailyExpense.financeData.id.eq(financeData.getId())))
                 .fetchOne();
+
+        return sum != null ? sum : 0L;
     }
 
     /**

@@ -34,7 +34,8 @@ public class WeekSaveService {
         }
 
         // 가장 최근의 일요일부터 오늘까지의 DailyExpense list
-        return dailyExpenseRepository.sumPricesBetweenDates(recentSunday, today);
+//        return dailyExpenseRepository.sumPricesBetweenDates(recentSunday, today);
+        return 0L;
     }
 
 

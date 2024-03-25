@@ -106,10 +106,8 @@ public class MemberCommandService {
             String content = String.format("홈잇 이메일 인증번호 입니다.\n%s", authCode);
             mailService.sendEmail(request.getEmail(), title, content);
         } catch (MessagingException e) {
-            e.printStackTrace();
             throw new MemberHandler(MemberErrorStatus.MAIL_BAD_REQUEST);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
             throw new MemberHandler(MemberErrorStatus.AUTH_CODE_ERROR);
         }
 

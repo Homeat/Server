@@ -172,4 +172,12 @@ public class MemberCommandService {
         Member selectedMember = memberRepository.findById(memberId).orElseThrow();
         selectedMember.reactivate();
     }
+
+    @Transactional
+    public void findPassword(MemberRequest.FindPasswordDto request) {
+        Member selectedMember = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.EMAIL_NOT_FOUND));
+
+        selectedMember.updatePassword(encoder.encode(request.getNewPassword()));
+    }
 }

@@ -115,4 +115,11 @@ public class MemberController {
         memberCommandService.reactivate(Long.parseLong(authentication.getName()));
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
+
+    @Operation(summary = "비밀번호 찾기 api")
+    @PatchMapping("/find-password")
+    public ApiPayload<?> findPassword(@RequestBody @Valid MemberRequest.FindPasswordDto request) {
+        memberCommandService.findPassword(request);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
 }

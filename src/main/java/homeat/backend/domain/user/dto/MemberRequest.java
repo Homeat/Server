@@ -76,6 +76,16 @@ public class MemberRequest {
     }
 
     @Getter
+    public static class FindPasswordDto {
+        @NotBlank
+        @Email
+        String email;
+
+        @NotBlank
+        String newPassword;
+    }
+
+    @Getter
     public static class UpdateInfoDto {
         @Nullable
         @Email

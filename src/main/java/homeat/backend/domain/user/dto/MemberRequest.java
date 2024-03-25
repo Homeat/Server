@@ -2,7 +2,6 @@ package homeat.backend.domain.user.dto;
 
 import homeat.backend.domain.user.annotation.ExistEmail;
 import homeat.backend.domain.user.annotation.ExistNickname;
-import homeat.backend.domain.user.annotation.ValidEnum;
 import homeat.backend.domain.user.entity.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

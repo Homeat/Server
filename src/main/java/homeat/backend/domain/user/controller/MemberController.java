@@ -21,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.List;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -113,6 +113,13 @@ public class MemberController {
     @PatchMapping("/mypage/reactivate")
     public ApiPayload<?> reactivate(Authentication authentication) {
         memberCommandService.reactivate(Long.parseLong(authentication.getName()));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "비밀번호 찾기 api")
+    @PatchMapping("/find-password")
+    public ApiPayload<?> findPassword(@RequestBody @Valid MemberRequest.FindPasswordDto request) {
+        memberCommandService.findPassword(request);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 }

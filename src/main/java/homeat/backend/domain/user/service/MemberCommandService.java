@@ -55,9 +55,7 @@ public class MemberCommandService {
     public String loginMember(MemberRequest.LoginDto request) {
         // 이메일 존재 여부
         Member selectedMember = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> {
-                    throw new MemberHandler(MemberErrorStatus.EMAIL_NOT_FOUND);
-                });
+                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.EMAIL_NOT_FOUND));
 
         // 비밀번호 일치 여부
         if (!encoder.matches(request.getPassword(), selectedMember.getPassword())) {
@@ -80,9 +78,7 @@ public class MemberCommandService {
     @Transactional
     public MemberInfo saveMemberInfo(MemberRequest.CreateInfoDto request, Long memberId) {
         Member selectedMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> {
-                    throw new MemberHandler(MemberErrorStatus.MEMBER_NOT_FOUND);
-                });
+                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.MEMBER_NOT_FOUND));
         MemberInfo newMemberInfo = MemberConverter.toMemberInfo(request, selectedMember);
 
         FinanceData newFinanceData = FinanceData.builder()
@@ -110,10 +106,8 @@ public class MemberCommandService {
             String content = String.format("홈잇 이메일 인증번호 입니다.\n%s", authCode);
             mailService.sendEmail(request.getEmail(), title, content);
         } catch (MessagingException e) {
-            e.printStackTrace();
             throw new MemberHandler(MemberErrorStatus.MAIL_BAD_REQUEST);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
             throw new MemberHandler(MemberErrorStatus.AUTH_CODE_ERROR);
         }
 
@@ -171,5 +165,13 @@ public class MemberCommandService {
     public void reactivate(Long memberId) {
         Member selectedMember = memberRepository.findById(memberId).orElseThrow();
         selectedMember.reactivate();
+    }
+
+    @Transactional
+    public void findPassword(MemberRequest.FindPasswordDto request) {
+        Member selectedMember = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.EMAIL_NOT_FOUND));
+
+        selectedMember.updatePassword(encoder.encode(request.getNewPassword()));
     }
 }

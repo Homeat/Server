@@ -12,6 +12,7 @@ public class InfoTalkDTO {
 
     private String title;
     private String content;
+    private Long addressId;
     private List<String> tags;
 
 }

@@ -31,5 +31,6 @@ public class Address extends BaseEntity {
     @Column(precision = 9, scale = 6)
     private BigDecimal y_coord;
 
+    @Column(columnDefinition = "POINT SRID 4326")
     private Point point;
 }

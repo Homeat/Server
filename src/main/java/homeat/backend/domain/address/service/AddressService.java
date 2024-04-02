@@ -1,6 +1,7 @@
 package homeat.backend.domain.address.service;
 
 import homeat.backend.domain.address.dto.AddressResponse;
+import homeat.backend.domain.address.entity.Address;
 import homeat.backend.domain.address.repository.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -63,5 +64,10 @@ public class AddressService {
 
     public Long getTotalCountByKeyword(String keyword) {
         return addressRepository.countByKeyword(keyword).get(0);
+    }
+
+    public void test() {
+        Address address = addressRepository.findAddressById(1L);
+        System.out.println(address.getFull_nm());
     }
 }

@@ -62,4 +62,11 @@ public class AddressController {
                 .neighborhoods(neighborhoods)
                 .build());
     }
+
+    @Operation(summary = "테스트")
+    @GetMapping("/test")
+    public ApiPayload<?> test() {
+        addressService.test();
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, "test");
+    }
 }

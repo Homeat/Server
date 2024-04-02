@@ -55,12 +55,11 @@ public class InfoTalkService {
     @Transactional
     public ResponseEntity<?> saveInfoTalk(InfoTalkDTO dto, Member member) {
 
-        Address address = addressRepository.findById(dto.getAddressId()).get();
 
         InfoTalk infoTalk = InfoTalk.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
-                .address(address)
+                .address(dto.getAddressId())
                 .save(Save.저장)
                 .member(member)
                 .build();

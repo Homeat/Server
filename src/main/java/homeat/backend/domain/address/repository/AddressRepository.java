@@ -1,6 +1,7 @@
 package homeat.backend.domain.address.repository;
 
 import homeat.backend.domain.address.entity.Address;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -21,4 +22,6 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
 
     @Query(value = "select count(*) from address where full_nm like %?1%", nativeQuery = true)
     List<Long> countByKeyword(String keyword);
+
+
 }

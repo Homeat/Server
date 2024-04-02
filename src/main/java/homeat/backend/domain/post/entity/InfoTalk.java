@@ -69,9 +69,8 @@ public class InfoTalk extends BaseEntity {
     @Builder.Default
     private List<InfoTalkComment> infoTalkComments = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "address_id")
-    private Address address;
+    // 주소
+    private Long address;
 
     public void update(String title, String content) {
 

@@ -63,7 +63,7 @@ dependencies {
 
 	// spatial
 	implementation 'com.querydsl:querydsl-spatial'
-	implementation group: 'org.hibernate', name: 'hibernate-spatial'
+	implementation 'org.hibernate:hibernate-spatial'
 }
 
 tasks.named('test') {

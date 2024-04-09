@@ -1,5 +1,6 @@
 package homeat.backend.test;
 
+import homeat.backend.domain.address.dto.AddressResponse;
 import homeat.backend.domain.address.entity.Address;
 import homeat.backend.domain.address.repository.AddressRepository;
 import org.assertj.core.api.Assertions;
@@ -33,7 +34,7 @@ public class AddressRepositoryTest {
     @DisplayName("현재 가장 가까운 동네 조회")
     @Test
     public void testFindFirstByPointDistance() {
-        Address add = addressRepository.findFirstByPointDistance(126.9221, 37.5617);
+        AddressResponse.GetQueryDTO add = addressRepository.findFirstByPointDistance(126.9221, 37.5617);
 
         System.out.println(add.getFullNm());
     }

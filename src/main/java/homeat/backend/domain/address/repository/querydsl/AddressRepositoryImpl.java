@@ -5,6 +5,8 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.spatial.SpatialOps;
 import com.querydsl.spatial.locationtech.jts.JTSGeometryExpressions;
+import homeat.backend.domain.address.dto.AddressResponse;
+import homeat.backend.domain.address.dto.QAddressResponse_GetQueryDTO;
 import homeat.backend.domain.address.entity.Address;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -24,9 +26,9 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
     }
 
     @Override
-    public Address findFirstByPointDistance(Double x, Double y) {
+    public AddressResponse.GetQueryDTO findFirstByPointDistance(Double x, Double y) {
         return queryFactory
-                .select(address)
+                .select(new QAddressResponse_GetQueryDTO(address.id, address.code, address.fullNm, address.emdNm))
                 .from(address)
                 .orderBy(
                         getDistance(x,y).asc()

@@ -4,6 +4,7 @@ import homeat.backend.domain.address.dto.AddressResponse;
 import homeat.backend.domain.address.entity.Address;
 import homeat.backend.domain.address.repository.AddressRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,8 +67,10 @@ public class AddressService {
         return addressRepository.countByKeyword(keyword).get(0);
     }
 
-    public void test() {
-        Address address = addressRepository.findAddressById(1L);
-        System.out.println(address.getFull_nm());
+    public Object test() {
+//        Address add = addressRepository.findByPointDistance(126.9221, 37.5617).get(0);
+//        Address add = addressRepository.findFirstByPointDistance(126.9221, 37.5617);
+        Pageable pageable = PageRequest.of(0, 10);
+        return addressRepository.findSliceByPointDistance(126.9221, 37.5617, pageable);
     }
 }

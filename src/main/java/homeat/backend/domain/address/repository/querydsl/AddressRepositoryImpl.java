@@ -7,13 +7,17 @@ import com.querydsl.spatial.SpatialOps;
 import com.querydsl.spatial.locationtech.jts.JTSGeometryExpressions;
 import homeat.backend.domain.address.dto.AddressResponse;
 import homeat.backend.domain.address.dto.QAddressResponse_GetQueryDTO;
-import homeat.backend.domain.address.entity.Address;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import javax.persistence.EntityManager;
+
+import java.util.List;
 
 import static homeat.backend.domain.address.entity.QAddress.address;
 
@@ -30,20 +34,39 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
         return queryFactory
                 .select(new QAddressResponse_GetQueryDTO(address.id, address.code, address.fullNm, address.emdNm))
                 .from(address)
-                .orderBy(
-                        getDistance(x,y).asc()
-                )
+                .orderBy(getDistance(x,y).asc())
                 .fetchFirst();
     }
 
+    @Override
+    public Slice<AddressResponse.GetQueryDTO> findSliceByPointDistance(Double x, Double y, Pageable pageable) {
+        List<AddressResponse.GetQueryDTO> contents = queryFactory
+                .select(new QAddressResponse_GetQueryDTO(address.id, address.code, address.fullNm, address.emdNm))
+                .from(address)
+                .orderBy(getDistance(x,y).asc())
+                .limit(pageable.getPageSize()+1)
+                .offset(pageable.getOffset())
+                .fetch();
 
-    public Point createPoint(double lat, double lng) {
+        return new SliceImpl<>(contents, pageable, hasNext(contents, pageable.getPageSize()));
+    }
+
+
+    private Point createPoint(double lat, double lng) {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel());
         return geometryFactory.createPoint(new Coordinate(lat, lng));
     }
 
-    public NumberExpression<Double> getDistance(double lat, double lng) {
+    private NumberExpression<Double> getDistance(double lat, double lng) {
         Point currentPoint = createPoint(lat, lng);
         return Expressions.numberOperation(Double.class, SpatialOps.DISTANCE, address.point, JTSGeometryExpressions.asJTSGeometry(currentPoint));
+    }
+
+    private boolean hasNext(List<AddressResponse.GetQueryDTO> contents, int pageSize) {
+        if(contents.size() > pageSize) {
+            contents.remove(pageSize);
+            return true;
+        }
+        return false;
     }
 }

@@ -7,6 +7,7 @@ import homeat.backend.global.payload.CommonSuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,8 +66,7 @@ public class AddressController {
 
     @Operation(summary = "테스트")
     @GetMapping("/test")
-    public ApiPayload<?> test() {
-        addressService.test();
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, "test");
+    public ResponseEntity<?> test() {
+        return ResponseEntity.ok().body(addressService.test());
     }
 }

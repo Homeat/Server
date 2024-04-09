@@ -21,15 +21,15 @@ public class Address extends BaseEntity {
 
     private Long code;
 
-    private String full_nm;
+    private String fullNm;
 
-    private String emd_nm;
-
-    @Column(precision = 9, scale = 6)
-    private BigDecimal x_coord;
+    private String emdNm;
 
     @Column(precision = 9, scale = 6)
-    private BigDecimal y_coord;
+    private BigDecimal xCoord;
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal yCoord;
 
     @Column(columnDefinition = "POINT SRID 4326")
     private Point point;

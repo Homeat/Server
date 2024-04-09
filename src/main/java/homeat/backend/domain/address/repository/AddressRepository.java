@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Long>, AddressRepositoryCustom {
@@ -22,4 +23,11 @@ public interface AddressRepository extends JpaRepository<Address, Long>, Address
 
     @Query(value = "select count(*) from address where full_nm like %?1%", nativeQuery = true)
     List<Long> countByKeyword(String keyword);
+
+    Optional<Address> findById(Long id);
+
+    Long countByFullNmContaining(String contain);
+
+    @Query(value = "SELECT a FROM Address a ORDER BY ST_DISTANCE(POINT(:x, :y), a.point)")
+    List<Address> findByPointDistance(Double x, Double y);
 }

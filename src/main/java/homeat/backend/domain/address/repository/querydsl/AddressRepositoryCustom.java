@@ -4,5 +4,5 @@ import homeat.backend.domain.address.entity.Address;
 
 
 public interface AddressRepositoryCustom {
-    Address findAddressById(Long id);
+    Address findFirstByPointDistance(Double x, Double y);
 }

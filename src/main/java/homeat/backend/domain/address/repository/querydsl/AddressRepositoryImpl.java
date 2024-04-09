@@ -1,7 +1,15 @@
 package homeat.backend.domain.address.repository.querydsl;
 
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.spatial.SpatialOps;
+import com.querydsl.spatial.locationtech.jts.JTSGeometryExpressions;
 import homeat.backend.domain.address.entity.Address;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 
 import javax.persistence.EntityManager;
 
@@ -16,12 +24,24 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
     }
 
     @Override
-    public Address findAddressById(Long id) {
+    public Address findFirstByPointDistance(Double x, Double y) {
         return queryFactory
                 .select(address)
                 .from(address)
-                .where(address.id.eq(id))
-                .fetchOne();
+                .orderBy(
+                        getDistance(x,y).asc()
+                )
+                .fetchFirst();
+    }
 
+
+    public Point createPoint(double lat, double lng) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel());
+        return geometryFactory.createPoint(new Coordinate(lat, lng));
+    }
+
+    public NumberExpression<Double> getDistance(double lat, double lng) {
+        Point currentPoint = createPoint(lat, lng);
+        return Expressions.numberOperation(Double.class, SpatialOps.DISTANCE, address.point, JTSGeometryExpressions.asJTSGeometry(currentPoint));
     }
 }

@@ -39,12 +39,12 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
     }
 
     @Override
-    public Slice<AddressResponse.GetQueryDTO> findSliceByPointDistance(Double x, Double y, Pageable pageable) {
+    public Slice<AddressResponse.GetQueryDTO> findAllByOrderByDistanceAsc(Double x, Double y, Pageable pageable) {
         List<AddressResponse.GetQueryDTO> contents = queryFactory
                 .select(new QAddressResponse_GetQueryDTO(address.id, address.code, address.fullNm, address.emdNm))
                 .from(address)
                 .orderBy(stDistance(x,y).asc())
-                .limit(pageable.getPageSize()+1)
+                .limit(pageable.getPageSize()+1L)
                 .offset(pageable.getOffset())
                 .fetch();
 

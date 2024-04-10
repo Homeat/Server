@@ -71,6 +71,6 @@ public class AddressService {
 //        Address add = addressRepository.findByPointDistance(126.9221, 37.5617).get(0);
 //        Address add = addressRepository.findFirstByPointDistance(126.9221, 37.5617);
         Pageable pageable = PageRequest.of(0, 10);
-        return addressRepository.findAllByOrderByDistanceAsc(126.9221, 37.5617, pageable);
+        return addressRepository.findByFullNmContainingOrderByDistanceAsc(126.9221, 37.5617, "대구", pageable);
     }
 }

@@ -51,6 +51,20 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
         return new SliceImpl<>(contents, pageable, hasNext(contents, pageable.getPageSize()));
     }
 
+    @Override
+    public Slice<AddressResponse.GetQueryDTO> findByFullNmContainingOrderByDistanceAsc(Double x, Double y, String keyword, Pageable pageable) {
+        List<AddressResponse.GetQueryDTO> contents = queryFactory
+                .select(new QAddressResponse_GetQueryDTO(address.id, address.code, address.fullNm, address.emdNm))
+                .from(address)
+                .where(address.fullNm.contains(keyword))
+                .orderBy(stDistance(x,y).asc())
+                .limit(pageable.getPageSize()+1L)
+                .offset(pageable.getOffset())
+                .fetch();
+
+        return new SliceImpl<>(contents, pageable, hasNext(contents, pageable.getPageSize()));
+    }
+
 
     private Point createPoint(double lat, double lng) {
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel());

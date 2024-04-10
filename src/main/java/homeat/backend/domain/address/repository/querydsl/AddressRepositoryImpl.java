@@ -34,7 +34,7 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
         return queryFactory
                 .select(new QAddressResponse_GetQueryDTO(address.id, address.code, address.fullNm, address.emdNm))
                 .from(address)
-                .orderBy(getDistance(x,y).asc())
+                .orderBy(stDistance(x,y).asc())
                 .fetchFirst();
     }
 
@@ -43,7 +43,7 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
         List<AddressResponse.GetQueryDTO> contents = queryFactory
                 .select(new QAddressResponse_GetQueryDTO(address.id, address.code, address.fullNm, address.emdNm))
                 .from(address)
-                .orderBy(getDistance(x,y).asc())
+                .orderBy(stDistance(x,y).asc())
                 .limit(pageable.getPageSize()+1)
                 .offset(pageable.getOffset())
                 .fetch();
@@ -57,7 +57,7 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
         return geometryFactory.createPoint(new Coordinate(lat, lng));
     }
 
-    private NumberExpression<Double> getDistance(double lat, double lng) {
+    private NumberExpression<Double> stDistance(double lat, double lng) {
         Point currentPoint = createPoint(lat, lng);
         return Expressions.numberOperation(Double.class, SpatialOps.DISTANCE, address.point, JTSGeometryExpressions.asJTSGeometry(currentPoint));
     }

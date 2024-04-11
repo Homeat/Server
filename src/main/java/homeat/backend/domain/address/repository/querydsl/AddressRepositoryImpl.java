@@ -30,9 +30,9 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
     }
 
     @Override
-    public AddressResponse.GetQueryDTO findFirstByPointDistance(Double x, Double y) {
+    public AddressResponse.AddressDTO findFirstByPointDistance(Double x, Double y) {
         return queryFactory
-                .select(Projections.constructor(AddressResponse.GetQueryDTO.class,
+                .select(Projections.constructor(AddressResponse.AddressDTO.class,
                         address.id,
                         address.code,
                         address.fullNm,
@@ -43,9 +43,9 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
     }
 
     @Override
-    public Slice<AddressResponse.GetQueryDTO> findAllByOrderByDistanceAsc(Double x, Double y, Pageable pageable) {
-        List<AddressResponse.GetQueryDTO> contents = queryFactory
-                .select(Projections.constructor(AddressResponse.GetQueryDTO.class,
+    public Slice<AddressResponse.AddressDTO> findAllByOrderByDistanceAsc(Double x, Double y, Pageable pageable) {
+        List<AddressResponse.AddressDTO> contents = queryFactory
+                .select(Projections.constructor(AddressResponse.AddressDTO.class,
                         address.id,
                         address.code,
                         address.fullNm,
@@ -60,9 +60,9 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
     }
 
     @Override
-    public Slice<AddressResponse.GetQueryDTO> findByFullNmContainingOrderByDistanceAsc(Double x, Double y, String keyword, Pageable pageable) {
-        List<AddressResponse.GetQueryDTO> contents = queryFactory
-                .select(Projections.constructor(AddressResponse.GetQueryDTO.class,
+    public Slice<AddressResponse.AddressDTO> findByFullNmContainingOrderByDistanceAsc(Double x, Double y, String keyword, Pageable pageable) {
+        List<AddressResponse.AddressDTO> contents = queryFactory
+                .select(Projections.constructor(AddressResponse.AddressDTO.class,
                         address.id,
                         address.code,
                         address.fullNm,
@@ -88,7 +88,7 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
         return Expressions.numberOperation(Double.class, SpatialOps.DISTANCE, address.point, JTSGeometryExpressions.asJTSGeometry(currentPoint));
     }
 
-    private boolean hasNext(List<AddressResponse.GetQueryDTO> contents, int pageSize) {
+    private boolean hasNext(List<AddressResponse.AddressDTO> contents, int pageSize) {
         if(contents.size() > pageSize) {
             contents.remove(pageSize);
             return true;

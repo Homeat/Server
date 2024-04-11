@@ -3,18 +3,12 @@ package homeat.backend.test;
 import homeat.backend.domain.address.dto.AddressResponse;
 import homeat.backend.domain.address.entity.Address;
 import homeat.backend.domain.address.repository.AddressRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-
-import java.util.List;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -34,7 +28,7 @@ public class AddressRepositoryTest {
     @DisplayName("현재 가장 가까운 동네 조회")
     @Test
     public void testFindFirstByPointDistance() {
-        AddressResponse.GetQueryDTO add = addressRepository.findFirstByPointDistance(126.9221, 37.5617);
+        AddressResponse.AddressDTO add = addressRepository.findFirstByPointDistance(126.9221, 37.5617);
 
         System.out.println(add.getFullNm());
     }

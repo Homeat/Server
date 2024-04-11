@@ -1,6 +1,5 @@
 package homeat.backend.domain.address.dto;
 
-import com.querydsl.core.annotations.QueryProjection;
 import lombok.*;
 
 import java.math.BigInteger;
@@ -32,7 +31,7 @@ public class AddressResponse {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class GetQueryDTO {
+    public static class AddressDTO {
         Long addressId;
         Long code;
         String fullNm;

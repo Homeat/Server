@@ -30,19 +30,13 @@ public class AddressResponse {
 
     @Builder
     @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class GetQueryDTO {
         Long addressId;
         Long code;
         String fullNm;
         String emdNm;
-
-        @QueryProjection
-        public GetQueryDTO(Long addressId, Long code, String fullNm, String emdNm) {
-            this.addressId = addressId;
-            this.code = code;
-            this.fullNm = fullNm;
-            this.emdNm = emdNm;
-        }
     }
 
 }

@@ -1,12 +1,12 @@
 package homeat.backend.domain.address.repository.querydsl;
 
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.spatial.SpatialOps;
 import com.querydsl.spatial.locationtech.jts.JTSGeometryExpressions;
 import homeat.backend.domain.address.dto.AddressResponse;
-import homeat.backend.domain.address.dto.QAddressResponse_GetQueryDTO;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -32,7 +32,11 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
     @Override
     public AddressResponse.GetQueryDTO findFirstByPointDistance(Double x, Double y) {
         return queryFactory
-                .select(new QAddressResponse_GetQueryDTO(address.id, address.code, address.fullNm, address.emdNm))
+                .select(Projections.constructor(AddressResponse.GetQueryDTO.class,
+                        address.id,
+                        address.code,
+                        address.fullNm,
+                        address.emdNm))
                 .from(address)
                 .orderBy(stDistance(x,y).asc())
                 .fetchFirst();
@@ -41,7 +45,11 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
     @Override
     public Slice<AddressResponse.GetQueryDTO> findAllByOrderByDistanceAsc(Double x, Double y, Pageable pageable) {
         List<AddressResponse.GetQueryDTO> contents = queryFactory
-                .select(new QAddressResponse_GetQueryDTO(address.id, address.code, address.fullNm, address.emdNm))
+                .select(Projections.constructor(AddressResponse.GetQueryDTO.class,
+                        address.id,
+                        address.code,
+                        address.fullNm,
+                        address.emdNm))
                 .from(address)
                 .orderBy(stDistance(x,y).asc())
                 .limit(pageable.getPageSize()+1L)
@@ -54,7 +62,11 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
     @Override
     public Slice<AddressResponse.GetQueryDTO> findByFullNmContainingOrderByDistanceAsc(Double x, Double y, String keyword, Pageable pageable) {
         List<AddressResponse.GetQueryDTO> contents = queryFactory
-                .select(new QAddressResponse_GetQueryDTO(address.id, address.code, address.fullNm, address.emdNm))
+                .select(Projections.constructor(AddressResponse.GetQueryDTO.class,
+                        address.id,
+                        address.code,
+                        address.fullNm,
+                        address.emdNm))
                 .from(address)
                 .where(address.fullNm.contains(keyword))
                 .orderBy(stDistance(x,y).asc())

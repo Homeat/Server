@@ -30,7 +30,7 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
     }
 
     @Override
-    public AddressResponse.AddressDTO findFirstByPointDistance(Double x, Double y) {
+    public AddressResponse.AddressDTO findFirstByPointDistance(double lat, double lng) {
         return queryFactory
                 .select(Projections.constructor(AddressResponse.AddressDTO.class,
                         address.id,
@@ -38,12 +38,12 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
                         address.fullNm,
                         address.emdNm))
                 .from(address)
-                .orderBy(stDistance(x,y).asc())
+                .orderBy(stDistance(lat, lng).asc())
                 .fetchFirst();
     }
 
     @Override
-    public Slice<AddressResponse.AddressDTO> findAllByOrderByDistanceAsc(Double x, Double y, Pageable pageable) {
+    public Slice<AddressResponse.AddressDTO> findAllByOrderByDistanceAsc(double lat, double lng, Pageable pageable) {
         List<AddressResponse.AddressDTO> contents = queryFactory
                 .select(Projections.constructor(AddressResponse.AddressDTO.class,
                         address.id,
@@ -51,7 +51,7 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
                         address.fullNm,
                         address.emdNm))
                 .from(address)
-                .orderBy(stDistance(x,y).asc())
+                .orderBy(stDistance(lat, lng).asc())
                 .limit(pageable.getPageSize()+1L)
                 .offset(pageable.getOffset())
                 .fetch();
@@ -60,7 +60,7 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
     }
 
     @Override
-    public Slice<AddressResponse.AddressDTO> findByFullNmContainingOrderByDistanceAsc(Double x, Double y, String keyword, Pageable pageable) {
+    public Slice<AddressResponse.AddressDTO> findByFullNmContainingOrderByDistanceAsc(double lat, double lng, String keyword, Pageable pageable) {
         List<AddressResponse.AddressDTO> contents = queryFactory
                 .select(Projections.constructor(AddressResponse.AddressDTO.class,
                         address.id,
@@ -69,7 +69,7 @@ public class AddressRepositoryImpl implements AddressRepositoryCustom {
                         address.emdNm))
                 .from(address)
                 .where(address.fullNm.contains(keyword))
-                .orderBy(stDistance(x,y).asc())
+                .orderBy(stDistance(lat, lng).asc())
                 .limit(pageable.getPageSize()+1L)
                 .offset(pageable.getOffset())
                 .fetch();

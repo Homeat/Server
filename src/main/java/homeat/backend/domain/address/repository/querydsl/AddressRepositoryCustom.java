@@ -6,7 +6,7 @@ import org.springframework.data.domain.Slice;
 
 
 public interface AddressRepositoryCustom {
-    AddressResponse.AddressDTO findFirstByPointDistance(Double x, Double y);
-    Slice<AddressResponse.AddressDTO> findAllByOrderByDistanceAsc(Double x, Double y, Pageable pageable);
-    Slice<AddressResponse.AddressDTO> findByFullNmContainingOrderByDistanceAsc(Double x, Double y, String keyword, Pageable pageable);
+    AddressResponse.AddressDTO findFirstByPointDistance(double lat, double lng);
+    Slice<AddressResponse.AddressDTO> findAllByOrderByDistanceAsc(double lat, double lng, Pageable pageable);
+    Slice<AddressResponse.AddressDTO> findByFullNmContainingOrderByDistanceAsc(double lat, double lng, String keyword, Pageable pageable);
 }

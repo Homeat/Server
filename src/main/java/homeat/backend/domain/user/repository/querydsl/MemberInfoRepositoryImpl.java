@@ -1,4 +1,4 @@
-package homeat.backend.domain.user.repository;
+package homeat.backend.domain.user.repository.querydsl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.user.entity.MemberInfo;

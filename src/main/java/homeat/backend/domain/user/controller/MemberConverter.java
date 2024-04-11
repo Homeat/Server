@@ -43,7 +43,7 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponse.MyPageResultDTO toMyPageResultDTO(Member member, MemberInfo memberInfo, AddressResponse.NeighborhoodResultDTO addressInfo) {
+    public static MemberResponse.MyPageResultDTO toMyPageResultDTO(Member member, MemberInfo memberInfo, AddressResponse.AddressDTO addressInfo) {
         return MemberResponse.MyPageResultDTO.builder()
                 .email(member.getEmail())
                 .nickname(member.getNickname())

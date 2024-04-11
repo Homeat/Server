@@ -1,6 +1,7 @@
 package homeat.backend.domain.user.controller;
 
 import homeat.backend.domain.address.dto.AddressResponse;
+import homeat.backend.domain.address.entity.Address;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.dto.MemberResponse;
 import homeat.backend.domain.user.entity.Member;
@@ -18,12 +19,12 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberInfo toMemberInfo(MemberRequest.CreateInfoDto request, Member member) {
+    public static MemberInfo toMemberInfo(MemberRequest.CreateInfoDto request, Member member, Address address) {
         return MemberInfo.builder()
                 .member(member)
+                .address(address)
                 .gender(request.getGender())
                 .birth(request.getBirth())
-                .address(request.getAdderessId())
                 .income(request.getIncome())
                 .build();
     }

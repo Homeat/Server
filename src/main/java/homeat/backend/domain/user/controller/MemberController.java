@@ -57,7 +57,7 @@ public class MemberController {
         Long memberId = Long.parseLong(authentication.getName());
         Member member = memberQueryService.mypageMember(memberId);
         MemberInfo memberInfo = memberQueryService.mypageMemberInfo(memberId);
-        AddressResponse.AddressDTO addressInfo = AddressConvertor.toAddressInfo(addressService.getAddress(memberInfo.getAddress()));
+        AddressResponse.AddressDTO addressInfo = AddressConvertor.toAddressInfo(memberInfo.getAddress());
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toMyPageResultDTO(member, memberInfo, addressInfo));
     }
 

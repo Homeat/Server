@@ -1,9 +1,9 @@
 name: Jira Issue Link
 
 on:
-    issues:
-        types:
-          - opened
+  issues:
+    types:
+      - opened
 
 jobs:
   create-issue:

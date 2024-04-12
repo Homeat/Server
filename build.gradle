@@ -61,8 +61,9 @@ dependencies {
 	// smtp
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-	// hibernate spatial
-	implementation group: 'org.hibernate', name: 'hibernate-spatial'
+	// spatial
+	implementation 'com.querydsl:querydsl-spatial'
+	implementation 'org.hibernate:hibernate-spatial'
 }
 
 tasks.named('test') {

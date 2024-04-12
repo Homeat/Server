@@ -42,7 +42,7 @@ public class MemberResponse {
         Gender gender;
         LocalDate birth;
         Long income;
-        AddressResponse.NeighborhoodResultDTO address;
+        AddressResponse.AddressDTO address;
     }
 
     @Builder

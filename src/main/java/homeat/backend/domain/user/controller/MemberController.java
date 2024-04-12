@@ -1,5 +1,6 @@
 package homeat.backend.domain.user.controller;
 
+import homeat.backend.domain.address.controller.AddressConvertor;
 import homeat.backend.domain.address.dto.AddressResponse;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.dto.MemberResponse;
@@ -56,7 +57,7 @@ public class MemberController {
         Long memberId = Long.parseLong(authentication.getName());
         Member member = memberQueryService.mypageMember(memberId);
         MemberInfo memberInfo = memberQueryService.mypageMemberInfo(memberId);
-        AddressResponse.NeighborhoodResultDTO addressInfo = addressService.getAddressInfoById(memberInfo.getAddress());
+        AddressResponse.AddressDTO addressInfo = AddressConvertor.toAddressInfo(memberInfo.getAddress());
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toMyPageResultDTO(member, memberInfo, addressInfo));
     }
 

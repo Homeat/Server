@@ -1,5 +1,6 @@
 package homeat.backend.domain.user.entity;
 
+import homeat.backend.domain.address.entity.Address;
 import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;
 
@@ -22,6 +23,10 @@ public class MemberInfo extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id")
+    private Address address;
+
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -35,11 +40,9 @@ public class MemberInfo extends BaseEntity {
 
     private String phoneNumber;
 
-    private Long address;
-
     private Long income;
 
-    public void updateAddress(Long address) {
+    public void updateAddress(Address address) {
         this.address = address;
     }
 

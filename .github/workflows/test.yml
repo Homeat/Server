@@ -1,0 +1,20 @@
+name: Test
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: print
+        run: |
+          sh "echo ${{ github.event.issue.title }}"
+          sh "echo ${{ github.event.issue.html_url }}"
+          sh "echo ${{ github.event.label.name }}"

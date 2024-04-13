@@ -27,7 +27,7 @@ jobs:
           project: HOMEAT
           issuetype: Task
           summary: ${{ github.event.issue.title }}
-          description: ${{ github.event.issue.html_url }}
+          fields: '{"url": "${{ github.event.issue.html_url }}"}'
 
       - name: Get New Branch Name
         id: new-branch

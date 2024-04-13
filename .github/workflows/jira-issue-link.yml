@@ -36,7 +36,7 @@ jobs:
           for label in ${{ toJson(github.event.issue.labels.*.name) }}:
             if ':' in label:
               branch_type = label.split(':')[-1].strip()
-              ticket_num = ${{ steps.create.outputs.issue }}
+              ticket_num = '${{ steps.create.outputs.issue }}'
               print(f"::set-output name=name::{branch_type}/{ticket_num}")
 
       - name: Create New Branch with Ticket Number

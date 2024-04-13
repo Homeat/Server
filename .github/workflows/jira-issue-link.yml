@@ -27,7 +27,8 @@ jobs:
           project: HOMEAT
           issuetype: Task
           summary: ${{ github.event.issue.title }}
-          fields: '{"labels": ["백엔드"], "customfield_11452": "${{ github.event.issue.html_url }}"}'
+          description: ${{ github.event.issue.html_url }}
+          fields: '{"labels": ["백엔드"]}'
 
       - name: Get New Branch Name
         id: new-branch

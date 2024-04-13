@@ -23,7 +23,7 @@ jobs:
       - name: Jira Issue Create
         id: create
         uses: atlassian/gajira-create@v3
-        env:
+        with:
           project: HOMEAT
           issuetype: Task
           summary: ${{ github.event.issue.title }}

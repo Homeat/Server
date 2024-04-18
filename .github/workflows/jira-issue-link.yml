@@ -34,11 +34,15 @@ jobs:
         id: new-branch
         shell: python
         run: |
+          import os
           for label in ${{ toJson(github.event.issue.labels.*.name) }}:
             if ':' in label:
               branch_type = label.split(':')[-1].strip()
               ticket_num = '${{ steps.create.outputs.issue }}'
-              print(f"::set-output name=name::{branch_type}/{ticket_num}")
+              value = f"{branch_type}/{ticket_num}"
+              break
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            f.write(f"name={value}\n")
 
       - name: Create New Branch with Ticket Number
         run: |

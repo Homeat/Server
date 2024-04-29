@@ -60,14 +60,14 @@ public class HomeController {
     }
 
     /**
-     *  OCR 영수증 처리 (끝 -> 다른 양식은 어떻게 할 지 고민해보기)
+     *  영수증 사진을 OCR 영수증 처리하면서 동시에 이미지 db 저장 (끝 -> 다른 양식은 어떻게 할 지 고민해보기)
      */
     @Operation(summary = "영수증 추출(ocr) API, 완료")
     @PostMapping(value = "/receipt", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<Long> processReceipt(@RequestParam("file") MultipartFile file) {
+    public ApiPayload<List<HomeResponseDTO.ReceiptResultDTO>> processReceipt(@RequestParam("file") MultipartFile file) {
         try {
-            Long totalExpense = homeService.processReceiptAndSaveExpense(file);
-            return ApiPayload.onSuccess(CommonSuccessStatus.OK, totalExpense);
+            List<HomeResponseDTO.ReceiptResultDTO> result = homeService.processReceiptAndSaveExpense(file);
+            return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
         } catch (IOException e) {
             logger.error("영수증 처리 에러 발생", e);
             return ApiPayload.onFailure(CommonErrorStatus.INTERNAL_SERVER_ERROR.getCode(), "영수증 처리 에러", null);

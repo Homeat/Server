@@ -54,29 +54,29 @@ public class MemberCommandService {
         return memberRepository.save(newMember);
     }
 
-    @Transactional
-    public String loginMember(MemberRequest.LoginDto request) {
-        // 이메일 존재 여부
-        Member selectedMember = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.EMAIL_NOT_FOUND));
+//    @Transactional
+//    public String loginMember(MemberRequest.LoginDto request) {
+//        // 이메일 존재 여부
+//        Member selectedMember = memberRepository.findByEmail(request.getEmail())
+//                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.EMAIL_NOT_FOUND));
+//
+//        // 비밀번호 일치 여부
+//        if (!encoder.matches(request.getPassword(), selectedMember.getPassword())) {
+//            throw new MemberHandler(MemberErrorStatus.INVALID_PASSWORD);
+//        }
+//
+//        return jwtUtil.createJwt(selectedMember.getId());
+//    }
 
-        // 비밀번호 일치 여부
-        if (!encoder.matches(request.getPassword(), selectedMember.getPassword())) {
-            throw new MemberHandler(MemberErrorStatus.INVALID_PASSWORD);
-        }
-
-        return jwtUtil.createJwt(selectedMember.getId());
-    }
-
-    @Transactional
-    public String loginMember(Long memberId) {
-        return jwtUtil.createJwt(memberId);
-    }
-
-    public LocalDateTime getJwtExpiredAt(String token) {
-        Date expiredAt = jwtUtil.getExpiredAt(token);
-        return LocalDateTime.ofInstant(expiredAt.toInstant(), ZoneId.systemDefault());
-    }
+//    @Transactional
+//    public String loginMember(Long memberId) {
+//        return jwtUtil.createJwt(memberId);
+//    }
+//
+//    public LocalDateTime getJwtExpiredAt(String token) {
+//        Date expiredAt = jwtUtil.getExpiredAt(token);
+//        return LocalDateTime.ofInstant(expiredAt.toInstant(), ZoneId.systemDefault());
+//    }
 
     @Transactional
     public MemberInfo saveMemberInfo(MemberRequest.CreateInfoDto request, Long memberId) {

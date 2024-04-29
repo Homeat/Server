@@ -39,17 +39,17 @@ public class MemberController {
     @PostMapping("/join")
     public ApiPayload<MemberResponse.JoinResultDTO> create(@RequestBody @Valid MemberRequest.JoinDto request) {
         Member member = memberCommandService.joinMember(request);
-        String token = memberCommandService.loginMember(member.getId());
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member, token));
+//        String token = memberCommandService.loginMember(member.getId());
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member, "token"));
     }
 
-    @Operation(summary = "로그인 api")
-    @PostMapping("/login")
-    public ApiPayload<MemberResponse.LoginResultDTO> login(@RequestBody @Valid MemberRequest.LoginDto request) {
-        String token = memberCommandService.loginMember(request);
-        LocalDateTime expiredAt = memberCommandService.getJwtExpiredAt(token);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toLoginResultDTO(token, expiredAt));
-    }
+//    @Operation(summary = "로그인 api")
+//    @PostMapping("/login")
+//    public ApiPayload<MemberResponse.LoginResultDTO> login(@RequestBody @Valid MemberRequest.LoginDto request) {
+//        String token = memberCommandService.loginMember(request);
+//        LocalDateTime expiredAt = memberCommandService.getJwtExpiredAt(token);
+//        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toLoginResultDTO(token, expiredAt));
+//    }
 
     @Operation(summary = "회원정보 api")
     @GetMapping("/mypage")

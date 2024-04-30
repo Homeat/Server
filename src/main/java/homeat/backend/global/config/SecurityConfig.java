@@ -21,6 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final AuthenticationEntryPoint entryPoint;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtil jwtUtil;
 
@@ -44,6 +45,9 @@ public class SecurityConfig {
                 .authorizeRequests(request -> request
                         .antMatchers("/v1/members/join", "/v1/members/login", "/health", "/v3/api-docs/**", "/swagger*/**", "/", "/login").permitAll()
 //                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(handler -> handler
+                        .authenticationEntryPoint(entryPoint)
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

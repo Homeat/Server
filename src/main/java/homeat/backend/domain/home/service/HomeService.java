@@ -192,7 +192,7 @@ public class HomeService {
         // 총 금액 추출
         Long totalPrice = extractTotalExpense(ocrResult);
 
-        String imageUrl = s3Service.upload(Collections.singletonList(file)).get(0);
+        String imageUrl = s3Service.uploadReceiptImg(file);
 
         HomeResponseDTO.ReceiptResultDTO result = new HomeResponseDTO.ReceiptResultDTO(totalPrice, imageUrl);
 

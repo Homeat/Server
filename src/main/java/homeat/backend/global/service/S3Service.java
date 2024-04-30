@@ -68,6 +68,26 @@ public class S3Service  {
         return imgUrl;
     }
 
+    public String uploadReceiptImg(MultipartFile multipartFile) {
+        String imgUrl = "";
+
+        String fileName = createFileName(multipartFile.getOriginalFilename());
+
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(multipartFile.getSize());
+        objectMetadata.setContentType(multipartFile.getContentType());
+
+        try(InputStream inputStream = multipartFile.getInputStream()) {
+            s3Client.putObject(new PutObjectRequest(bucket+"/homeat/receipt", fileName, inputStream, objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            imgUrl = s3Client.getUrl(bucket+"/homeat/receipt", fileName).toString();
+        } catch(IOException e) {
+            throw new IllegalArgumentException("사진 입력 오류");
+        }
+
+        return imgUrl;
+    }
+
     public List<String> upload(List<MultipartFile> multipartFile)   {
         List<String> imgUrlList = new ArrayList<>();
 

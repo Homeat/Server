@@ -64,9 +64,9 @@ public class HomeController {
      */
     @Operation(summary = "영수증 추출(ocr) API, 완료")
     @PostMapping(value = "/receipt", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<List<HomeResponseDTO.ReceiptResultDTO>> processReceipt(@RequestParam("file") MultipartFile file) {
+    public ApiPayload<HomeResponseDTO.ReceiptResultDTO> processReceipt(@RequestParam("file") MultipartFile file) {
         try {
-            List<HomeResponseDTO.ReceiptResultDTO> result = homeService.processReceiptAndSaveExpense(file);
+            HomeResponseDTO.ReceiptResultDTO result = homeService.processReceiptAndSaveExpense(file);
             return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
         } catch (IOException e) {
             logger.error("영수증 처리 에러 발생", e);

@@ -172,8 +172,7 @@ public class HomeService {
     /**
      * OCR 영수증 처리
      */
-    @Transactional
-    public List<HomeResponseDTO.ReceiptResultDTO> processReceiptAndSaveExpense(MultipartFile file) throws IOException {
+    public HomeResponseDTO.ReceiptResultDTO processReceiptAndSaveExpense(MultipartFile file) throws IOException {
         // 파일 확장자 예외처리
         String originalFilename = file.getOriginalFilename();
         String extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
@@ -188,7 +187,7 @@ public class HomeService {
         String ocrResult = ocrService.processImage(convertedFile.getPath());
 
         // OCR 결과 로그
-         logger.info("OCR 결과 : {}", ocrResult);
+        logger.info("OCR 결과 : {}", ocrResult);
 
         // 총 금액 추출
         Long totalPrice = extractTotalExpense(ocrResult);
@@ -197,7 +196,7 @@ public class HomeService {
 
         HomeResponseDTO.ReceiptResultDTO result = new HomeResponseDTO.ReceiptResultDTO(totalPrice, imageUrl);
 
-        return List.of(result);
+        return result;
     }
 
     private Long extractTotalExpense(String ocrResult) {

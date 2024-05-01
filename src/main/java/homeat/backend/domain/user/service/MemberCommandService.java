@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.Cookie;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -182,5 +183,10 @@ public class MemberCommandService {
                 .orElseThrow(() -> new MemberHandler(MemberErrorStatus.EMAIL_NOT_FOUND));
 
         selectedMember.updatePassword(encoder.encode(request.getNewPassword()));
+    }
+
+    @Transactional
+    public Cookie reissue(Long userId, String refreshToken, Long expiredAt) {
+        return new Cookie("Refresh-Token", jwtUtil.createJwt("refresh", userId, expiredAt));
     }
 }

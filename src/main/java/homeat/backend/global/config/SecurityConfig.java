@@ -1,5 +1,6 @@
 package homeat.backend.global.config;
 
+import homeat.backend.domain.user.repository.RefreshRepository;
 import homeat.backend.global.security.LoginFilter;
 import homeat.backend.global.security.jwt.JwtFilter;
 import homeat.backend.global.security.jwt.JwtUtil;
@@ -24,6 +25,7 @@ public class SecurityConfig {
     private final AuthenticationEntryPoint entryPoint;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtil jwtUtil;
+    private final RefreshRepository refreshRepository;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -53,7 +55,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }

@@ -2,6 +2,7 @@ package homeat.backend.global.security.jwt;
 
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
@@ -22,39 +24,37 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        //request에서 Authorization 헤더를 찾음
-        String authorization= request.getHeader("Authorization");
+        String accessToken = request.getHeader("Access-Token");
 
-        //Authorization 헤더 검증
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-
+        if (accessToken == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authorization.split(" ")[1];
-
-        //토큰 소멸 시간 검증
-        if (jwtUtil.isExpired(token)) {
-
-//            response.setStatus(410);
-            System.out.println("token expired");
-
-            filterChain.doFilter(request, response);
+        try {
+            jwtUtil.isExpired(accessToken);
+        } catch (ExpiredJwtException e) {
+            PrintWriter writer = response.getWriter();
+            writer.print("access token expired");
+            response.setStatus(401);
             return;
         }
 
+        String category = jwtUtil.getCategory(accessToken);
+        if(!category.equals("access")) {
+            PrintWriter writer = response.getWriter();
+            writer.print("invalid access token");
+            response.setStatus(401);
+            return;
+        }
 
-        Long userId = jwtUtil.getUserId(token);
-
+        Long userId = jwtUtil.getUserId(accessToken);
         Member tempMember = Member.builder()
                 .id(userId)
                 .build();
-
         CustomUserDetails customUserDetails = new CustomUserDetails(tempMember);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);

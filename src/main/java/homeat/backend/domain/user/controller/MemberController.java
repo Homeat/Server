@@ -6,11 +6,12 @@ import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.dto.MemberResponse;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.entity.MemberInfo;
-import homeat.backend.domain.address.service.AddressService;
 import homeat.backend.domain.user.service.MemberCommandService;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
+import homeat.backend.global.security.LoginService;
+import homeat.backend.global.security.jwt.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +21,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.time.LocalDateTime;
 
 
 @RestController
@@ -35,7 +36,8 @@ public class MemberController {
 
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
-    private final AddressService addressService;
+    private final LoginService loginService;
+    private final JwtUtil jwtUtil;
 
     @Operation(summary = "회원가입 api")
     @PostMapping("/join")
@@ -45,13 +47,12 @@ public class MemberController {
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member, "token"));
     }
 
-//    @Operation(summary = "로그인 api")
-//    @PostMapping("/login")
-//    public ApiPayload<MemberResponse.LoginResultDTO> login(@RequestBody @Valid MemberRequest.LoginDto request) {
-//        String token = memberCommandService.loginMember(request);
-//        LocalDateTime expiredAt = memberCommandService.getJwtExpiredAt(token);
-//        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toLoginResultDTO(token, expiredAt));
-//    }
+    @Operation(summary = "로그인 api")
+    @PostMapping("/login")
+    public ApiPayload<?> login(@RequestBody MemberRequest.LoginDto request) {
+        // Filter에서 작동하지만, Swagger 위해서 틀만 작성
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
 
     @Operation(summary = "회원정보 api")
     @GetMapping("/mypage")
@@ -123,6 +124,20 @@ public class MemberController {
     @PatchMapping("/find-password")
     public ApiPayload<?> findPassword(@RequestBody @Valid MemberRequest.FindPasswordDto request) {
         memberCommandService.findPassword(request);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "토큰 재발급 api")
+    @PostMapping("/reissue")
+    public ApiPayload<?> reissue(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = loginService.validateRefreshToken(request.getCookies());
+
+        Long userId = jwtUtil.getUserId(refreshToken);
+        String newAccessToken = loginService.issueAccessToken(userId);
+        Cookie newRefreshToken = loginService.reissueRefreshToken(userId, refreshToken);
+
+        response.addHeader("Access-Token", newAccessToken);
+        response.addCookie(newRefreshToken);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 }

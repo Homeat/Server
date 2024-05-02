@@ -29,14 +29,12 @@ import java.time.ZoneId;
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
-    private final RefreshRepository refreshRepository;
+    private final LoginService loginService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public LoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, RefreshRepository refreshRepository) {
+    public LoginFilter(AuthenticationManager authenticationManager, LoginService loginService) {
         this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
-        this.refreshRepository = refreshRepository;
+        this.loginService = loginService;
 
         setFilterProcessesUrl("/v1/members/login");
     }
@@ -70,42 +68,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         Long userId = customUserDetails.getUserId();
 
-        String accessToken = jwtUtil.createJwt("access", userId, 60*60*10L);
-        String refreshToken = jwtUtil.createJwt("refresh", userId, 24*60*60*10L);
-
-        addRefreshEntity(userId, refreshToken, 24*60*60*10L);
+        String accessToken = loginService.issueAccessToken(userId);
+        Cookie refreshToken = loginService.issueRefreshToken(userId);
 
         response.addHeader("Access-Token", accessToken);
-        response.addCookie(createCookie("Refresh-Token", refreshToken));
+        response.addCookie(refreshToken);
         writeOutput(request, response, HttpServletResponse.SC_OK, ApiPayload.onSuccess(CommonSuccessStatus.OK, null));
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
         writeOutput(request, response, HttpServletResponse.SC_UNAUTHORIZED, ApiPayload.onFailure(LoginErrorStatus.LOGIN_FAILED, null));
-    }
-
-    private void addRefreshEntity(Long userId, String refreshToken, Long expiredMs) {
-
-        LocalDateTime date = LocalDateTime.now(ZoneId.systemDefault()).plusSeconds(expiredMs/1000L);
-        System.currentTimeMillis();
-        Refresh newRefresh = Refresh.builder()
-                .userId(userId)
-                .refreshToken(refreshToken)
-                .expiredAt(date)
-                .build();
-        refreshRepository.save(newRefresh);
-    }
-
-    private Cookie createCookie(String key, String value) {
-
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-
-        return cookie;
     }
 
     private void writeOutput(HttpServletRequest request, HttpServletResponse response, int statusCode, ApiPayload<?> data) {

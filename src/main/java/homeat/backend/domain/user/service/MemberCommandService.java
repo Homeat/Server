@@ -24,11 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
-import javax.servlet.http.Cookie;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -54,30 +50,6 @@ public class MemberCommandService {
 
         return memberRepository.save(newMember);
     }
-
-//    @Transactional
-//    public String loginMember(MemberRequest.LoginDto request) {
-//        // 이메일 존재 여부
-//        Member selectedMember = memberRepository.findByEmail(request.getEmail())
-//                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.EMAIL_NOT_FOUND));
-//
-//        // 비밀번호 일치 여부
-//        if (!encoder.matches(request.getPassword(), selectedMember.getPassword())) {
-//            throw new MemberHandler(MemberErrorStatus.INVALID_PASSWORD);
-//        }
-//
-//        return jwtUtil.createJwt(selectedMember.getId());
-//    }
-
-//    @Transactional
-//    public String loginMember(Long memberId) {
-//        return jwtUtil.createJwt(memberId);
-//    }
-//
-//    public LocalDateTime getJwtExpiredAt(String token) {
-//        Date expiredAt = jwtUtil.getExpiredAt(token);
-//        return LocalDateTime.ofInstant(expiredAt.toInstant(), ZoneId.systemDefault());
-//    }
 
     @Transactional
     public MemberInfo saveMemberInfo(MemberRequest.CreateInfoDto request, Long memberId) {
@@ -183,10 +155,5 @@ public class MemberCommandService {
                 .orElseThrow(() -> new MemberHandler(MemberErrorStatus.EMAIL_NOT_FOUND));
 
         selectedMember.updatePassword(encoder.encode(request.getNewPassword()));
-    }
-
-    @Transactional
-    public Cookie reissue(Long userId, String refreshToken, Long expiredAt) {
-        return new Cookie("Refresh-Token", jwtUtil.createJwt("refresh", userId, expiredAt));
     }
 }

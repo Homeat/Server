@@ -2,6 +2,8 @@ package homeat.backend.global.security.jwt;
 
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.global.exception.GeneralException;
+import homeat.backend.global.security.LoginErrorStatus;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,38 +26,33 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String accessToken = request.getHeader("Access-Token");
-
-        if (accessToken == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         try {
+            String accessToken = request.getHeader("Access-Token");
+            if (accessToken == null)
+                throw new GeneralException(LoginErrorStatus.NOT_FOUND_TOKEN);
+
             jwtUtil.isExpired(accessToken);
+
+            String category = jwtUtil.getCategory(accessToken);
+            if(!category.equals("access"))
+                throw new GeneralException(LoginErrorStatus.INVALID_TOKEN);
+
+            Long userId = jwtUtil.getUserId(accessToken);
+            Member tempMember = Member.builder()
+                    .id(userId)
+                    .build();
+            CustomUserDetails customUserDetails = new CustomUserDetails(tempMember);
+
+            Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
         } catch (ExpiredJwtException e) {
-            PrintWriter writer = response.getWriter();
-            writer.print("access token expired");
-            response.setStatus(401);
-            return;
+            request.setAttribute("exception", new GeneralException(LoginErrorStatus.EXPIRED_TOKEN));
+        } catch (GeneralException e) {
+            request.setAttribute("exception", e);
+        } catch (Exception e) {
+            request.setAttribute("exception", new GeneralException(LoginErrorStatus.INVALID_TOKEN));
         }
-
-        String category = jwtUtil.getCategory(accessToken);
-        if(!category.equals("access")) {
-            PrintWriter writer = response.getWriter();
-            writer.print("invalid access token");
-            response.setStatus(401);
-            return;
-        }
-
-        Long userId = jwtUtil.getUserId(accessToken);
-        Member tempMember = Member.builder()
-                .id(userId)
-                .build();
-        CustomUserDetails customUserDetails = new CustomUserDetails(tempMember);
-
-        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
     }

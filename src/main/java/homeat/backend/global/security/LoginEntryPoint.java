@@ -1,4 +1,4 @@
-package homeat.backend.global.security.jwt;
+package homeat.backend.global.security;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.AuthenticationException;
@@ -12,10 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
-public class JwtEntryPoint implements AuthenticationEntryPoint {
+public class LoginEntryPoint implements AuthenticationEntryPoint {
     private final HandlerExceptionResolver resolver;
 
-    public JwtEntryPoint(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+    public LoginEntryPoint(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
         this.resolver = resolver;
     }
 

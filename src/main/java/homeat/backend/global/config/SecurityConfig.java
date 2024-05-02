@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests(request -> request
                         .antMatchers("/v1/members/join", "/v1/members/login", "/health", "/v3/api-docs/**", "/swagger*/**", "/", "/login").permitAll()
-//                        .anyRequest().authenticated()
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(handler -> handler
                         .authenticationEntryPoint(entryPoint)

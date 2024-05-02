@@ -48,7 +48,7 @@ public class MemberController {
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member, "token"));
     }
 
-    @Operation(summary = "로그인 api")
+    @Operation(summary = "로그인 api", description = "헤더의 Authorization에 access 토큰, 쿠키에 refresh 토큰 반환")
     @PostMapping("/login")
     public ApiPayload<?> login(@RequestBody MemberRequest.LoginDto request) {
         // Filter에서 작동하지만, Swagger 위해서 틀만 작성
@@ -135,7 +135,7 @@ public class MemberController {
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
-    @Operation(summary = "토큰 재발급 api", description = "Cookie에 refresh 토큰 필요")
+    @Operation(summary = "토큰 재발급 api", description = "Cookie에 기존 refresh 토큰 필요, 헤더의 Authorization에 access 토큰, 쿠키에 refresh 토큰 반환")
     @PostMapping("/reissue")
     public ApiPayload<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = loginService.validateRefreshToken(request.getCookies());

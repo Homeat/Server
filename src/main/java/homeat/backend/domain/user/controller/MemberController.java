@@ -55,6 +55,13 @@ public class MemberController {
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
+    @Operation(summary = "로그아웃 api", description = "Cookie에 refresh 토큰 필요")
+    @PostMapping("/logout")
+    public ApiPayload<?> logout() {
+        // Filter에서 작동하지만, Swagger 위해서 틀만 작성
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
     @Operation(summary = "회원정보 api")
     @GetMapping("/mypage")
     public ApiPayload<MemberResponse.MyPageResultDTO> mypage(@AuthenticationPrincipal CustomUserDetails authentication) {
@@ -128,7 +135,7 @@ public class MemberController {
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
-    @Operation(summary = "토큰 재발급 api")
+    @Operation(summary = "토큰 재발급 api", description = "Cookie에 refresh 토큰 필요")
     @PostMapping("/reissue")
     public ApiPayload<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = loginService.validateRefreshToken(request.getCookies());

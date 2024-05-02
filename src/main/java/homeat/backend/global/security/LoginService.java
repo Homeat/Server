@@ -1,8 +1,6 @@
 package homeat.backend.global.security;
 
 import homeat.backend.domain.user.entity.Refresh;
-import homeat.backend.domain.user.handler.MemberErrorStatus;
-import homeat.backend.domain.user.handler.MemberHandler;
 import homeat.backend.domain.user.repository.RefreshRepository;
 import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.security.jwt.JwtUtil;
@@ -40,7 +38,7 @@ public class LoginService {
     public Cookie issueRefreshToken(Long userId) {
         String refreshToken = jwtUtil.createJwt("refresh", userId, refreshExpirationTime*1000L);
         saveRefreshToken(userId, refreshToken, refreshExpirationTime);
-        return createCookie("refresh", refreshToken);
+        return createCookie("refresh", refreshToken, refreshExpirationTime.intValue());
     }
 
     @Transactional
@@ -48,7 +46,13 @@ public class LoginService {
         refreshRepository.deleteByRefreshToken(refreshToken);
         String newRefreshToken = jwtUtil.createJwt("refresh", userId, refreshExpirationTime*1000L);
         saveRefreshToken(userId, newRefreshToken, refreshExpirationTime);
-        return createCookie("refresh", newRefreshToken);
+        return createCookie("refresh", newRefreshToken, refreshExpirationTime.intValue());
+    }
+
+    @Transactional
+    public Cookie revokeRefreshToken(String refreshToken) {
+        refreshRepository.deleteByRefreshToken(refreshToken);
+        return createCookie("refresh", null, 0);
     }
 
     public String validateRefreshToken(Cookie[] cookies) {
@@ -88,9 +92,9 @@ public class LoginService {
         refreshRepository.save(newRefresh);
     }
 
-    private Cookie createCookie(String key, String value) {
+    private Cookie createCookie(String key, String value, int expiry) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60);
+        cookie.setMaxAge(expiry);
         cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setHttpOnly(true);

@@ -2,13 +2,11 @@ package homeat.backend.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import homeat.backend.domain.user.dto.CustomUserDetails;
-import homeat.backend.domain.user.entity.Refresh;
-import homeat.backend.domain.user.repository.RefreshRepository;
 import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
-import homeat.backend.global.security.jwt.JwtUtil;
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,8 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -37,6 +33,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         this.loginService = loginService;
 
         setFilterProcessesUrl("/v1/members/login");
+    }
+
+    @Getter
+    @Setter
+    static class LoginDTO {
+        private String email;
+        private String password;
     }
 
     @Override

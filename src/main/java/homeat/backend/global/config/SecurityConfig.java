@@ -1,8 +1,8 @@
 package homeat.backend.global.config;
 
-import homeat.backend.domain.user.repository.RefreshRepository;
 import homeat.backend.global.security.LoginFilter;
 import homeat.backend.global.security.LoginService;
+import homeat.backend.global.security.LogoutFilter;
 import homeat.backend.global.security.jwt.JwtFilter;
 import homeat.backend.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +57,7 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), loginService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new LogoutFilter(loginService), org.springframework.security.web.authentication.logout.LogoutFilter.class)
                 .build();
     }
 }

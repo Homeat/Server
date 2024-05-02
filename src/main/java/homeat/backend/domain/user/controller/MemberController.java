@@ -136,7 +136,7 @@ public class MemberController {
         String newAccessToken = loginService.issueAccessToken(userId);
         Cookie newRefreshToken = loginService.reissueRefreshToken(userId, refreshToken);
 
-        response.addHeader("Access-Token", newAccessToken);
+        response.addHeader("Authorization", newAccessToken);
         response.addCookie(newRefreshToken);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }

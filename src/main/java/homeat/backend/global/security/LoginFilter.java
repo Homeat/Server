@@ -71,7 +71,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = loginService.issueAccessToken(userId);
         Cookie refreshToken = loginService.issueRefreshToken(userId);
 
-        response.addHeader("Access-Token", accessToken);
+        response.addHeader("Authorization", accessToken);
         response.addCookie(refreshToken);
         writeOutput(request, response, HttpServletResponse.SC_OK, ApiPayload.onSuccess(CommonSuccessStatus.OK, null));
     }

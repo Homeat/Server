@@ -27,10 +27,11 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         try {
-            String accessToken = request.getHeader("Access-Token");
-            if (accessToken == null)
+            String authorization = request.getHeader("Authorization");
+            if (authorization == null || !authorization.startsWith("Bearer "))
                 throw new GeneralException(LoginErrorStatus.NOT_FOUND_TOKEN);
 
+            String accessToken = authorization.split(" ")[1];
             jwtUtil.isExpired(accessToken);
 
             String category = jwtUtil.getCategory(accessToken);

@@ -32,14 +32,15 @@ public class LoginService {
     private Long refreshExpirationTime;
 
     public String issueAccessToken(Long userId) {
-        return jwtUtil.createJwt("access", userId, accessExpirationTime*1000L);
+        String accessToken = jwtUtil.createJwt("access", userId, accessExpirationTime*1000L);
+        return "Bearer " + accessToken;
     }
 
     @Transactional
     public Cookie issueRefreshToken(Long userId) {
         String refreshToken = jwtUtil.createJwt("refresh", userId, refreshExpirationTime*1000L);
         saveRefreshToken(userId, refreshToken, refreshExpirationTime);
-        return createCookie("Refresh-Token", refreshToken);
+        return createCookie("refresh", refreshToken);
     }
 
     @Transactional
@@ -47,13 +48,13 @@ public class LoginService {
         refreshRepository.deleteByRefreshToken(refreshToken);
         String newRefreshToken = jwtUtil.createJwt("refresh", userId, refreshExpirationTime*1000L);
         saveRefreshToken(userId, newRefreshToken, refreshExpirationTime);
-        return createCookie("Refresh-Token", newRefreshToken);
+        return createCookie("refresh", newRefreshToken);
     }
 
     public String validateRefreshToken(Cookie[] cookies) {
         String refreshToken = null;
         for (Cookie cookie : cookies)
-            if (cookie.getName().equals("Refresh-Token"))
+            if (cookie.getName().equals("refresh"))
                 refreshToken = cookie.getValue();
 
         if (refreshToken == null)

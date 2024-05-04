@@ -36,7 +36,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Getter
-    @Setter
     static class LoginDTO {
         private String email;
         private String password;

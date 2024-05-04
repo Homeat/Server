@@ -4,6 +4,7 @@ import homeat.backend.domain.homeatreport.dto.ReportBadgeResponseDTO;
 import homeat.backend.domain.homeatreport.dto.ReportTierNicknameResponseDTO;
 import homeat.backend.domain.homeatreport.entity.Week;
 import homeat.backend.domain.homeatreport.service.HomeatReportBadgeService;
+import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.payload.ApiPayload;
@@ -12,7 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,9 +38,9 @@ public class HomeatReportBadgeController {
     @Operation(summary = "홈잇리포트 주별조회 상단의 홈잇티어와 닉네임 표시 api")
     @GetMapping("/TierNickname")
     public ApiPayload<ReportTierNicknameResponseDTO> putTierNickname(
-            Authentication authentication
+            @AuthenticationPrincipal CustomUserDetails authentication
     ) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, homeatReportBadgeService.getHomeatTierNickName(member));
     }
 
@@ -47,9 +48,9 @@ public class HomeatReportBadgeController {
     @GetMapping("/Badge")
     public ResponseEntity<?> getHomeatBadgeController(
             @RequestParam Long lastWeekId,
-            Authentication authentication
+            @AuthenticationPrincipal CustomUserDetails authentication
     ) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
 
         return homeatReportBadgeService.getHomeatBadge(member, lastWeekId);
     }

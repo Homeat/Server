@@ -24,6 +24,10 @@ public class ApiPayload<T> {
     }
 
     // 실패
+    public static <T> ApiPayload<T> onFailure(BaseStatus status, T data) {
+        return new ApiPayload<>(false, status.getReasonHttpStatus().getCode(), status.getReasonHttpStatus().getMessage(), data);
+    }
+
     public static <T> ApiPayload<T> onFailure(String code, String message, T data) {
         return new ApiPayload<>(false, code, message, data);
     }

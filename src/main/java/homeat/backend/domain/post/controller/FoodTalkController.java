@@ -4,6 +4,7 @@ import homeat.backend.domain.post.dto.CommentDTO;
 import homeat.backend.domain.post.dto.FoodTalkDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.service.FoodTalkService;
+import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +13,7 @@ import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -38,9 +39,9 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 저장 api")
     @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> saveFoodTalk(@RequestBody @Valid FoodTalkDTO dto, Authentication authentication) {
+    public ResponseEntity<?> saveFoodTalk(@RequestBody @Valid FoodTalkDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
 
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         return foodTalkService.saveFoodTalk(dto, member);
     }
 
@@ -64,8 +65,8 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 삭제 api")
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<?> deleteFoodTalk(@PathVariable("id") Long id, Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+    public ResponseEntity<?> deleteFoodTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
 
         return foodTalkService.deleteFoodTalk(id, member);
     }
@@ -84,8 +85,8 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시글 1개 조회 api")
     @GetMapping("{id}")
-    public ResponseEntity<?> getFoodTalk(@PathVariable("id") Long id, Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+    public ResponseEntity<?> getFoodTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         return foodTalkService.getFoodTalk(id, member);
     }
 
@@ -144,9 +145,9 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 댓글 작성, id는 집밥토크 게시물 id 입니다.")
     @PostMapping("/comment/{id}")
-    public ResponseEntity<?> saveComment(@RequestBody @Valid CommentDTO dto, Authentication authentication) {
+    public ResponseEntity<?> saveComment(@RequestBody @Valid CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
 
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         return foodTalkService.saveComment(dto, member);
     }
 
@@ -155,8 +156,8 @@ public class FoodTalkController {
      */
     @Operation(summary = "댓글 삭제 api입니다. id는 댓글 아이디입니다.")
     @DeleteMapping("/comment/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable("commentId") Long commentId, Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+    public ResponseEntity<?> deleteComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         return foodTalkService.deleteComment(commentId, member);
     }
 
@@ -165,8 +166,8 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 대댓글 작성, id는 댓글 아이디입니다.")
     @PostMapping("/reply/{id}")
-    public ResponseEntity<?> saveReply(@RequestBody @Valid CommentDTO dto, Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+    public ResponseEntity<?> saveReply(@RequestBody @Valid CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         return foodTalkService.saveReply(dto, member);
     }
 
@@ -175,8 +176,8 @@ public class FoodTalkController {
      */
     @Operation(summary = "대댓글 삭제, id는 대댓글 아이디입니다")
     @DeleteMapping("/reply/{id}")
-    public ResponseEntity<?> deleteReply(@PathVariable("id") Long id, Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+    public ResponseEntity<?> deleteReply(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         return foodTalkService.deleteReply(id, member);
     }
 
@@ -185,8 +186,8 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시물 공감하기 api입니다. id는 집밥토크 게시물 id 입니다")
     @PostMapping("/love/{id}")
-    public ResponseEntity<?> saveLove(@PathVariable("id") Long id, Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+    public ResponseEntity<?> saveLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         return foodTalkService.saveLove(id, member);
     }
 
@@ -195,8 +196,8 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시물 공감 취소하기, id는 집밥토크 게시물 id 입니다")
     @DeleteMapping("/love/{id}")
-    public ResponseEntity<?> deleteLove(@PathVariable("id") Long id, Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+    public ResponseEntity<?> deleteLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         return foodTalkService.deleteLove(id, member);
     }
 }

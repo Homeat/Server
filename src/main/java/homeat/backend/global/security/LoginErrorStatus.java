@@ -1,4 +1,4 @@
-package homeat.backend.global.security.jwt;
+package homeat.backend.global.security;
 
 import homeat.backend.global.payload.BaseStatus;
 import homeat.backend.global.payload.ReasonDTO;
@@ -8,13 +8,14 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
-public enum JwtErrorStatus implements BaseStatus {
+public enum LoginErrorStatus implements BaseStatus {
 
-    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_4010", "토큰이 올바르지 않습니다."),
-    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_4011", "토큰이 만료되었습니다."),
-    WRONG_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_4012", "토큰이 변조되거나, 로그아웃 되었습니다."),
-    NOT_FOUND_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_4013", "토큰이 필요합니다."),
-    NOT_FOUND_ID(HttpStatus.NOT_FOUND, "AUTH_4040", "찾을 수 없는(탈퇴한) 회원입니다."),
+    INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "AUTH_4000", "잘못된 파라미터 형식입니다."),
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "AUTH_4010", "로그인 정보가 잘못되었습니다."),
+    NOT_FOUND_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_4011", "토큰이 존재하지 않습니다."),
+    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_4012", "토큰이 만료되었습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH_4013", "토큰이 올바르지 않습니다."),
+    OUTPUT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH_5000", "서버 출력에 오류가 있습니다. 관리자에게 문의하세요."),
     ;
 
     private final HttpStatus httpStatus;

@@ -28,5 +28,7 @@ public class HomeRequestDTO {
 
         @NotBlank
         private String memo;
+
+        private String url;
     }
 }

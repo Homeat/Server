@@ -3,6 +3,7 @@ package homeat.backend.domain.home.controller;
 import homeat.backend.domain.home.dto.HomeRequestDTO;
 import homeat.backend.domain.home.dto.HomeResponseDTO;
 import homeat.backend.domain.home.service.HomeService;
+import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.payload.ApiPayload;
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,8 +41,8 @@ public class HomeController {
     @PatchMapping("/next-target-expense")
     public ApiPayload<String> updateNextTargetExpense(
             @RequestBody HomeRequestDTO.nextTargetExpenseDTO dto,
-            Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+            @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         String message = homeService.updateNextTargetExpense(dto, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, message);
     }
@@ -53,21 +54,21 @@ public class HomeController {
      */
     @Operation(summary = "홈 화면 조회 api, 완료")
     @GetMapping("/")
-    public ApiPayload<HomeResponseDTO.HomeResultDTO> getHome(Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+    public ApiPayload<HomeResponseDTO.HomeResultDTO> getHome(@AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         HomeResponseDTO.HomeResultDTO result = homeService.getHome(member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
-     *  OCR 영수증 처리 (끝 -> 다른 양식은 어떻게 할 지 고민해보기)
+     *  영수증 사진을 OCR 영수증 처리하면서 동시에 이미지 db 저장 (끝 -> 다른 양식은 어떻게 할 지 고민해보기)
      */
     @Operation(summary = "영수증 추출(ocr) API, 완료")
     @PostMapping(value = "/receipt", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<Long> processReceipt(@RequestParam("file") MultipartFile file) {
+    public ApiPayload<HomeResponseDTO.ReceiptResultDTO> processReceipt(@RequestParam("file") MultipartFile file) {
         try {
-            Long totalExpense = homeService.processReceiptAndSaveExpense(file);
-            return ApiPayload.onSuccess(CommonSuccessStatus.OK, totalExpense);
+            HomeResponseDTO.ReceiptResultDTO result = homeService.processReceiptAndSaveExpense(file);
+            return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
         } catch (IOException e) {
             logger.error("영수증 처리 에러 발생", e);
             return ApiPayload.onFailure(CommonErrorStatus.INTERNAL_SERVER_ERROR.getCode(), "영수증 처리 에러", null);
@@ -81,8 +82,8 @@ public class HomeController {
     @Operation(summary = "지출 추가 api, 완료")
     @PostMapping("/add-expense")
     public ApiPayload<String> createReceipt(@RequestBody HomeRequestDTO.ReceiptDTO dto,
-                                            Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+                                            @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         String message = homeService.createReceipt(dto, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, message);
     }
@@ -96,8 +97,8 @@ public class HomeController {
     public ApiPayload<List<HomeResponseDTO.CalendarResultDTO>> getCalendar(
             @RequestParam(value = "year", defaultValue = "#{T(java.time.LocalDate).now().getYear()}") String year,
             @RequestParam(value = "month", defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") String month,
-            Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+            @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         List<HomeResponseDTO.CalendarResultDTO> result = homeService.getCalendar(year, month, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
@@ -111,8 +112,8 @@ public class HomeController {
             @RequestParam("year") String year,
             @RequestParam("month") String month,
             @RequestParam("day") String day,
-            Authentication authentication) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+            @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
         HomeResponseDTO.CalendarDayResultDTO result = homeService.getCalendarDay(year, month, day, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }

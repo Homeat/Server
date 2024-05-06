@@ -12,6 +12,7 @@ spring:
       hibernate:
         format_sql: true
         highlight_sql: true
+        dialect: org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect
   servlet:
     multipart:
       enabled: true
@@ -34,6 +35,10 @@ cloud:
 jwt:
   secret:
     key: ${jwt.secret.key}
+  access:
+    expire: ${jwt.access.expire}
+  refresh:
+    expire: ${jwt.refresh.expire}
 
 ocr:
   secret:

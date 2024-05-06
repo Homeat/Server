@@ -1,5 +1,7 @@
 package homeat.backend.domain.user.service;
 
+import homeat.backend.domain.address.entity.Address;
+import homeat.backend.domain.address.repository.AddressRepository;
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
 import homeat.backend.domain.homeatreport.entity.Week;
@@ -23,9 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +35,7 @@ public class MemberCommandService {
     private final MemberInfoRepository memberInfoRepository;
     private final FinanceDataRepository financeDataRepository;
     private final WeekRepository weekRepository;
+    private final AddressRepository addressRepository;
     private final BCryptPasswordEncoder encoder;
     private final JwtUtil jwtUtil;
     private final MailService mailService;
@@ -52,34 +52,12 @@ public class MemberCommandService {
     }
 
     @Transactional
-    public String loginMember(MemberRequest.LoginDto request) {
-        // 이메일 존재 여부
-        Member selectedMember = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.EMAIL_NOT_FOUND));
-
-        // 비밀번호 일치 여부
-        if (!encoder.matches(request.getPassword(), selectedMember.getPassword())) {
-            throw new MemberHandler(MemberErrorStatus.INVALID_PASSWORD);
-        }
-
-        return jwtUtil.createJwt(selectedMember.getId());
-    }
-
-    @Transactional
-    public String loginMember(Long memberId) {
-        return jwtUtil.createJwt(memberId);
-    }
-
-    public LocalDateTime getJwtExpiredAt(String token) {
-        Date expiredAt = jwtUtil.getExpiredAt(token);
-        return LocalDateTime.ofInstant(expiredAt.toInstant(), ZoneId.systemDefault());
-    }
-
-    @Transactional
     public MemberInfo saveMemberInfo(MemberRequest.CreateInfoDto request, Long memberId) {
         Member selectedMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberHandler(MemberErrorStatus.MEMBER_NOT_FOUND));
-        MemberInfo newMemberInfo = MemberConverter.toMemberInfo(request, selectedMember);
+        Address selectedAddress = addressRepository.findById(request.getAdderessId())
+                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.ADDRESS_NOT_FOUND));
+        MemberInfo newMemberInfo = MemberConverter.toMemberInfo(request, selectedMember, selectedAddress);
 
         FinanceData newFinanceData = FinanceData.builder()
                 .member(selectedMember)
@@ -103,7 +81,7 @@ public class MemberCommandService {
         try {
             authCode = mailService.createCode();
             String title = "홈잇 이메일 인증번호";
-            String content = String.format("홈잇 이메일 인증번호 입니다.\n%s", authCode);
+            String content = String.format("홈잇 이메일 인증번호 입니다.%n%s", authCode);
             mailService.sendEmail(request.getEmail(), title, content);
         } catch (MessagingException e) {
             throw new MemberHandler(MemberErrorStatus.MAIL_BAD_REQUEST);
@@ -133,7 +111,11 @@ public class MemberCommandService {
         if (request.getEmail() != null) selectedMember.updateEmail(request.getEmail());
         if (request.getNickname() != null) selectedMember.updateNickname(request.getNickname());
         if (request.getIncome() != null) selectedMemberInfo.updateIncome(request.getIncome());
-        if (request.getAddressId() != null) selectedMemberInfo.updateAddress(request.getAddressId());
+        if (request.getAddressId() != null) {
+            Address selectedAddress = addressRepository.findById(request.getAddressId())
+                    .orElseThrow(() -> new MemberHandler(MemberErrorStatus.ADDRESS_NOT_FOUND));
+            selectedMemberInfo.updateAddress(selectedAddress);
+        }
     }
 
     @Transactional

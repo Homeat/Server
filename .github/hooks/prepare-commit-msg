@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Extract the current branch name
+BRANCH_NAME=$(git symbolic-ref --short HEAD)
+
+# Identify the JIRA ticket number from the branch name
+JIRA_TICKET=$(echo $BRANCH_NAME | grep -oE '[A-Z]+-[0-9]+')
+
+if [ ! -z "$JIRA_TICKET" ] && ! grep -q "^\[$JIRA_TICKET\]" "$1"; then
+    COMMIT_MSG=$(cat $1)
+    echo "[$JIRA_TICKET] $COMMIT_MSG" > $1
+fi

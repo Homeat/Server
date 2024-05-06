@@ -20,6 +20,7 @@ import homeat.backend.domain.homeatreport.repository.BadgeImgRepository;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
 import homeat.backend.domain.homeatreport.service.WeekSaveService;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.global.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,7 @@ public class HomeService {
     private final FinanceDataRepository financeDataRepository;
     private final BadgeImgRepository badgeImgRepository;
 
+    private final S3Service s3Service;
     private final OCRService ocrService;
     private final FileUtil fileUtil;
 
@@ -170,8 +172,7 @@ public class HomeService {
     /**
      * OCR 영수증 처리
      */
-    @Transactional
-    public Long processReceiptAndSaveExpense(MultipartFile file) throws IOException {
+    public HomeResponseDTO.ReceiptResultDTO processReceiptAndSaveExpense(MultipartFile file) throws IOException {
         // 파일 확장자 예외처리
         String originalFilename = file.getOriginalFilename();
         String extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
@@ -186,12 +187,16 @@ public class HomeService {
         String ocrResult = ocrService.processImage(convertedFile.getPath());
 
         // OCR 결과 로그
-         logger.info("OCR 결과 : {}", ocrResult);
+        logger.info("OCR 결과 : {}", ocrResult);
 
         // 총 금액 추출
         Long totalPrice = extractTotalExpense(ocrResult);
 
-        return totalPrice;
+        String imageUrl = s3Service.uploadReceiptImg(file);
+
+        HomeResponseDTO.ReceiptResultDTO result = new HomeResponseDTO.ReceiptResultDTO(totalPrice, imageUrl);
+
+        return result;
     }
 
     private Long extractTotalExpense(String ocrResult) {
@@ -258,6 +263,7 @@ public class HomeService {
                     .expense(dto.getMoney())
                     .costType(dto.getType())
                     .memo(dto.getMemo())
+                    .url(dto.getUrl())
                     .build();
 
             receiptRepo.save(receipt);
@@ -275,7 +281,7 @@ public class HomeService {
 
             return "영수증 저장 성공";
         } catch (Exception e) {
-            throw new RuntimeException("영수증 저잘 실패 : " + e.getMessage());
+            throw new RuntimeException("영수증 저장 실패 : " + e.getMessage());
         }
     }
 

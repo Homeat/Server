@@ -31,11 +31,8 @@ public class MemberRequest {
 
     @Getter
     public static class LoginDto {
-        @NotBlank
-        @Email
-        String email;
 
-        @NotBlank
+        String email;
         String password;
     }
 
@@ -47,7 +44,7 @@ public class MemberRequest {
         @Past
         LocalDate birth;
 
-        @Min(value = 0)
+        @Min(value = 1)
         Long adderessId;
 
         @Min(value = 0)
@@ -98,7 +95,7 @@ public class MemberRequest {
         String nickname;
 
         @Nullable
-        @Min(value = 0)
+        @Min(value = 1)
         Long addressId;
 
         @Nullable

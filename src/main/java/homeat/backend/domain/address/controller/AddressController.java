@@ -7,13 +7,9 @@ import homeat.backend.global.payload.CommonSuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,42 +20,27 @@ public class AddressController {
 
     private final AddressService addressService;
 
-    @Operation(summary = "동네 조회 api")
-    @GetMapping()
-    public ApiPayload<AddressResponse.NeighborhoodResultDTO> address(@RequestParam("latitude") Double x,
-                                                                     @RequestParam("logitude") Double y) {
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, addressService.getAddress(x, y));
+    @Operation(summary = "가장 가까운 동네 1개 조회 api")
+    @GetMapping("/closest")
+    public ApiPayload<AddressResponse.AddressDTO> getAddressClosest(@RequestParam("latitude") double lat,
+                                                                    @RequestParam("longitude") double lng) {
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, addressService.getClosestAddress(lat, lng));
     }
 
-    @Operation(summary = "주변 동네 조회 api")
-    @GetMapping("/neighborhood")
-    public ApiPayload<AddressResponse.GetNeighborhoodResultDTO> neighborhood(@RequestParam("latitude") Double x,
-                                                                            @RequestParam("logitude") Double y,
-                                                                            @RequestParam("page") int page) {
-
-        List<AddressResponse.NeighborhoodResultDTO> neighborhoods = addressService.getNegiborhood(x, y, page);
-        Long totalColumnCount = addressService.getTotalCount();
-
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, AddressResponse.GetNeighborhoodResultDTO.builder()
-                .totalColumnCount(totalColumnCount)
-                .totlaPageNum((totalColumnCount / 20) + 1)
-                .neighborhoods(neighborhoods)
-                .build());
+    @Operation(summary = "가까운 동네 페이징 조회 api")
+    @GetMapping("")
+    public ApiPayload<Slice<AddressResponse.AddressDTO>> getAddressList(@RequestParam("latitude") double lat,
+                                                                        @RequestParam("longitude") double lng,
+                                                                        @RequestParam("pageNum") int pageNum) {
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, addressService.getCloseAddressList(lat, lng, pageNum));
     }
 
-    @Operation(summary = "키워드 활용해서 주변 동네 조회 api")
-    @GetMapping("/neighboorhood/keyword")
-    public ApiPayload<AddressResponse.GetNeighborhoodResultDTO> address(@RequestParam("latitude") Double x,
-                                                                        @RequestParam("logitude") Double y,
-                                                                        @RequestParam("keyword") String keyword,
-                                                                        @RequestParam("page") int page) {
-        List<AddressResponse.NeighborhoodResultDTO> neighborhoods = addressService.getNegiborhoodWithKeyword(x, y, keyword, page);
-        Long totalColumnCount = addressService.getTotalCountByKeyword(keyword);
-
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, AddressResponse.GetNeighborhoodResultDTO.builder()
-                .totalColumnCount(totalColumnCount)
-                .totlaPageNum((totalColumnCount / 20) + 1)
-                .neighborhoods(neighborhoods)
-                .build());
+    @Operation(summary = "가까운 동네 검색 페이징 api")
+    @GetMapping("/search")
+    public ApiPayload<Slice<AddressResponse.AddressDTO>> getAddressSearchList(@RequestParam("latitude") double lat,
+                                                                            @RequestParam("longitude") double lng,
+                                                                            @RequestParam("keyword") String keyword,
+                                                                            @RequestParam("pageNum") int pageNum) {
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, addressService.getCloseAddressSearchList(lat, lng, keyword, pageNum));
     }
 }

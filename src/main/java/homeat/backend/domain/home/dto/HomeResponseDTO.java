@@ -11,6 +11,15 @@ public class HomeResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class ReceiptResultDTO {
+        private Long totalPrice;
+        private String imageUrl;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ExpenseResultDTO {
         private Long expense;
     }

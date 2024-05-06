@@ -28,4 +28,7 @@ public class Receipt extends BaseEntity {
 
     @Column(columnDefinition = "TEXT" /*, nullable = false */)
     private String memo;
+
+    @Column(columnDefinition = "TEXT")
+    private String url;
 }

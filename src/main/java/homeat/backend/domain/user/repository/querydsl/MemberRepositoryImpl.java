@@ -1,4 +1,4 @@
-package homeat.backend.domain.user.repository;
+package homeat.backend.domain.user.repository.querydsl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.user.entity.Gender;
@@ -8,11 +8,8 @@ import homeat.backend.domain.user.entity.QMemberInfo;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
-import static homeat.backend.domain.user.entity.QMember.member;
 
 @Repository
 public class MemberRepositoryImpl implements MemberRepositoryCustom {

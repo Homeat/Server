@@ -2,6 +2,7 @@ package homeat.backend.domain.post.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.domain.address.entity.Address;
+import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.global.common.domain.BaseEntity;
 import homeat.backend.domain.user.entity.Member;
 import java.util.ArrayList;
@@ -69,8 +70,6 @@ public class InfoTalk extends BaseEntity {
     @Builder.Default
     private List<InfoTalkComment> infoTalkComments = new ArrayList<>();
 
-    // 주소
-    private Long address;
 
     public void update(String title, String content) {
 

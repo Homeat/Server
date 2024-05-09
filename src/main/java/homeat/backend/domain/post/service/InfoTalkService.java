@@ -25,6 +25,7 @@ import homeat.backend.domain.post.repository.InfoTalkLoveRepository;
 import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,6 @@ public class InfoTalkService {
         InfoTalk infoTalk = InfoTalk.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
-                .address(dto.getAddressId())
                 .save(Save.저장)
                 .member(member)
                 .build();

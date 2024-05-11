@@ -1,0 +1,14 @@
+package homeat.backend.domain.homeatreport.repository;
+
+import homeat.backend.domain.analyze.entity.FinanceData;
+import homeat.backend.domain.homeatreport.entity.Week_Check;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface WeekCheckRepository extends JpaRepository<Week_Check, Long> {
+
+    Optional<Week_Check> findTopByFinanceDataOrderByIdDesc(FinanceData financeData);
+}

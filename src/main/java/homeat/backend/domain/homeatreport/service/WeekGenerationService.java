@@ -1,3 +1,4 @@
+/*
 package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
@@ -48,11 +49,13 @@ public class WeekGenerationService {
 
     }
 
-    /**
+    */
+/**
      *  1. 매주 일요일에 week 엔티티 새로 생성
      *  2. 직전 week 엔티티의 달성 여부, 홈잇티어, badge 이미지 최신화
      *  3. week 엔티티 생성 시점에 month가 바뀌었으면 financedata 엔티티 새로 생성
-     */
+     *//*
+
 
     // 회원가입 시점이 일요일 00시 00분인 경우 예외처리 필요
     public void generateNewWeek(FinanceData financeData) {
@@ -143,6 +146,7 @@ public class WeekGenerationService {
 
 }
 
+*/
 
 
 //@Service

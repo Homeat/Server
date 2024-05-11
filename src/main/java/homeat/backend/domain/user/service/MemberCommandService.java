@@ -4,8 +4,10 @@ import homeat.backend.domain.address.entity.Address;
 import homeat.backend.domain.address.repository.AddressRepository;
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
-import homeat.backend.domain.homeatreport.entity.Week;
-import homeat.backend.domain.homeatreport.repository.WeekRepository;
+import homeat.backend.domain.homeatreport.entity.Week_Analyze;
+import homeat.backend.domain.homeatreport.entity.Week_Check;
+import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
+import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
 import homeat.backend.domain.user.controller.MemberConverter;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.entity.Member;
@@ -37,7 +39,8 @@ public class MemberCommandService {
     private final MemberRepository memberRepository;
     private final MemberInfoRepository memberInfoRepository;
     private final FinanceDataRepository financeDataRepository;
-    private final WeekRepository weekRepository;
+    private final WeekCheckRepository weekCheckRepository;
+    private final WeekAnalyzeRepository weekAnalyzeRepository;
     private final AddressRepository addressRepository;
     private final BCryptPasswordEncoder encoder;
     private final JwtUtil jwtUtil;
@@ -91,12 +94,17 @@ public class MemberCommandService {
                 .build();
         financeDataRepository.save(newFinanceData);
 
-        Week newWeek = Week.builder()
+        Week_Check newWeekCheck = Week_Check.builder()
                 .financeData(newFinanceData)
                 .goal_price(request.getGoalPrice())
                 .next_goal_price(request.getGoalPrice())
                 .build();
-        weekRepository.save(newWeek);
+        weekCheckRepository.save(newWeekCheck);
+
+        Week_Analyze newWeekAnalyze = Week_Analyze.builder()
+                .financeData(newFinanceData)
+                .build();
+        weekAnalyzeRepository.save(newWeekAnalyze);
 
         return memberInfoRepository.save(newMemberInfo);
     }

@@ -34,7 +34,9 @@ public class Week_Analyze extends BaseEntity {
     // week_out_price setter
     public void setOutPrice(Long price) { this.week_out_price = price; }
 
-    // FinaceData setter
-    public void setFinanceData(FinanceData financeData) { this.financeData = financeData; }
+    // FinaceData updater
+    public void updateFinanceData(FinanceData financeData) {
+        this.financeData = financeData;
+    }
 
 }

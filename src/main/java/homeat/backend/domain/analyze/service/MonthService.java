@@ -2,8 +2,10 @@ package homeat.backend.domain.analyze.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
-import homeat.backend.domain.homeatreport.entity.Week;
-import homeat.backend.domain.homeatreport.repository.WeekRepository;
+import homeat.backend.domain.homeatreport.entity.Week_Analyze;
+import homeat.backend.domain.homeatreport.entity.Week_Check;
+import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
+import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +27,8 @@ public class MonthService {
 
     private final MemberRepository memberRepository;
     private final FinanceDataRepository financeDataRepository;
-    private final WeekRepository weekRepository;
+    private final WeekCheckRepository weekCheckRepository;
+    private final WeekAnalyzeRepository weekAnalyzeRepository;
 
     /**
      * 매달 1일, default row 생성
@@ -64,10 +67,18 @@ public class MonthService {
                 LocalDateTime endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY)).atStartOfDay();
 
                 if (startOfWeek.getMonth() != endOfWeek.getMonth()) {
-                    List<Week> weeks = weekRepository.findAllByCreatedAtBetween(startOfWeek, endOfWeek);
-                    weeks.forEach(week -> {
-                        week.updateFinanceData(savedfinanceData);
-                        weekRepository.save(week);
+                    List<Week_Check> weekChecks = weekCheckRepository.findAllByCreatedAtBetween(startOfWeek, endOfWeek);
+                    List<Week_Analyze> weekAnalyzes = weekAnalyzeRepository.findAllByCreatedAtBetween(startOfWeek, endOfWeek);
+                    // weekCheck의 financeData 업데이트
+                    weekChecks.forEach(weekCheck -> {
+                        weekCheck.updateFinanceData(savedfinanceData);
+                        weekCheckRepository.save(weekCheck);
+                    });
+
+                    // weekAnalyze의 financeData 업데이트
+                    weekAnalyzes.forEach(weekAnalyze -> {
+                        weekAnalyze.updateFinanceData(savedfinanceData);
+                        weekAnalyzeRepository.save(weekAnalyze);
                     });
                 }
             }

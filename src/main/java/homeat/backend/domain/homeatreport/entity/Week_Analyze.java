@@ -29,12 +29,12 @@ public class Week_Analyze extends BaseEntity {
     private Long week_out_price = 0L; // n째주 배달외식 가격
 
     // week_jipbap_price setter
-    private void setJipbapPrice(Long price) { this.week_jipbap_price = price; }
+    public void setJipbapPrice(Long price) { this.week_jipbap_price = price; }
 
     // week_out_price setter
-    private void setOutPrice(Long price) { this.week_out_price = price; }
+    public void setOutPrice(Long price) { this.week_out_price = price; }
 
     // FinaceData setter
-    private void setFinanceData(FinanceData financeData) { this.financeData = financeData; }
+    public void setFinanceData(FinanceData financeData) { this.financeData = financeData; }
 
 }

@@ -16,7 +16,10 @@ import homeat.backend.domain.home.service.ocr.OCRService;
 import homeat.backend.domain.homeatreport.entity.Badge_img;
 import homeat.backend.domain.homeatreport.entity.QWeek;
 import homeat.backend.domain.homeatreport.entity.Week;
+import homeat.backend.domain.homeatreport.entity.Week_Check;
 import homeat.backend.domain.homeatreport.repository.BadgeImgRepository;
+import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
+import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
 import homeat.backend.domain.homeatreport.service.WeekSaveService;
 import homeat.backend.domain.user.entity.Member;
@@ -46,7 +49,8 @@ public class HomeService {
 
     private final DailyExpenseRepo dailyExpenseRepo;
     private final ReceiptRepo receiptRepo;
-    private final WeekRepository weekRepository;
+    private final WeekCheckRepository weekCheckRepository;
+    private final WeekAnalyzeRepository weekAnalyzeRepository;
     private final FinanceDataRepository financeDataRepository;
     private final BadgeImgRepository badgeImgRepository;
 
@@ -69,10 +73,10 @@ public class HomeService {
                 .orElseThrow(() -> new NoSuchElementException("해당 회원의 FinanceData가 존재하지 않습니다."));
 
         // 다음 주 Week 조회
-        Week nextWeek = weekRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData)
+        Week_Check nextWeekCheck = weekCheckRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData)
                         .orElseThrow(() -> new NoSuchElementException("해당 회원의 Week가 존재하지 않습니다."));
 
-        nextWeek.updateNextGoalPrice(dto.getNextTargetExpense());
+        nextWeekCheck.updateNextGoalPrice(dto.getNextTargetExpense());
 
         return "다음 주 목표금액 수정완료";
     }
@@ -92,9 +96,9 @@ public class HomeService {
         FinanceData beforeMonthFinanceData = financeDataList.size() > 1 ? financeDataList.get(1) : null;
 
         // 이번 주 목표 식비 조회
-        Week thisWeek = weekRepository.findFirstByFinanceDataOrderByCreatedAtDesc(thisMonthFinanceData)
+        Week_Check thisWeekCheck = weekCheckRepository.findFirstByFinanceDataOrderByCreatedAtDesc(thisMonthFinanceData)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 Week가 존재하지 않습니다."));
-        Long thisWeekGoalPrice = thisWeek.getGoal_price();
+        Long thisWeekGoalPrice = thisWeekCheck.getGoal_price();
 
         int badgeCount = thisMonthFinanceData.getNum_homeat_badge().intValue();
         badgeCount = Math.min(badgeCount, 9);
@@ -271,11 +275,11 @@ public class HomeService {
             /**
              * exceed_price update
              */
-            Week week = weekRepository.findTopByFinanceDataOrderByIdDesc(financeData)
+            Week_Check weekCheck = weekCheckRepository.findTopByFinanceDataOrderByIdDesc(financeData)
                     .orElseThrow(() -> new NoSuchElementException("조회할 수 있는 Current Week가 없습니다."));
             Long accumulateExpense = accumulatePrice(financeData);
 
-            weekSaveService.saveWeek(week, accumulateExpense);
+            weekSaveService.saveWeekCheck(weekCheck, accumulateExpense);
 
             financeDataRepository.save(financeData);
 
@@ -342,7 +346,7 @@ public class HomeService {
         }
 
         // Week 엔티티 조회
-        Week week = weekRepository.findFirstByFinanceDataAndCreatedAtBetween(financeData, startOfWeek, endOfWeek)
+        Week_Check weekCheck = weekCheckRepository.findFirstByFinanceDataAndCreatedAtBetween(financeData, startOfWeek, endOfWeek)
                 .orElseThrow(() -> new NoSuchElementException("해당 Week 데이터가 없습니다."));
 
         // 일요일부터 선택 날짜까지의 DailyExpense 모두 조회
@@ -366,7 +370,7 @@ public class HomeService {
         totalUsedPrice += todayJipbapPrice + todayOutPrice;
 
         // 총 사용 금액과 목표 금액
-        long remainingGoalPrice = week.getGoal_price() - totalUsedPrice;
+        long remainingGoalPrice = weekCheck.getGoal_price() - totalUsedPrice;
 
         HomeResponseDTO.CalendarDayResultDTO result = HomeResponseDTO.CalendarDayResultDTO.builder()
                 .date(targetDate)

@@ -14,13 +14,10 @@ import homeat.backend.domain.home.repository.ReceiptRepo;
 import homeat.backend.domain.home.service.ocr.FileUtil;
 import homeat.backend.domain.home.service.ocr.OCRService;
 import homeat.backend.domain.homeatreport.entity.Badge_img;
-import homeat.backend.domain.homeatreport.entity.QWeek;
-import homeat.backend.domain.homeatreport.entity.Week;
 import homeat.backend.domain.homeatreport.entity.Week_Check;
 import homeat.backend.domain.homeatreport.repository.BadgeImgRepository;
 import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
 import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
-import homeat.backend.domain.homeatreport.repository.WeekRepository;
 import homeat.backend.domain.homeatreport.service.WeekSaveService;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.global.service.S3Service;
@@ -31,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.PreUpdate;
 import java.io.File;
 import java.io.IOException;
 import java.time.DayOfWeek;
@@ -40,7 +36,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
-import static homeat.backend.domain.homeatreport.entity.QWeek.week;
 
 @Service
 @Transactional(readOnly = true)

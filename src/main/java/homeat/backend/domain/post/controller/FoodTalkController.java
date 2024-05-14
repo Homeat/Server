@@ -6,6 +6,7 @@ import homeat.backend.domain.post.dto.FoodResponseDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkSaveDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
+import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
 import homeat.backend.domain.post.service.FoodTalkService;
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -104,8 +106,9 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 최신순 조회 및 검색, lastFoodTalkId 보다 작은 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/latest")
-    public ResponseEntity<?> getFoodTalkLatest(FoodTalkSearchCondition condition, @RequestParam Long lastFoodTalkId) {
-        return foodTalkService.getFoodTalkLatest(condition, lastFoodTalkId);
+    public ApiPayload<Slice<FoodTalkTotalView>> getFoodTalkLatest(FoodTalkSearchCondition condition, @RequestParam Long lastFoodTalkId) {
+        Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkLatest(condition, lastFoodTalkId);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK,result);
     }
 
     /**
@@ -113,8 +116,9 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 오래된 순 조회 및 검색, lastFoodTalkId 보다 큰 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/oldest")
-    public ResponseEntity<?> getFoodTalkOldest(FoodTalkSearchCondition condition, @RequestParam Long OldestFoodTalkId) {
-        return foodTalkService.getFoodTalkOldest(condition, OldestFoodTalkId);
+    public ApiPayload<Slice<FoodTalkTotalView>> getFoodTalkOldest(FoodTalkSearchCondition condition, @RequestParam Long OldestFoodTalkId) {
+        Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkOldest(condition, OldestFoodTalkId);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK,result);
     }
 
     /**
@@ -122,9 +126,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 공감 순 조회 및 검색, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/love")
-    public ResponseEntity<?> getFoodTalkByLove(FoodTalkSearchCondition condition, @RequestParam Long id,
+    public ApiPayload<Slice<FoodTalkTotalView>> getFoodTalkByLove(FoodTalkSearchCondition condition, @RequestParam Long id,
                                                @RequestParam int love) {
-        return foodTalkService.getFoodTalkByLove(condition, id, love);
+        Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkByLove(condition, id, love);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK,result);
     }
 
     /**
@@ -132,9 +137,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 조회 순 조회 및 검색, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/view")
-    public ResponseEntity<?> getFoodTalkByView(FoodTalkSearchCondition condition, @RequestParam Long id,
+    public ApiPayload<Slice<FoodTalkTotalView>> getFoodTalkByView(FoodTalkSearchCondition condition, @RequestParam Long id,
                                                @RequestParam int view) {
-        return foodTalkService.getFoodTalkByView(condition, id, view);
+        Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkByView(condition, id, view);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK,result);
     }
 
     /**

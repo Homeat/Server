@@ -9,6 +9,7 @@ import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkReplyViewDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkSaveDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
+import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
 import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.FoodRecipe;
 import homeat.backend.domain.post.entity.FoodRecipePicture;
@@ -31,6 +32,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -244,37 +246,38 @@ public class FoodTalkService {
     }
 
 
-    public ResponseEntity<?> getFoodTalkLatest(FoodTalkSearchCondition condition, Long lastFoodTalkId) {
+    public Slice<FoodTalkTotalView> getFoodTalkLatest(FoodTalkSearchCondition condition, Long lastFoodTalkId) {
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByIdLessThanOrderByIdDesc(condition,lastFoodTalkId,pageable));
+        return foodTalkRepository.findByIdLessThanOrderByIdDesc(condition, lastFoodTalkId, pageable);
 
 
     }
 
-    public ResponseEntity<?> getFoodTalkOldest(FoodTalkSearchCondition condition, Long OldestFoodTalkId) {
+    public Slice<FoodTalkTotalView> getFoodTalkOldest(FoodTalkSearchCondition condition, Long OldestFoodTalkId) {
 
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByIdGreaterThanOrderByIdAsc(condition,OldestFoodTalkId, pageable));
+
+        return foodTalkRepository.findByIdGreaterThanOrderByIdAsc(condition, OldestFoodTalkId, pageable);
     }
 
-    public ResponseEntity<?> getFoodTalkByLove(FoodTalkSearchCondition condition, Long id, int love) {
+    public Slice<FoodTalkTotalView> getFoodTalkByLove(FoodTalkSearchCondition condition, Long id, int love) {
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByLoveLessThanOrderByLoveDesc(condition,id,love, pageable));
+        return foodTalkRepository.findByLoveLessThanOrderByLoveDesc(condition,id,love, pageable);
 
 
     }
 
-    public ResponseEntity<?> getFoodTalkByView(FoodTalkSearchCondition condition, Long id, int view) {
+    public Slice<FoodTalkTotalView> getFoodTalkByView(FoodTalkSearchCondition condition, Long id, int view) {
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByViewLessThanOrderByViewDesc(condition,id,view, pageable));
+        return foodTalkRepository.findByViewLessThanOrderByViewDesc(condition,id,view, pageable);
     }
 
 

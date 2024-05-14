@@ -28,6 +28,9 @@ public class Week_Analyze extends BaseEntity {
     @Builder.Default
     private Long week_out_price = 0L; // n째주 배달외식 가격
 
+    @Builder.Default
+    private Integer weekZeroExpense = 1; // 이번주 지출 여부. 1이면 이번주 지출이 없음, 0이면 이번주 지출이 있음
+
     // week_jipbap_price setter
     public void setJipbapPrice(Long price) { this.week_jipbap_price = price; }
 

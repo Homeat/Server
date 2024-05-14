@@ -32,6 +32,9 @@ public class FinanceData extends BaseEntity {
     @Builder.Default
     private Long num_homeat_badge = 1L; // 홈잇뱃지 개수
 
+    @Builder.Default
+    private Integer monthZeroExpense = 1; // 이번달 지출 여부. 0이면 지출이 있는 경우, 1이면 지출이 없는 경우
+
     public void addJipbapPrice(long price) {
         this.month_jipbap_price += price;
     }

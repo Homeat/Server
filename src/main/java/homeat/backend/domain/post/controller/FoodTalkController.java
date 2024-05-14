@@ -1,12 +1,16 @@
 package homeat.backend.domain.post.controller;
 
 import homeat.backend.domain.post.dto.CommentDTO;
-import homeat.backend.domain.post.dto.FoodTalkDTO;
+import homeat.backend.domain.post.dto.FoodRequestDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkSaveDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.service.FoodTalkService;
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
+import homeat.backend.global.payload.ApiPayload;
+import homeat.backend.global.payload.CommonSuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import javax.validation.Valid;
@@ -39,10 +43,12 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 저장 api")
     @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> saveFoodTalk(@RequestBody @Valid FoodTalkDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<FoodResponseDTO.FoodTalkSaveDTO> saveFoodTalk(@RequestBody @Valid FoodRequestDTO.FoodTalkSaveDTO dto,
+                                                                    @AuthenticationPrincipal CustomUserDetails authentication) {
 
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.saveFoodTalk(dto, member);
+        FoodTalkSaveDTO result = foodTalkService.saveFoodTalk(dto, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
     }
 
     /**
@@ -50,13 +56,14 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 사진 저장 api")
     @PostMapping(value = "/upload/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadImages(@PathVariable("id") Long id,
+    public ApiPayload<String> uploadImages(@PathVariable("id") Long id,
                                           @RequestPart("imgUrl") List<MultipartFile> multipartFiles) {
         if (multipartFiles == null) {
             throw new IllegalArgumentException("사진이 없습니다");
         }
+        String result = foodTalkService.uploadImages(id, multipartFiles);
 
-        return foodTalkService.uploadImages(id, multipartFiles);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
     }
 
 
@@ -76,7 +83,7 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시글 수정 api, 아직 개발 X")
     @PatchMapping("/update/{id}")
-    public ResponseEntity<?> updateFoodTalk(@RequestBody @Valid FoodTalkDTO dto, @PathVariable("id") Long id) {
+    public ResponseEntity<?> updateFoodTalk(@RequestBody @Valid FoodRequestDTO.FoodTalkSaveDTO dto, @PathVariable("id") Long id) {
         return foodTalkService.updateFoodTalk(dto, id);
     }
 

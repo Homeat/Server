@@ -1,12 +1,14 @@
 package homeat.backend.domain.post.service;
 
 import homeat.backend.domain.post.dto.CommentDTO;
+import homeat.backend.domain.post.dto.FoodRequestDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkSaveDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.FoodRecipe;
 import homeat.backend.domain.post.entity.FoodRecipePicture;
 import homeat.backend.domain.post.entity.FoodTalk;
-import homeat.backend.domain.post.dto.FoodTalkDTO;
 import homeat.backend.domain.post.entity.FoodTalkComment;
 import homeat.backend.domain.post.entity.FoodTalkLove;
 import homeat.backend.domain.post.entity.FoodTalkReply;
@@ -19,7 +21,6 @@ import homeat.backend.domain.post.repository.FoodTalkCommentRepository;
 import homeat.backend.domain.post.repository.FoodTalkReplyRepository;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
 import homeat.backend.domain.user.entity.Member;
-import homeat.backend.domain.user.repository.MemberRepository;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,7 +49,7 @@ public class FoodTalkService {
 
     // 게시글 작성
     @Transactional
-    public ResponseEntity<?> saveFoodTalk(FoodTalkDTO dto, Member member) {
+    public FoodResponseDTO.FoodTalkSaveDTO saveFoodTalk(FoodRequestDTO.FoodTalkSaveDTO dto, Member member) {
 
         FoodTalk foodTalk = FoodTalk.builder()
                 .member(member)
@@ -61,12 +60,19 @@ public class FoodTalkService {
                 .build();
         foodTalkRepository.save(foodTalk);
 
+        FoodTalkSaveDTO result = FoodTalkSaveDTO.builder()
+                .id(foodTalk.getId())
+                .nickname(foodTalk.getMember().getNickname())
+                .name(dto.getName())
+                .memo(dto.getMemo())
+                .tag(dto.getTag())
+                .build();
 
-        return ResponseEntity.ok().body(foodTalk);
+        return result;
     }
 
     @Transactional
-    public ResponseEntity<?> uploadImages(Long id, List<MultipartFile> multipartFiles) {
+    public String uploadImages(Long id, List<MultipartFile> multipartFiles) {
         List<String> imgPaths = s3Service.upload(multipartFiles);
         System.out.println("IMG 경로들 : " + imgPaths);
         postBlankCheck(imgPaths);
@@ -83,7 +89,7 @@ public class FoodTalkService {
         }
 
 
-        return ResponseEntity.ok(foodTalk.getId() + "번 집밥토크 사진 저장완료");
+        return id + " 번 게시물 사진저장완료";
     }
 
     private void postBlankCheck(List<String> imgPaths) {
@@ -135,7 +141,7 @@ public class FoodTalkService {
 
 
     @Transactional
-    public ResponseEntity<?> updateFoodTalk(FoodTalkDTO dto, Long id) {
+    public ResponseEntity<?> updateFoodTalk(FoodRequestDTO.FoodTalkSaveDTO dto, Long id) {
         FoodTalk foodTalk = foodTalkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
 

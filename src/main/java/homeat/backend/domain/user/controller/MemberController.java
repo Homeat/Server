@@ -10,6 +10,7 @@ import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.domain.user.service.MemberCommandService;
 import homeat.backend.domain.user.service.MemberMapper;
 import homeat.backend.domain.user.service.MemberQueryService;
+import homeat.backend.domain.user.service.MemberService;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
 import homeat.backend.global.security.LoginService;
@@ -27,6 +28,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 
 
 @RestController
@@ -35,23 +37,30 @@ import javax.validation.Valid;
 @Tag(name = "Member", description = "회원 관련 api")
 @RequestMapping("/v1/members")
 public class MemberController {
-
+    private final MemberService memberService;
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
-    private final LoginService loginService;
-    private final JwtUtil jwtUtil;
 
-    @Operation(summary = "회원가입 api")
-    @PostMapping("/join")
-    public ApiPayload<MemberResponse.JoinResultDTO> create(@RequestBody @Valid MemberRequest.JoinDto request) {
-        Member member = memberCommandService.joinMember(request);
-//        String token = memberCommandService.loginMember(member.getId());
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberMapper.toJoinResultDTO(member, "token"));
+    @Operation(summary = "이메일 회원가입 api")
+    @PostMapping("/join/email")
+    public ApiPayload<?> joinByEmail(HttpServletResponse response,
+                                     @RequestBody @Valid MemberRequest.joinEmailDto requestDto) {
+        memberService.insertMemberByEmail(response, requestDto);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
+
+//    @Operation(summary = "카카오 회원가입 api")
+//    @PostMapping("/join/kakao")
+//    public ApiPayload<?> joinByKakao(HttpServletRequest request,
+//                                     HttpServletResponse response,
+//                                     @RequestBody @Valid MemberRequest.joinKakaoDto requestDto) {
+//        memberService.insertMemberByKakao(request, response, requestDto);
+//        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
+//    }
 
     @Operation(summary = "로그인 api", description = "헤더의 Authorization에 access 토큰, 쿠키에 refresh 토큰 반환")
     @PostMapping("/login")
-    public ApiPayload<?> login(@RequestBody MemberRequest.LoginDto request) {
+    public ApiPayload<?> login(@RequestBody MemberRequest.loginDto request) {
         // Filter에서 작동하지만, Swagger 위해서 틀만 작성
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
@@ -61,6 +70,34 @@ public class MemberController {
     public ApiPayload<?> logout() {
         // Filter에서 작동하지만, Swagger 위해서 틀만 작성
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "토큰 재발급 api", description = "Cookie에 기존 refresh 토큰 필요, 헤더의 Authorization에 access 토큰, 쿠키에 refresh 토큰 반환")
+    @PostMapping("/reissue")
+    public ApiPayload<?> reissue(HttpServletRequest request, HttpServletResponse response) {
+        memberService.reissueToken(request, response);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "비밀번호 찾기(인증 후, 재설정) api")
+    @PatchMapping("/find-password")
+    public ApiPayload<?> findPassword(@RequestBody @Valid MemberRequest.FindPasswordDto request) {
+        memberService.findPassword(request);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "회원 가입시, 이메일 인증 요청 api(이메일이 중복되지 않아야 함)")
+    @PostMapping("/email-cerification")
+    public ApiPayload<MemberResponse.emailCheckDto> emailCerification(@RequestBody @Valid MemberRequest.emailCheckDto request) {
+        String authCode = memberService.certifyEmail(request);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberMapper.toEmailCheck(authCode));
+    }
+
+    @Operation(summary = "비밀번호 찾기시, 이메일 검증 요청 api(가입된 이메일이 존재해야 함)")
+    @PostMapping("/email-verification")
+    public ApiPayload<MemberResponse.emailCheckDto> emailVerification(@RequestBody @Valid MemberRequest.emailCheckDto request) {
+        String authCode = memberService.verifyEmail(request);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberMapper.toEmailCheck(authCode));
     }
 
     @Operation(summary = "회원정보 api")
@@ -78,13 +115,6 @@ public class MemberController {
     public ApiPayload<MemberResponse.CreateInfoResultDTO> createMypage(@RequestBody @Valid MemberRequest.CreateInfoDto request, @AuthenticationPrincipal CustomUserDetails authentication) {
         MemberInfo memberInfo = memberCommandService.saveMemberInfo(request, authentication.getUserId());
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberMapper.toCreateInfoResultDTO(memberInfo));
-    }
-
-    @Operation(summary = "회원가입시, 이메일 인증 요청 api")
-    @PostMapping("/email-verification")
-    public ApiPayload<MemberResponse.EmailVerifyDto> emailVerificationReq(@RequestBody @Valid MemberRequest.EmailVerifyDto request) {
-        String authCode = memberCommandService.sendCodeToEmail(request);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberMapper.toEmailVerifyDTO(authCode));
     }
 
     @Operation(summary = "비밀번호 변경 api")
@@ -126,27 +156,6 @@ public class MemberController {
     @PatchMapping("/mypage/reactivate")
     public ApiPayload<?> reactivate(@AuthenticationPrincipal CustomUserDetails authentication) {
         memberCommandService.reactivate(authentication.getUserId());
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
-    }
-
-    @Operation(summary = "비밀번호 찾기 api")
-    @PatchMapping("/find-password")
-    public ApiPayload<?> findPassword(@RequestBody @Valid MemberRequest.FindPasswordDto request) {
-        memberCommandService.findPassword(request);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
-    }
-
-    @Operation(summary = "토큰 재발급 api", description = "Cookie에 기존 refresh 토큰 필요, 헤더의 Authorization에 access 토큰, 쿠키에 refresh 토큰 반환")
-    @PostMapping("/reissue")
-    public ApiPayload<?> reissue(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = loginService.validateRefreshToken(request.getCookies());
-
-        Long userId = jwtUtil.getUserId(refreshToken);
-        String newAccessToken = loginService.issueAccessToken(userId);
-        Cookie newRefreshToken = loginService.reissueRefreshToken(userId, refreshToken);
-
-        response.addHeader("Authorization", newAccessToken);
-        response.addCookie(newRefreshToken);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 }

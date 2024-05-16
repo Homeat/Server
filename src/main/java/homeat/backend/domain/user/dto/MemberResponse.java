@@ -11,6 +11,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class MemberResponse {
+    @Getter
+    @Builder
+    public static class emailCheckDto {
+        String authCode;
+    }
 
     @Builder
     @Getter

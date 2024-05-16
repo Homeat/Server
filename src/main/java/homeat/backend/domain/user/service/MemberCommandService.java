@@ -74,24 +74,6 @@ public class MemberCommandService {
     }
 
     @Transactional
-    public String sendCodeToEmail(MemberRequest.EmailVerifyDto request) {
-        String authCode;
-
-        try {
-            authCode = mailService.createCode();
-            String title = "홈잇 이메일 인증번호";
-            String content = String.format("홈잇 이메일 인증번호 입니다.%n%s", authCode);
-            mailService.sendEmail(request.getEmail(), title, content);
-        } catch (MessagingException e) {
-            throw new GeneralException(MemberErrorStatus.MAIL_BAD_REQUEST);
-        } catch (NoSuchAlgorithmException e) {
-            throw new GeneralException(MemberErrorStatus.AUTH_CODE_ERROR);
-        }
-
-        return authCode;
-    }
-
-    @Transactional
     public void updatePassword(MemberRequest.UpdatePasswordDto request, Long memberId) {
         Member selectedMember = memberRepository.findById(memberId).orElseThrow();
 
@@ -148,11 +130,5 @@ public class MemberCommandService {
         selectedMember.reactivate();
     }
 
-    @Transactional
-    public void findPassword(MemberRequest.FindPasswordDto request) {
-        Member selectedMember = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new GeneralException(MemberErrorStatus.EMAIL_NOT_FOUND));
 
-        selectedMember.updatePassword(encoder.encode(request.getNewPassword()));
-    }
 }

@@ -12,6 +12,28 @@ import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 public class MemberRequest {
+    @Getter
+    public static class joinEmailDto {
+        @NotBlank
+        @Email
+        @ExistEmail
+        String email;
+
+        @NotBlank
+        String password;
+    }
+
+    @Getter
+    public static class joinKakaoDto {
+        @Min(0)
+        Long kakaoId;
+    }
+
+    @Getter
+    public static class loginDto {
+        String email;
+        String password;
+    }
 
     @Getter
     @Setter
@@ -30,10 +52,10 @@ public class MemberRequest {
     }
 
     @Getter
-    public static class LoginDto {
-
+    public static class emailCheckDto {
+        @NotBlank
+        @Email
         String email;
-        String password;
     }
 
     @Getter
@@ -52,14 +74,6 @@ public class MemberRequest {
 
         @Min(value = 0)
         Long goalPrice;
-    }
-
-    @Getter
-    public static class EmailVerifyDto {
-        @NotBlank
-        @Email
-        @ExistEmail
-        String email;
     }
 
     @Getter

@@ -41,8 +41,7 @@ dependencies {
 
 	// swagger 설정
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.15'
-	implementation 'io.springfox:springfox-swagger2:2.9.2'
-	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+	implementation 'org.springdoc:springdoc-openapi-security:1.6.15'
 
 	// AWS s3 설정
 	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws', version: '2.2.5.RELEASE'

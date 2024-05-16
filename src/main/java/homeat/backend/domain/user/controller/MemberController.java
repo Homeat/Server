@@ -1,20 +1,15 @@
 package homeat.backend.domain.user.controller;
 
-import homeat.backend.domain.address.controller.AddressConvertor;
-import homeat.backend.domain.address.dto.AddressResponse;
+
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.dto.MemberResponse;
-import homeat.backend.domain.user.entity.Member;
-import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.domain.user.service.MemberCommandService;
 import homeat.backend.domain.user.service.MemberMapper;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.domain.user.service.MemberService;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
-import homeat.backend.global.security.LoginService;
-import homeat.backend.global.security.jwt.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +19,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 
 
 @RestController
@@ -81,7 +74,7 @@ public class MemberController {
 
     @Operation(summary = "비밀번호 찾기(인증 후, 재설정) api")
     @PatchMapping("/find-password")
-    public ApiPayload<?> findPassword(@RequestBody @Valid MemberRequest.FindPasswordDto request) {
+    public ApiPayload<?> findPassword(@RequestBody @Valid MemberRequest.findPasswordDto request) {
         memberService.findPassword(request);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
@@ -100,36 +93,9 @@ public class MemberController {
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberMapper.toEmailCheck(authCode));
     }
 
-    @Operation(summary = "회원정보 api")
-    @GetMapping("/mypage")
-    public ApiPayload<MemberResponse.MyPageResultDTO> mypage(@AuthenticationPrincipal CustomUserDetails authentication) {
-        Long memberId = authentication.getUserId();
-        Member member = memberQueryService.mypageMember(memberId);
-        MemberInfo memberInfo = memberQueryService.mypageMemberInfo(memberId);
-        AddressResponse.AddressDTO addressInfo = AddressConvertor.toAddressInfo(memberInfo.getAddress());
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberMapper.toMyPageResultDTO(member, memberInfo, addressInfo));
-    }
 
-    @Operation(summary = "회원가입시, 부가 회원정보 추가 api")
-    @PostMapping("/mypage")
-    public ApiPayload<MemberResponse.CreateInfoResultDTO> createMypage(@RequestBody @Valid MemberRequest.CreateInfoDto request, @AuthenticationPrincipal CustomUserDetails authentication) {
-        MemberInfo memberInfo = memberCommandService.saveMemberInfo(request, authentication.getUserId());
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberMapper.toCreateInfoResultDTO(memberInfo));
-    }
 
-    @Operation(summary = "비밀번호 변경 api")
-    @PatchMapping("/mypage/password")
-    public ApiPayload<?> updatePassword(@RequestBody @Valid MemberRequest.UpdatePasswordDto request, @AuthenticationPrincipal CustomUserDetails authentication) {
-        memberCommandService.updatePassword(request, authentication.getUserId());
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
-    }
 
-    @Operation(summary = "회원정보 수정 api")
-    @PatchMapping("/mypage")
-    public ApiPayload<?> updateInfo(@RequestBody @Valid MemberRequest.UpdateInfoDto request, @AuthenticationPrincipal CustomUserDetails authentication) {
-        memberCommandService.updateInfo(request, authentication.getUserId());
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
-    }
 
     @Operation(summary = "프로필 사진 수정 api")
     @PatchMapping(value = "/mypage/profileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

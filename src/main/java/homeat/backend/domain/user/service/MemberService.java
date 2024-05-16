@@ -57,7 +57,7 @@ public class MemberService {
     }
 
     @Transactional
-    public void findPassword(MemberRequest.FindPasswordDto request) {
+    public void findPassword(MemberRequest.findPasswordDto request) {
         Member selectedMember = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new GeneralException(MemberErrorStatus.EMAIL_NOT_FOUND));
 

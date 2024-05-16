@@ -6,14 +6,13 @@ import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
 import homeat.backend.domain.homeatreport.entity.Week;
 import homeat.backend.domain.homeatreport.repository.WeekRepository;
-import homeat.backend.domain.user.controller.MemberConverter;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.entity.MemberInfo;
-import homeat.backend.domain.user.handler.MemberErrorStatus;
-import homeat.backend.domain.user.handler.MemberHandler;
+import homeat.backend.domain.user.controller.MemberErrorStatus;
 import homeat.backend.domain.user.repository.MemberInfoRepository;
 import homeat.backend.domain.user.repository.MemberRepository;
+import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.security.jwt.JwtUtil;
 import homeat.backend.global.service.MailService;
 import homeat.backend.global.service.S3Service;
@@ -46,7 +45,7 @@ public class MemberCommandService {
 
         // 중복 이메일, 닉네임 -> dto 에서 처리
         request.setPassword(encoder.encode(request.getPassword()));
-        Member newMember = MemberConverter.toMember(request);
+        Member newMember = MemberMapper.toMember(request);
 
         return memberRepository.save(newMember);
     }
@@ -54,10 +53,10 @@ public class MemberCommandService {
     @Transactional
     public MemberInfo saveMemberInfo(MemberRequest.CreateInfoDto request, Long memberId) {
         Member selectedMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(MemberErrorStatus.MEMBER_NOT_FOUND));
         Address selectedAddress = addressRepository.findById(request.getAdderessId())
-                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.ADDRESS_NOT_FOUND));
-        MemberInfo newMemberInfo = MemberConverter.toMemberInfo(request, selectedMember, selectedAddress);
+                .orElseThrow(() -> new GeneralException(MemberErrorStatus.ADDRESS_NOT_FOUND));
+        MemberInfo newMemberInfo = MemberMapper.toMemberInfo(request, selectedMember, selectedAddress);
 
         FinanceData newFinanceData = FinanceData.builder()
                 .member(selectedMember)
@@ -84,9 +83,9 @@ public class MemberCommandService {
             String content = String.format("홈잇 이메일 인증번호 입니다.%n%s", authCode);
             mailService.sendEmail(request.getEmail(), title, content);
         } catch (MessagingException e) {
-            throw new MemberHandler(MemberErrorStatus.MAIL_BAD_REQUEST);
+            throw new GeneralException(MemberErrorStatus.MAIL_BAD_REQUEST);
         } catch (NoSuchAlgorithmException e) {
-            throw new MemberHandler(MemberErrorStatus.AUTH_CODE_ERROR);
+            throw new GeneralException(MemberErrorStatus.AUTH_CODE_ERROR);
         }
 
         return authCode;
@@ -97,7 +96,7 @@ public class MemberCommandService {
         Member selectedMember = memberRepository.findById(memberId).orElseThrow();
 
         if (!encoder.matches(request.getOriginPassword(), selectedMember.getPassword())) {
-            throw new MemberHandler(MemberErrorStatus.INVALID_PASSWORD);
+            throw new GeneralException(MemberErrorStatus.INVALID_PASSWORD);
         }
 
         selectedMember.updatePassword(encoder.encode(request.getNewPassword()));
@@ -113,7 +112,7 @@ public class MemberCommandService {
         if (request.getIncome() != null) selectedMemberInfo.updateIncome(request.getIncome());
         if (request.getAddressId() != null) {
             Address selectedAddress = addressRepository.findById(request.getAddressId())
-                    .orElseThrow(() -> new MemberHandler(MemberErrorStatus.ADDRESS_NOT_FOUND));
+                    .orElseThrow(() -> new GeneralException(MemberErrorStatus.ADDRESS_NOT_FOUND));
             selectedMemberInfo.updateAddress(selectedAddress);
         }
     }
@@ -152,7 +151,7 @@ public class MemberCommandService {
     @Transactional
     public void findPassword(MemberRequest.FindPasswordDto request) {
         Member selectedMember = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new MemberHandler(MemberErrorStatus.EMAIL_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(MemberErrorStatus.EMAIL_NOT_FOUND));
 
         selectedMember.updatePassword(encoder.encode(request.getNewPassword()));
     }

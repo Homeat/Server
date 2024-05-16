@@ -8,6 +8,7 @@ import homeat.backend.domain.user.dto.MemberResponse;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.domain.user.service.MemberCommandService;
+import homeat.backend.domain.user.service.MemberMapper;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
@@ -45,7 +46,7 @@ public class MemberController {
     public ApiPayload<MemberResponse.JoinResultDTO> create(@RequestBody @Valid MemberRequest.JoinDto request) {
         Member member = memberCommandService.joinMember(request);
 //        String token = memberCommandService.loginMember(member.getId());
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toJoinResultDTO(member, "token"));
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberMapper.toJoinResultDTO(member, "token"));
     }
 
     @Operation(summary = "로그인 api", description = "헤더의 Authorization에 access 토큰, 쿠키에 refresh 토큰 반환")
@@ -69,21 +70,21 @@ public class MemberController {
         Member member = memberQueryService.mypageMember(memberId);
         MemberInfo memberInfo = memberQueryService.mypageMemberInfo(memberId);
         AddressResponse.AddressDTO addressInfo = AddressConvertor.toAddressInfo(memberInfo.getAddress());
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toMyPageResultDTO(member, memberInfo, addressInfo));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberMapper.toMyPageResultDTO(member, memberInfo, addressInfo));
     }
 
     @Operation(summary = "회원가입시, 부가 회원정보 추가 api")
     @PostMapping("/mypage")
     public ApiPayload<MemberResponse.CreateInfoResultDTO> createMypage(@RequestBody @Valid MemberRequest.CreateInfoDto request, @AuthenticationPrincipal CustomUserDetails authentication) {
         MemberInfo memberInfo = memberCommandService.saveMemberInfo(request, authentication.getUserId());
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberConverter.toCreateInfoResultDTO(memberInfo));
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberMapper.toCreateInfoResultDTO(memberInfo));
     }
 
     @Operation(summary = "회원가입시, 이메일 인증 요청 api")
     @PostMapping("/email-verification")
     public ApiPayload<MemberResponse.EmailVerifyDto> emailVerificationReq(@RequestBody @Valid MemberRequest.EmailVerifyDto request) {
         String authCode = memberCommandService.sendCodeToEmail(request);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberConverter.toEmailVerifyDTO(authCode));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberMapper.toEmailVerifyDTO(authCode));
     }
 
     @Operation(summary = "비밀번호 변경 api")

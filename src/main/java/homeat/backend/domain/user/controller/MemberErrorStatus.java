@@ -1,4 +1,4 @@
-package homeat.backend.domain.user.handler;
+package homeat.backend.domain.user.controller;
 
 import homeat.backend.global.payload.BaseStatus;
 import homeat.backend.global.payload.ReasonDTO;

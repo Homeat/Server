@@ -1,4 +1,4 @@
-package homeat.backend.domain.user.controller;
+package homeat.backend.domain.user.service;
 
 import homeat.backend.domain.address.dto.AddressResponse;
 import homeat.backend.domain.address.entity.Address;
@@ -9,7 +9,7 @@ import homeat.backend.domain.user.entity.MemberInfo;
 
 import java.time.LocalDateTime;
 
-public class MemberConverter {
+public class MemberMapper {
 
     public static Member toMember(MemberRequest.JoinDto request) {
         return Member.builder()

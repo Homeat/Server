@@ -1,6 +1,6 @@
 package homeat.backend.domain.post.controller;
 
-import homeat.backend.domain.post.dto.CommentDTO;
+import homeat.backend.domain.post.dto.FoodRequestDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.service.InfoTalkService;
@@ -130,7 +130,7 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 댓글 작성, id는 정보토크 게시물 id 입니다.")
     @PostMapping("/comment/{id}")
-    public ResponseEntity<?> saveComment(@RequestBody @Valid CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ResponseEntity<?> saveComment(@RequestBody @Valid FoodRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
 
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         return infoTalkService.saveComment(dto, member);
@@ -151,7 +151,7 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 대댓글 작성, id는 댓글 아이디입니다.")
     @PostMapping("/reply/{id}")
-    public ResponseEntity<?> saveReply(@RequestBody @Valid CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ResponseEntity<?> saveReply(@RequestBody @Valid FoodRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         return infoTalkService.saveReply(dto, member);
     }

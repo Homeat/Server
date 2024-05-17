@@ -1,16 +1,9 @@
 package homeat.backend.domain.post.service;
 
-import homeat.backend.domain.address.entity.Address;
 import homeat.backend.domain.address.repository.AddressRepository;
-import homeat.backend.domain.post.dto.CommentDTO;
-import homeat.backend.domain.post.dto.InfoHashTagDTO;
+import homeat.backend.domain.post.dto.FoodRequestDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
-import homeat.backend.domain.post.entity.FoodPicture;
-import homeat.backend.domain.post.entity.FoodTalk;
-import homeat.backend.domain.post.entity.FoodTalkComment;
-import homeat.backend.domain.post.entity.FoodTalkLove;
-import homeat.backend.domain.post.entity.FoodTalkReply;
 import homeat.backend.domain.post.entity.InfoHashTag;
 import homeat.backend.domain.post.entity.InfoPicture;
 import homeat.backend.domain.post.entity.InfoTalk;
@@ -25,11 +18,8 @@ import homeat.backend.domain.post.repository.InfoTalkLoveRepository;
 import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
 import homeat.backend.domain.user.entity.Member;
-import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.global.service.S3Service;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -191,7 +181,7 @@ public class InfoTalkService {
 
 
     @Transactional
-    public ResponseEntity<?> saveComment(CommentDTO dto, Member member) {
+    public ResponseEntity<?> saveComment(FoodRequestDTO.CommentDTO dto, Member member) {
 
         InfoTalk infoTalk = infoTalkRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 게시글을 찾을 수 없습니다."));
@@ -236,7 +226,7 @@ public class InfoTalkService {
     }
 
     @Transactional
-    public ResponseEntity<?> saveReply(CommentDTO dto, Member member) {
+    public ResponseEntity<?> saveReply(FoodRequestDTO.CommentDTO dto, Member member) {
         InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 댓글을 찾을 수 없습니다."));
 

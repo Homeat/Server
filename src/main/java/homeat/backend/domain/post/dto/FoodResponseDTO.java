@@ -56,6 +56,7 @@ public class FoodResponseDTO {
     public static class FoodTalkCommentViewDTO {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
+        private Long commentId;
         private String commentNickName;
         private String content;
         private List<FoodResponseDTO.FoodTalkReplyViewDTO> foodTalkReplies;
@@ -66,9 +67,13 @@ public class FoodResponseDTO {
     public static class FoodTalkReplyViewDTO {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
+        private Long replyId;
         private String replyNickName;
         private String content;
     }
+
+
+
 
 
 

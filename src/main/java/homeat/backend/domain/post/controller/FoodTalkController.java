@@ -1,6 +1,5 @@
 package homeat.backend.domain.post.controller;
 
-import homeat.backend.domain.post.dto.CommentDTO;
 import homeat.backend.domain.post.dto.FoodRequestDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkSaveDTO;
@@ -13,6 +12,7 @@ import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import javax.validation.Valid;
@@ -148,11 +148,12 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 레시피 업로드, List 형식입니다!, id는 집밥토크 게시물 id 입니다.")
     @PostMapping(value = "/recipe/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> saveRecipe(@PathVariable("id") Long id, @RequestParam("recipe") String recipe,
+    public ApiPayload<String> saveRecipe(@PathVariable("id") Long id, @RequestParam("recipe") String recipe,
                                         @RequestParam("ingredient") String ingredient, @RequestParam("tip") String tip,
                                         @RequestParam(value = "files", required = false) List<MultipartFile> files) {
 
-        return foodTalkService.saveRecipe(id, recipe, ingredient, tip, files);
+        String result = foodTalkService.saveRecipe(id, recipe, ingredient, tip, files);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
     }
 
     /**
@@ -160,10 +161,11 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 댓글 작성, id는 집밥토크 게시물 id 입니다.")
     @PostMapping("/comment/{id}")
-    public ResponseEntity<?> saveComment(@RequestBody @Valid CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<String> saveComment(@RequestBody @Valid FoodRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
 
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.saveComment(dto, member);
+        String result = foodTalkService.saveComment(dto, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED,result);
     }
 
     /**
@@ -171,9 +173,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "댓글 삭제 api입니다. id는 댓글 아이디입니다.")
     @DeleteMapping("/comment/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<String> deleteComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.deleteComment(commentId, member);
+        String result = foodTalkService.deleteComment(commentId, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
@@ -181,9 +184,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 대댓글 작성, id는 댓글 아이디입니다.")
     @PostMapping("/reply/{id}")
-    public ResponseEntity<?> saveReply(@RequestBody @Valid CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<String> saveReply(@RequestBody @Valid FoodRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.saveReply(dto, member);
+        String result = foodTalkService.saveReply(dto, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
     }
 
     /**
@@ -191,9 +195,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "대댓글 삭제, id는 대댓글 아이디입니다")
     @DeleteMapping("/reply/{id}")
-    public ResponseEntity<?> deleteReply(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<String> deleteReply(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.deleteReply(id, member);
+        String result = foodTalkService.deleteReply(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
@@ -201,9 +206,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시물 공감하기 api입니다. id는 집밥토크 게시물 id 입니다")
     @PostMapping("/love/{id}")
-    public ResponseEntity<?> saveLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<String> saveLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.saveLove(id, member);
+        String result = foodTalkService.saveLove(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
@@ -211,8 +217,9 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시물 공감 취소하기, id는 집밥토크 게시물 id 입니다")
     @DeleteMapping("/love/{id}")
-    public ResponseEntity<?> deleteLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<String> deleteLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.deleteLove(id, member);
+        String result = foodTalkService.deleteLove(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 }

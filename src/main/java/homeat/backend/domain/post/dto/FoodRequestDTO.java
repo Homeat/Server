@@ -5,6 +5,7 @@ import java.util.List;
 import javax.mail.Multipart;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +19,12 @@ public class FoodRequestDTO {
         private String memo;
         @NotNull
         private Tag tag;
+    }
+
+    @Getter
+    public static class CommentDTO {
+        Long id;
+        String content;
     }
 
 

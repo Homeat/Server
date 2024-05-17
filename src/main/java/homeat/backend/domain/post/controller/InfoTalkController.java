@@ -168,20 +168,22 @@ public class InfoTalkController {
      * 대댓글 작성
      */
     @Operation(summary = "정보토크 대댓글 작성, id는 댓글 아이디입니다.")
-    @PostMapping("/reply/{id}")
-    public ResponseEntity<?> saveReply(@RequestBody @Valid InfoRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+    @PostMapping("/reply")
+    public ApiPayload<String> saveReply(@RequestBody @Valid InfoRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return infoTalkService.saveReply(dto, member);
+        String result = infoTalkService.saveReply(dto, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
     }
 
     /**
      * 대댓글 삭제
      */
     @Operation(summary = "대댓글 삭제, id는 대댓글 아이디입니다")
-    @DeleteMapping("/reply/{id}")
-    public ResponseEntity<?> deleteReply(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    @DeleteMapping("/reply/{replyId}")
+    public ApiPayload<String> deleteReply(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return infoTalkService.deleteReply(id, member);
+        String result = infoTalkService.deleteReply(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**

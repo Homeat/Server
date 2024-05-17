@@ -310,7 +310,7 @@ public class InfoTalkService {
     }
 
     @Transactional
-    public ResponseEntity<?> saveReply(InfoRequestDTO.CommentDTO dto, Member member) {
+    public String saveReply(InfoRequestDTO.CommentDTO dto, Member member) {
         InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 댓글을 찾을 수 없습니다."));
 
@@ -331,11 +331,11 @@ public class InfoTalkService {
 
 
 
-        return ResponseEntity.ok().body(infoTalkReply);
+        return dto.getId() + "번 댓글의 대댓글 작성을 완료하였습니다.";
     }
 
     @Transactional
-    public ResponseEntity<?> deleteReply(Long id, Member member) {
+    public String deleteReply(Long id, Member member) {
         InfoTalkReply infoTalkReply = infoTalkReplyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 댓글을 찾을 수 없습니다."));
 
@@ -352,7 +352,7 @@ public class InfoTalkService {
 
         infoTalk.updateCommentSize(commentNum + replyNum);
 
-        return ResponseEntity.ok(id + "번 댓글 삭제 완료");
+        return id + "번 대댓글 삭제 완료";
     }
 
     @Transactional

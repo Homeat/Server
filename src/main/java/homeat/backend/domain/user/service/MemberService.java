@@ -33,7 +33,7 @@ public class MemberService {
         Member newMember = MemberMapper.toEmailMember(requestDto.getEmail(), encoder.encode(requestDto.getPassword()));
         Member savedMember = memberRepository.save(newMember);
 
-        issueToken(response, savedMember.getId());
+        issueToken(savedMember.getId(), response);
     }
 
 //    @Transactional
@@ -76,9 +76,9 @@ public class MemberService {
         return sendCodeToEmail(request.getEmail());
     }
 
-    private void issueToken(HttpServletResponse response, Long userId) {
-        String newAccessToken = loginService.issueAccessToken(userId);
-        Cookie newRefreshToken = loginService.issueRefreshToken(userId);
+    private void issueToken(Long memberId, HttpServletResponse response) {
+        String newAccessToken = loginService.issueAccessToken(memberId);
+        Cookie newRefreshToken = loginService.issueRefreshToken(memberId);
 
         response.addHeader("Authorization", newAccessToken);
         response.addCookie(newRefreshToken);

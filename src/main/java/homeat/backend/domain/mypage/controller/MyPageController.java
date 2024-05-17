@@ -9,9 +9,11 @@ import homeat.backend.global.payload.CommonSuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
@@ -63,6 +65,35 @@ public class MyPageController {
     public ApiPayload<?> updatePassword(@AuthenticationPrincipal CustomUserDetails authentication,
                                         @RequestBody @Valid MyPageRequest.patchPasswordDto request) {
         myPageService.updatePassword(authentication.getUserId(), request);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "프로필 사진 수정 api")
+    @PatchMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiPayload<?> updateProfileImg(@AuthenticationPrincipal CustomUserDetails authentication,
+                                          @RequestParam("profileImg") MultipartFile profileImg) {
+        myPageService.updateProfileImg(authentication.getUserId(), profileImg);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "프로필 사진 삭제 api")
+    @DeleteMapping("/profile")
+    public ApiPayload<?> deleteProfileImg(@AuthenticationPrincipal CustomUserDetails authentication) {
+        myPageService.deleteProfileImg(authentication.getUserId());
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "회원탈퇴(비활성) api")
+    @PatchMapping("/withdraw")
+    public ApiPayload<?> withdraw(@AuthenticationPrincipal CustomUserDetails authentication) {
+        myPageService.withdraw(authentication.getUserId());
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "회원 재활성 api")
+    @PatchMapping("/reactivate")
+    public ApiPayload<?> reactivate(@AuthenticationPrincipal CustomUserDetails authentication) {
+        myPageService.reactivate(authentication.getUserId());
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 }

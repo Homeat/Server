@@ -356,7 +356,7 @@ public class InfoTalkService {
     }
 
     @Transactional
-    public ResponseEntity<?> saveLove(Long id, Member member) {
+    public String saveLove(Long id, Member member) {
         InfoTalk infoTalk = infoTalkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
 
@@ -374,11 +374,11 @@ public class InfoTalkService {
 
         infoTalkLoveRepository.save(infoTalkLove);
 
-        return ResponseEntity.ok(id + " 글에 대해 좋아요를 눌렀습니다.");
+        return id + "번 글에 대해 좋아요를 눌렀습니다.";
     }
 
     @Transactional
-    public ResponseEntity<?> deleteLove(Long id, Member member) {
+    public String deleteLove(Long id, Member member) {
 
 
         InfoTalk infoTalk = infoTalkRepository.findById(id)
@@ -391,6 +391,6 @@ public class InfoTalkService {
 
         infoTalkLoveRepository.delete(infoTalkLove);
 
-        return ResponseEntity.ok(id + " 글에 대해 좋아요를 취소했습니다.");
+        return id + "번 글에 대해 좋아요를 취소했습니다.";
     }
 }

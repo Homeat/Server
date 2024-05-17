@@ -191,9 +191,10 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 게시물 공감하기 api입니다. id는 정보토크 게시물 id 입니다")
     @PostMapping("/love/{id}")
-    public ResponseEntity<?> saveLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<String> saveLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return infoTalkService.saveLove(id, member);
+        String result = infoTalkService.saveLove(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
@@ -201,9 +202,10 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 게시물 공감 취소하기, id는 정보토크 게시물 id 입니다")
     @DeleteMapping("/love/{id}")
-    public ResponseEntity<?> deleteLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<String> deleteLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return infoTalkService.deleteLove(id, member);
+        String result = infoTalkService.deleteLove(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
 

@@ -158,9 +158,10 @@ public class InfoTalkController {
      */
     @Operation(summary = "댓글 삭제 api입니다. id는 댓글 아이디입니다.")
     @DeleteMapping("/comment/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<String> deleteComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return infoTalkService.deleteComment(commentId, member);
+        String result = infoTalkService.deleteComment(commentId, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**

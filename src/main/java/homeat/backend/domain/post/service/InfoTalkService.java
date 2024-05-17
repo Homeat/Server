@@ -289,7 +289,7 @@ public class InfoTalkService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteComment(Long commentId, Member member) {
+    public String deleteComment(Long commentId, Member member) {
         InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException(commentId + " 번의 댓글을 찾을 수 없습니다."));
 
@@ -306,7 +306,7 @@ public class InfoTalkService {
 
         infoTalk.updateCommentSize(commentNum + replyNum);
 
-        return ResponseEntity.ok(commentId + "번 댓글 삭제 완료");
+        return commentId + "번 댓글 삭제 완료";
     }
 
     @Transactional

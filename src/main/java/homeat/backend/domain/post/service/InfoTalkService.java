@@ -2,8 +2,19 @@ package homeat.backend.domain.post.service;
 
 import homeat.backend.domain.address.repository.AddressRepository;
 import homeat.backend.domain.post.dto.FoodRequestDTO;
-import homeat.backend.domain.post.dto.InfoTalkDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkCommentViewDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkReplyViewDTO;
+import homeat.backend.domain.post.dto.InfoRequestDTO;
+import homeat.backend.domain.post.dto.InfoResponseDTO;
+import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkCommentViewDTO;
+import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkReplyViewDTO;
+import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkSaveDTO;
+import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
+import homeat.backend.domain.post.dto.queryDto.InfoTalkTotalView;
+import homeat.backend.domain.post.entity.FoodTalkComment;
+import homeat.backend.domain.post.entity.FoodTalkReply;
 import homeat.backend.domain.post.entity.InfoHashTag;
 import homeat.backend.domain.post.entity.InfoPicture;
 import homeat.backend.domain.post.entity.InfoTalk;
@@ -18,11 +29,14 @@ import homeat.backend.domain.post.repository.InfoTalkLoveRepository;
 import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.service.S3Service;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +58,7 @@ public class InfoTalkService {
 
     // 정보토크 게시글 작성
     @Transactional
-    public ResponseEntity<?> saveInfoTalk(InfoTalkDTO dto, Member member) {
+    public InfoResponseDTO.InfoTalkSaveDTO saveInfoTalk(InfoRequestDTO.InfoTalkDTO dto, Member member) {
 
 
         InfoTalk infoTalk = InfoTalk.builder()
@@ -56,8 +70,11 @@ public class InfoTalkService {
 
         infoTalkRepository.save(infoTalk);
 
+        // 해시태그 리스트
+        List<String> infoTags = new ArrayList<>();
         if (dto.getTags() != null && !dto.getTags().isEmpty()) {
             for (String tag : dto.getTags()) {
+                infoTags.add(tag);
                 InfoHashTag infoHashTag = InfoHashTag.builder()
                         .infoTalk(infoTalk)
                         .tag(tag)
@@ -67,12 +84,19 @@ public class InfoTalkService {
 
         }
 
+        InfoTalkSaveDTO result = InfoTalkSaveDTO.builder()
+                .id(infoTalk.getId())
+                .nickname(member.getNickname())
+                .title(infoTalk.getTitle())
+                .content(infoTalk.getContent())
+                .tag(infoTags)
+                .build();
 
-        return ResponseEntity.ok().body(infoTalk);
+        return result;
     }
 
     @Transactional
-    public ResponseEntity<?> uploadImages(Long id, List<MultipartFile> multipartFiles) {
+    public String uploadImages(Long id, List<MultipartFile> multipartFiles) {
         List<String> imgPaths = s3Service.upload(multipartFiles);
         System.out.println("IMG 경로들 : " + imgPaths);
         postBlankCheck(imgPaths);
@@ -89,7 +113,7 @@ public class InfoTalkService {
         }
 
 
-        return ResponseEntity.ok(infoTalk.getId() + "번 정보토크 사진 저장완료");
+        return id + "번 정보토크 사진 저장완료";
     }
 
 
@@ -100,7 +124,7 @@ public class InfoTalkService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteInfoTalk(Long id, Member member) {
+    public String deleteInfoTalk(Long id, Member member) {
 
         InfoTalk infoTalk = infoTalkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
@@ -115,11 +139,11 @@ public class InfoTalkService {
 
         infoTalkRepository.delete(infoTalk);
 
-        return ResponseEntity.ok(id + " 번 게시글 삭제완료");
+        return id + " 번 게시글 삭제완료";
     }
 
     @Transactional
-    public ResponseEntity<?> updateInfoTalk(InfoTalkDTO dto, Long id) {
+    public ResponseEntity<?> updateInfoTalk(InfoRequestDTO.InfoTalkDTO dto, Long id) {
 
         InfoTalk infoTalk = infoTalkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
@@ -131,7 +155,7 @@ public class InfoTalkService {
 
     @Transactional
     // 정보토크 게시글 1개 조회
-    public ResponseEntity<?> getInfoTalk(Long id, Member member) {
+    public InfoResponseDTO.InfoTalkViewDTO getInfoTalk(Long id, Member member) {
 
         InfoTalk infoTalk = infoTalkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
@@ -144,44 +168,104 @@ public class InfoTalkService {
 
         infoTalk.plusView(infoTalk.getView() + 1);
 
-        return ResponseEntity.ok().body(infoTalk);
+        // 해시태그 리스트
+        List<String> infoTags = new ArrayList<>();
+        if (!infoTalk.getInfoHashTags().isEmpty()) {
+            for (InfoHashTag infoHashTag : infoTalk.getInfoHashTags()) {
+                infoTags.add(infoHashTag.getTag());
+            }
+        }
+
+        // 정보토크 사진 리스트
+        List<String> infoImages = new ArrayList<>();
+        if (!infoTalk.getInfoPictures().isEmpty()) {
+            for (InfoPicture infoPicture : infoTalk.getInfoPictures()) {
+                infoImages.add(infoPicture.getUrl());
+            }
+        }
+
+        // 정보토크 댓글, 대댓글 DTO 생성
+        List<InfoResponseDTO.InfoTalkCommentViewDTO> infoTalkCommentViewDTOList = new ArrayList<>();
+        if (infoTalk.getInfoTalkComments().isEmpty()) {
+        } else {
+            for (InfoTalkComment infoTalkComment : infoTalk.getInfoTalkComments()) {
+                List<InfoResponseDTO.InfoTalkReplyViewDTO> infoTalkReplyViewDTOList = new ArrayList<>();
+                if (infoTalkComment.getReplyList().isEmpty()) {
+                } else {
+                    for (InfoTalkReply infoTalkReply : infoTalkComment.getReplyList()) {
+                        InfoTalkReplyViewDTO infoTalkReplyViewDTO = InfoTalkReplyViewDTO.builder()
+                                .createdAt(infoTalkReply.getCreatedAt())
+                                .updatedAt(infoTalkReply.getUpdatedAt())
+                                .replyId(infoTalkReply.getId())
+                                .replyNickName(infoTalkReply.getMember().getNickname())
+                                .content(infoTalkReply.getContent())
+                                .build();
+                        infoTalkReplyViewDTOList.add(infoTalkReplyViewDTO);
+                    }
+                }
+                InfoTalkCommentViewDTO infoTalkCommentViewDTO = InfoTalkCommentViewDTO.builder()
+                        .createdAt(infoTalkComment.getCreatedAt())
+                        .updatedAt(infoTalkComment.getUpdatedAt())
+                        .commentId(infoTalkComment.getId())
+                        .commentNickName(infoTalkComment.getMember().getNickname())
+                        .content(infoTalkComment.getContent())
+                        .infoTalkReplies(infoTalkReplyViewDTOList)
+                        .build();
+                infoTalkCommentViewDTOList.add(infoTalkCommentViewDTO);
+            }
+        }
+
+        InfoTalkViewDTO result = InfoTalkViewDTO.builder()
+                .createdAt(infoTalk.getCreatedAt())
+                .updatedAt(infoTalk.getUpdatedAt())
+                .id(infoTalk.getId())
+                .postNickName(infoTalk.getMember().getNickname())
+                .title(infoTalk.getTitle())
+                .content(infoTalk.getContent())
+                .tags(infoTags)
+                .love(infoTalk.getLove())
+                .view(infoTalk.getView())
+                .commentNumber(infoTalk.getCommentNumber())
+                .setLove(infoTalk.getSetLove())
+                .infoPictureImages(infoImages)
+                .infoTalkComments(infoTalkCommentViewDTOList)
+                .build();
+
+        return result;
     }
 
-    public ResponseEntity<?> getInfoTalkLatest(InfoTalkSearchCondition condition, Long lastInfoTalkId) {
+    public Slice<InfoTalkTotalView> getInfoTalkLatest(InfoTalkSearchCondition condition, Long lastInfoTalkId) {
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok()
-                .body(infoTalkRepository.findByIdLessThanOrderByIdDesc(condition, lastInfoTalkId, pageable));
+        return infoTalkRepository.findByIdLessThanOrderByIdDesc(condition,
+                lastInfoTalkId, pageable);
     }
 
-    public ResponseEntity<?> getInfoTalkOldest(InfoTalkSearchCondition condition, Long oldestInfoTalkId) {
+    public Slice<InfoTalkTotalView> getInfoTalkOldest(InfoTalkSearchCondition condition, Long oldestInfoTalkId) {
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok()
-                .body(infoTalkRepository.findByIdGreaterThanOrderByIdAsc(condition, oldestInfoTalkId, pageable));
+        return infoTalkRepository.findByIdGreaterThanOrderByIdAsc(condition, oldestInfoTalkId, pageable);
     }
 
-    public ResponseEntity<?> getInfoTalkByLove(InfoTalkSearchCondition condition, Long id, int love) {
+    public Slice<InfoTalkTotalView> getInfoTalkByLove(InfoTalkSearchCondition condition, Long id, int love) {
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok()
-                .body(infoTalkRepository.findByLoveLessThanOrderByLoveDesc(condition, id, love, pageable));
+        return infoTalkRepository.findByLoveLessThanOrderByLoveDesc(condition, id, love, pageable);
     }
 
-    public ResponseEntity<?> getInfoTalkByView(InfoTalkSearchCondition condition, Long id, int view) {
+    public Slice<InfoTalkTotalView> getInfoTalkByView(InfoTalkSearchCondition condition, Long id, int view) {
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok()
-                .body(infoTalkRepository.findByViewLessThanOrderByViewDesc(condition, id, view, pageable));
+        return infoTalkRepository.findByViewLessThanOrderByViewDesc(condition, id, view, pageable);
     }
 
 
     @Transactional
-    public ResponseEntity<?> saveComment(FoodRequestDTO.CommentDTO dto, Member member) {
+    public String saveComment(InfoRequestDTO.CommentDTO dto, Member member) {
 
         InfoTalk infoTalk = infoTalkRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 게시글을 찾을 수 없습니다."));
@@ -201,7 +285,7 @@ public class InfoTalkService {
 
         infoTalk.updateCommentSize(commentNum + replyNum);
 
-        return ResponseEntity.ok().body(infoTalkComment);
+        return dto.getId() + "번 게시글의 댓글을 작성완료하였습니다.";
     }
 
     @Transactional
@@ -226,7 +310,7 @@ public class InfoTalkService {
     }
 
     @Transactional
-    public ResponseEntity<?> saveReply(FoodRequestDTO.CommentDTO dto, Member member) {
+    public ResponseEntity<?> saveReply(InfoRequestDTO.CommentDTO dto, Member member) {
         InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 댓글을 찾을 수 없습니다."));
 

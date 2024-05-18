@@ -49,13 +49,14 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
     }
 
     @Override
-    public Optional<Week_Check> findWeekByMemberId(Long member_id) {
+    public Optional<Week_Check> findWeekByMemberIdOrderByWeekCheckIdDesc(Long member_id) {
         QWeek_Check qWeekCheck = QWeek_Check.week_Check;
         QFinanceData qFinanceData = QFinanceData.financeData;
         return Optional.ofNullable(queryFactory.selectFrom(qWeekCheck)
                 .leftJoin(qWeekCheck.financeData, qFinanceData)
                 .where(qFinanceData.member.id.eq(member_id)
                         .and(qWeekCheck.financeData.id.eq(qFinanceData.id)))
+                        .orderBy(qWeekCheck.id.desc())
                 .fetchOne());
     }
 

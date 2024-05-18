@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WeekRepositoryCustom {
-    Optional<Week_Check> findWeekByMemberId(Long member_id);
+    Optional<Week_Check> findWeekByMemberIdOrderByWeekCheckIdDesc(Long member_id);
 
     Slice<Week> findWeekByMemberIdAsc(Long member_id, Long lastWeekId, Pageable pageable);
 

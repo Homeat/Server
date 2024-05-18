@@ -1,6 +1,5 @@
 package homeat.backend.domain.homeatreport.service;
 
-import homeat.backend.domain.home.repository.DailyExpenseRepo;
 import homeat.backend.domain.homeatreport.entity.Week_Analyze;
 import homeat.backend.domain.homeatreport.entity.Week_Check;
 import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
@@ -15,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class WeekSaveService {
 
     private final WeekCheckRepository weekCheckRepository;
-    private final DailyExpenseRepo dailyExpenseRepository;
     private final WeekAnalyzeRepository weekAnalyzeRepository;
 
     // Week_Check 엔티티의 초과 금액 업데이트

@@ -131,17 +131,17 @@ public class HomeatReportAnalyzeService {
         Integer weekIdx = findWeekIdx(date);
 
         for (Member m : members) {
-            Week_Analyze weekAnalyze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdx(m.getId(), weekIdx)
+            Week_Analyze weekAnalyze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(m.getId(), weekIdx, input_year, input_month)
                     .orElseThrow(() -> new NoSuchElementException(m.getNickname()+"의 Week Analyze가 존재하지 않습니다."));
 
             jipbapPrices += weekAnalyze.getWeek_jipbap_price(); // 멤버들의 집밥 가격 누적
-            outPrices += weekAnalyze.getWeek_out_price(); // 멤버들의 외식 비달 가격 누적
+            outPrices += weekAnalyze.getWeek_out_price(); // 멤버들의 외식 배달 가격 누적
 
         }
         Long average_jipbap = jipbapPrices / members.size(); // 비교군 멤버들의 평균 집밥 지출 비용
         Long average_out = outPrices / members.size(); // 비교군 멤버들의 평균 외식 배달 지출 비용
 
-        Week_Analyze memberWeekAnaylze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdx(member.getId(), weekIdx)
+        Week_Analyze memberWeekAnaylze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(member.getId(), weekIdx, input_year, input_month)
                 .orElseThrow(() -> new NoSuchElementException(member.getNickname()+"의 Week Analyze가 존재하지 않습니다."));
         Long jipbap_save = average_jipbap - memberWeekAnaylze.getWeek_jipbap_price(); // 주어진 멤버가 n째주에 절약한 집밥 비용
         Long out_save = average_out - memberWeekAnaylze.getWeek_out_price(); // 주어진 멤버가 n째주에 절약한 외식 배달 비용

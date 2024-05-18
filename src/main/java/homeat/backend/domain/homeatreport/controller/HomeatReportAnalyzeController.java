@@ -31,10 +31,12 @@ public class HomeatReportAnalyzeController {
      * @param authentication
      * @return
      */
+
     @Operation(summary = "홈잇리포트 소비분석 상단의 날짜 조회 api")
     @GetMapping("/ofMonth")
     public ApiPayload<ReportMonthlyAnalyzeResponseDTO> getMonthInput(
-            @RequestParam String input_year, String input_month,
+            @RequestParam(value = "input_year", defaultValue = "#{T(java.time.LocalDate).now().getYear()}") String input_year,
+            @RequestParam(value = "input_month", defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") String input_month,
             Authentication authentication
     ) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
@@ -53,10 +55,13 @@ public class HomeatReportAnalyzeController {
      * @param authentication
      * @return
      */
+
     @Operation(summary = "홈잇리포트 소비분석 하단의 날짜 조회 api")
     @GetMapping("/ofWeek")
     public ApiPayload<ReportWeeklyResponseDTO> getWeekInput(
-            @RequestParam String input_year, String input_month, String input_day,
+            @RequestParam(value = "input_year", defaultValue = "#{T(java.time.LocalDate).now().getYear()}") String input_year,
+            @RequestParam(value = "input_month", defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") String input_month,
+            @RequestParam(value = "input_day", defaultValue = "#{T(java.time.LocalDate).now().getDayOfMonth()") String input_day,
             Authentication authentication
     ) {
         Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));

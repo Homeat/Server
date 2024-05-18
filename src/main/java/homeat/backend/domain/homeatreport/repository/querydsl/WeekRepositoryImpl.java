@@ -108,4 +108,24 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
                 .fetch();
     }
 
+    /**
+     * memberId를 사용하여 특정 멤버의 모든 WeekCheck 엔티티를 최신순으로 정렬한 뒤 맨 위(최신)를 조회
+     * @param memberId
+     * @return
+     */
+    @Override
+    public Optional<Week_Analyze> findTopByMemberOrderByIdDesc(Long memberId) {
+        QWeek_Analyze qWeekAnalyze = QWeek_Analyze.week_Analyze;
+        QFinanceData qFinanceData = QFinanceData.financeData;
+        QMember qMember = QMember.member;
+
+        return Optional.ofNullable(queryFactory.selectFrom(qWeekAnalyze)
+                .leftJoin(qWeekAnalyze.financeData, qFinanceData)
+                .leftJoin(qFinanceData.member, qMember)
+                .where(qMember.id.eq(memberId))
+                .orderBy(qWeekAnalyze.id.desc())
+                .fetchFirst()
+        );
+    }
+
 }

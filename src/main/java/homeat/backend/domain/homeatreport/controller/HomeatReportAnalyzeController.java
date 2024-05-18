@@ -3,6 +3,7 @@ package homeat.backend.domain.homeatreport.controller;
 import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeResponseDTO;
 import homeat.backend.domain.homeatreport.dto.ReportWeeklyResponseDTO;
 import homeat.backend.domain.homeatreport.service.HomeatReportAnalyzeService;
+import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.payload.ApiPayload;
@@ -11,7 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,9 +38,9 @@ public class HomeatReportAnalyzeController {
     public ApiPayload<ReportMonthlyAnalyzeResponseDTO> getMonthInput(
             @RequestParam(value = "input_year", defaultValue = "#{T(java.time.LocalDate).now().getYear()}") String input_year,
             @RequestParam(value = "input_month", defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") String input_month,
-            Authentication authentication
+            @AuthenticationPrincipal CustomUserDetails authentication
     ) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
 
         Integer year = Integer.parseInt(input_year);
         Integer month = Integer.parseInt(input_month);
@@ -62,9 +63,9 @@ public class HomeatReportAnalyzeController {
             @RequestParam(value = "input_year", defaultValue = "#{T(java.time.LocalDate).now().getYear()}") String input_year,
             @RequestParam(value = "input_month", defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") String input_month,
             @RequestParam(value = "input_day", defaultValue = "#{T(java.time.LocalDate).now().getDayOfMonth()") String input_day,
-            Authentication authentication
+            @AuthenticationPrincipal CustomUserDetails authentication
     ) {
-        Member member = memberQueryService.mypageMember(Long.parseLong(authentication.getName()));
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
 
         Integer year = Integer.parseInt(input_year);
         Integer month = Integer.parseInt(input_month);

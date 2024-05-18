@@ -13,5 +13,4 @@ import java.util.Optional;
 @Repository
 public interface WeekAnalyzeRepository extends JpaRepository<Week_Analyze, Long> {
     List<Week_Analyze> findAllByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
-    Optional<Week_Analyze> findTopByMemberOrderByIdDesc(Member member);
 }

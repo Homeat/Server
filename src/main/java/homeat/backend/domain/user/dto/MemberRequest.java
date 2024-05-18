@@ -31,11 +31,8 @@ public class MemberRequest {
 
     @Getter
     public static class LoginDto {
-        @NotBlank
-        @Email
-        String email;
 
-        @NotBlank
+        String email;
         String password;
     }
 

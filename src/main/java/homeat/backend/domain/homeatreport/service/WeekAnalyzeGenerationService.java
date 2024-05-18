@@ -4,6 +4,7 @@ import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
 import homeat.backend.domain.homeatreport.entity.Week_Analyze;
 import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
+import homeat.backend.domain.homeatreport.repository.querydsl.WeekRepositoryCustom;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class WeekAnalyzeGenerationService {
     private final MemberRepository memberRepository;
     private final FinanceDataRepository financeDataRepository;
     private final WeekAnalyzeRepository weekAnalyzeRepository;
+    private final WeekRepositoryCustom weekRepositoryCustom;
 
     @Scheduled(cron = "0 0 0 1 * ?") // 매달 1일 자정에 실행
     public void runOnFirstDayOfMonth() {
@@ -63,7 +65,7 @@ public class WeekAnalyzeGenerationService {
 
         System.out.println(financeData.getMember().getId()+"th member handling");
 
-        Week_Analyze previousWeekAnalyze = weekAnalyzeRepository.findTopByMemberOrderByIdDesc(financeData.getMember())
+        Week_Analyze previousWeekAnalyze = weekRepositoryCustom.findTopByMemberOrderByIdDesc(financeData.getMember().getId())
                 .orElseThrow(() -> new NoSuchElementException("Previous Week Analyze not found."));
 
         Integer previousWeekIdx = previousWeekAnalyze.getWeekIdx();

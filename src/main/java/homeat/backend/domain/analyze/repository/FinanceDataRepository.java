@@ -15,4 +15,5 @@ public interface FinanceDataRepository extends JpaRepository<FinanceData, Long>,
     List<FinanceData> findTop2ByMemberOrderByCreatedAtDesc(Member member);
 
     Optional<FinanceData> findTopByMember_IdOrderByCreatedAtDesc(Long member_id);
+    Optional<FinanceData> findFinanceDataById(Long financeDataId);
 }

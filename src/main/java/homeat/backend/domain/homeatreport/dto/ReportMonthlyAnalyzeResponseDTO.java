@@ -11,10 +11,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReportMonthlyAnalyzeResponseDTO {
 
+    private Integer monthZeroExpense;
     private Long month_jipbap_price;
     private Long month_out_price;
-    private int jipbap_ratio;
-    private int out_ratio;
-    private String save_percent;
+    private Integer jipbap_ratio;
+    private Integer out_ratio;
+    private Double save_percent;
 
 }

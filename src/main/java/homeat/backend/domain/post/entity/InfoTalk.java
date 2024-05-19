@@ -1,6 +1,8 @@
 package homeat.backend.domain.post.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import homeat.backend.domain.address.entity.Address;
+import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.global.common.domain.BaseEntity;
 import homeat.backend.domain.user.entity.Member;
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,7 +42,6 @@ public class InfoTalk extends BaseEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "member_id")
     private Member member;
-
     private String title;
     private String content;
 
@@ -67,6 +69,7 @@ public class InfoTalk extends BaseEntity {
     @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
     @Builder.Default
     private List<InfoTalkComment> infoTalkComments = new ArrayList<>();
+
 
     public void update(String title, String content) {
 

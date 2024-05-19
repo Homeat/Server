@@ -1,5 +1,7 @@
 package homeat.backend.domain.post.service;
 
+import homeat.backend.domain.address.entity.Address;
+import homeat.backend.domain.address.repository.AddressRepository;
 import homeat.backend.domain.post.dto.CommentDTO;
 import homeat.backend.domain.post.dto.InfoHashTagDTO;
 import homeat.backend.domain.post.dto.InfoTalkDTO;
@@ -23,9 +25,11 @@ import homeat.backend.domain.post.repository.InfoTalkLoveRepository;
 import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,11 +49,13 @@ public class InfoTalkService {
     private final InfoTalkCommentRepository infoTalkCommentRepository;
     private final InfoTalkReplyRepository infoTalkReplyRepository;
     private final InfoTalkLoveRepository infoTalkLoveRepository;
+    private final AddressRepository addressRepository;
     private final S3Service s3Service;
 
     // 정보토크 게시글 작성
     @Transactional
     public ResponseEntity<?> saveInfoTalk(InfoTalkDTO dto, Member member) {
+
 
         InfoTalk infoTalk = InfoTalk.builder()
                 .title(dto.getTitle())

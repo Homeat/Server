@@ -6,6 +6,7 @@ import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.service.InfoTalkService;
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.domain.user.service.MemberQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;

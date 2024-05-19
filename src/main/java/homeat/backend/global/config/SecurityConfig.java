@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .cors()
                 .and()
                 .authorizeRequests(request -> request
-                        .antMatchers("/v1/members/**", "/health", "/v3/api-docs/**", "/swagger*/**", "/").permitAll()
+                        .antMatchers("/v1/members/**", "/v1/mypage/exist-nickname", "/health", "/v3/api-docs/**", "/swagger*/**", "/").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(handler -> handler

@@ -2,9 +2,9 @@ package homeat.backend.domain.mypage.service;
 
 import homeat.backend.domain.address.entity.Address;
 import homeat.backend.domain.analyze.entity.FinanceData;
-import homeat.backend.domain.homeatreport.entity.Week;
+import homeat.backend.domain.homeatreport.entity.Week_Analyze;
+import homeat.backend.domain.homeatreport.entity.Week_Check;
 import homeat.backend.domain.mypage.dto.MyPageRequest;
-import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.entity.MemberInfo;
 
@@ -25,11 +25,17 @@ public class MyPageMapper {
                 .build();
     }
 
-    public static Week toWeek(FinanceData financeData, Long goalPrice) {
-        return Week.builder()
+    public static Week_Check toWeekCheck(FinanceData financeData, Long goalPrice) {
+        return Week_Check.builder()
                 .financeData(financeData)
                 .goal_price(goalPrice)
                 .next_goal_price(goalPrice)
+                .build();
+    }
+
+    public static Week_Analyze toWeekAnalyze(FinanceData financeData) {
+        return Week_Analyze.builder()
+                .financeData(financeData)
                 .build();
     }
 }

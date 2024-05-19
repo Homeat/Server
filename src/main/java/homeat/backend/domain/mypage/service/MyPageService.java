@@ -5,8 +5,10 @@ import homeat.backend.domain.address.entity.Address;
 import homeat.backend.domain.address.repository.AddressRepository;
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
-import homeat.backend.domain.homeatreport.entity.Week;
-import homeat.backend.domain.homeatreport.repository.WeekRepository;
+import homeat.backend.domain.homeatreport.entity.Week_Analyze;
+import homeat.backend.domain.homeatreport.entity.Week_Check;
+import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
+import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
 import homeat.backend.domain.mypage.dto.MyPageRequest;
 import homeat.backend.domain.mypage.dto.MyPageResponse;
 import homeat.backend.domain.user.controller.MemberErrorStatus;
@@ -29,7 +31,8 @@ public class MyPageService {
     private final MemberInfoRepository memberInfoRepository;
     private final AddressRepository addressRepository;
     private final FinanceDataRepository financeDataRepository;
-    private final WeekRepository weekRepository;
+    private final WeekCheckRepository weekCheckRepository;
+    private final WeekAnalyzeRepository weekAnalyzeRepository;
     private final S3Service s3Service;
     private final BCryptPasswordEncoder encoder;
 
@@ -46,10 +49,12 @@ public class MyPageService {
         memberInfoRepository.save(newMemberInfo);
 
         FinanceData newFinanceData = MyPageMapper.toFinanceData(selectedMember);
-        financeDataRepository.save(newFinanceData);
+        Week_Check newWeekCheck = MyPageMapper.toWeekCheck(newFinanceData, request.getGoalPrice());
+        Week_Analyze newWeekAnalyze = MyPageMapper.toWeekAnalyze(newFinanceData);
 
-        Week newWeek = MyPageMapper.toWeek(newFinanceData, request.getGoalPrice());
-        weekRepository.save(newWeek);
+        financeDataRepository.save(newFinanceData);
+        weekCheckRepository.save(newWeekCheck);
+        weekAnalyzeRepository.save(newWeekAnalyze);
     }
 
     public MyPageResponse.getInfoDto selectInfo(Long memberId) {

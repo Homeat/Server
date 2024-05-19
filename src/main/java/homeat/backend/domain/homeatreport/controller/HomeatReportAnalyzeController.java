@@ -62,7 +62,7 @@ public class HomeatReportAnalyzeController {
     public ApiPayload<ReportWeeklyResponseDTO> getWeekInput(
             @RequestParam(value = "input_year", defaultValue = "#{T(java.time.LocalDate).now().getYear()}") String input_year,
             @RequestParam(value = "input_month", defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") String input_month,
-            @RequestParam(value = "input_day", defaultValue = "#{T(java.time.LocalDate).now().getDayOfMonth()") String input_day,
+            @RequestParam(value = "input_day", defaultValue = "#{T(java.time.LocalDate).now().getDayOfMonth()}") String input_day,
             @AuthenticationPrincipal CustomUserDetails authentication
     ) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());

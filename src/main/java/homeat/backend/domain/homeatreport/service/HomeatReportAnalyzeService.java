@@ -91,7 +91,7 @@ public class HomeatReportAnalyzeService {
 
     // 소비분석 하단의 주별 분석
     public ReportWeeklyResponseDTO getWeeklyAnalyze(Integer input_year, Integer input_month, Integer input_day, Member member) {
-        MemberInfo memberInfo = memberInfoRepository.findMemberInfoByMemberId(member.getId()); // 특정 멤버의 memberInfo 엔티티
+        MemberInfo memberInfo = memberInfoRepository.findMemberInfoByMember(member).orElseThrow(); // 특정 멤버의 memberInfo 엔티티
         System.out.println("Member's Name:" + memberInfo.getMember().getNickname());
 
         // 생년을 LocalDate 객체 생성

@@ -4,10 +4,10 @@ import homeat.backend.domain.address.dto.AddressResponse;
 import homeat.backend.domain.address.service.AddressService;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
-import homeat.backend.global.payload.SlicePayload;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,20 +27,20 @@ public class AddressController {
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, addressService.getClosestAddress(lat, lng));
     }
 
-    @Operation(summary = "가까운 동네 무한스크롤 조회 api")
+    @Operation(summary = "가까운 동네 페이징 조회 api")
     @GetMapping("")
-    public SlicePayload<AddressResponse.AddressDTO> getAddressList(@RequestParam("latitude") double lat,
-                                                                   @RequestParam("longitude") double lng,
-                                                                   @RequestParam("pageNum") int pageNum) {
-        return SlicePayload.onSuccess(CommonSuccessStatus.OK, addressService.getCloseAddressList(lat, lng, pageNum));
+    public ApiPayload<Slice<AddressResponse.AddressDTO>> getAddressList(@RequestParam("latitude") double lat,
+                                                                        @RequestParam("longitude") double lng,
+                                                                        @RequestParam("pageNum") int pageNum) {
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, addressService.getCloseAddressList(lat, lng, pageNum));
     }
 
-    @Operation(summary = "가까운 동네 검색 무한스크롤 api")
+    @Operation(summary = "가까운 동네 검색 페이징 api")
     @GetMapping("/search")
-    public SlicePayload<AddressResponse.AddressDTO> getAddressSearchList(@RequestParam("latitude") double lat,
-                                                                         @RequestParam("longitude") double lng,
-                                                                         @RequestParam("keyword") String keyword,
-                                                                         @RequestParam("pageNum") int pageNum) {
-        return SlicePayload.onSuccess(CommonSuccessStatus.OK, addressService.getCloseAddressSearchList(lat, lng, keyword, pageNum));
+    public ApiPayload<Slice<AddressResponse.AddressDTO>> getAddressSearchList(@RequestParam("latitude") double lat,
+                                                                            @RequestParam("longitude") double lng,
+                                                                            @RequestParam("keyword") String keyword,
+                                                                            @RequestParam("pageNum") int pageNum) {
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, addressService.getCloseAddressSearchList(lat, lng, keyword, pageNum));
     }
 }

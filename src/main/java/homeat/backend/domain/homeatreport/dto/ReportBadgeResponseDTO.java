@@ -12,6 +12,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReportBadgeResponseDTO {
 
+    private String homeatTier;
+    private String nickname;
     private Long week_id;
     private Long goal_price;
     private Long exceed_price;

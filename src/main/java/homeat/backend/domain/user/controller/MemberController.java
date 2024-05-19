@@ -1,17 +1,23 @@
 package homeat.backend.domain.user.controller;
 
 
+import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.dto.MemberResponse;
+import homeat.backend.domain.user.service.MemberCommandService;
 import homeat.backend.domain.user.service.MemberMapper;
+import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.domain.user.service.MemberService;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +31,8 @@ import javax.validation.Valid;
 @RequestMapping("/v1/members")
 public class MemberController {
     private final MemberService memberService;
+    private final MemberCommandService memberCommandService;
+    private final MemberQueryService memberQueryService;
 
     @Operation(summary = "이메일 회원가입 api")
     @PostMapping("/join/email")
@@ -83,5 +91,37 @@ public class MemberController {
     public ApiPayload<MemberResponse.emailCheckDto> emailVerification(@RequestBody @Valid MemberRequest.emailCheckDto request) {
         String authCode = memberService.verifyEmail(request);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberMapper.toEmailCheck(authCode));
+    }
+
+
+
+
+
+    @Operation(summary = "프로필 사진 수정 api")
+    @PatchMapping(value = "/mypage/profileImg", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiPayload<?> updateProfileImg(@RequestParam("profileImg") MultipartFile multipartProfileImg, @AuthenticationPrincipal CustomUserDetails authentication) {
+        memberCommandService.updateProfileImg(multipartProfileImg, authentication.getUserId());
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "프로필 사진 삭제 api")
+    @PatchMapping("/mypage/profileImg/delete")
+    public ApiPayload<?> deleteProfileImg(@AuthenticationPrincipal CustomUserDetails authentication) {
+        memberCommandService.deleteProfileImg(authentication.getUserId());
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "회원탈퇴(비활성) api")
+    @PatchMapping("/mypage/withdraw")
+    public ApiPayload<?> withdrawal(@AuthenticationPrincipal CustomUserDetails authentication) {
+        memberCommandService.withdraw(authentication.getUserId());
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "회원 재활성 api")
+    @PatchMapping("/mypage/reactivate")
+    public ApiPayload<?> reactivate(@AuthenticationPrincipal CustomUserDetails authentication) {
+        memberCommandService.reactivate(authentication.getUserId());
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 }

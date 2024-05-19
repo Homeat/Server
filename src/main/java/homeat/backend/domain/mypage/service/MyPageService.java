@@ -15,12 +15,10 @@ import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.domain.user.repository.MemberInfoRepository;
 import homeat.backend.domain.user.repository.MemberRepository;
 import homeat.backend.global.exception.GeneralException;
-import homeat.backend.global.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +28,8 @@ public class MyPageService {
     private final AddressRepository addressRepository;
     private final FinanceDataRepository financeDataRepository;
     private final WeekRepository weekRepository;
-    private final S3Service s3Service;
     private final BCryptPasswordEncoder encoder;
+
 
     @Transactional
     public void insertInfo(Long memberId, MyPageRequest.postInfoDto request) {
@@ -118,40 +116,5 @@ public class MyPageService {
             throw new GeneralException(MemberErrorStatus.INVALID_PASSWORD);
 
         selectedMember.updatePassword(encoder.encode(request.getNewPassword()));
-    }
-
-    @Transactional
-    public void updateProfileImg(Long memberId, MultipartFile profileImg) {
-        Member selectedMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GeneralException(MemberErrorStatus.MEMBER_NOT_FOUND));
-        String newProfileImgUrl = s3Service.uploadProfileImg(profileImg);
-
-        if (!selectedMember.getProfileImgUrl().equals("https://homeat-dev-s3.s3.ap-northeast-2.amazonaws.com/homeat/default/default_icon.png"))
-            s3Service.fileDelete(selectedMember.getProfileImgUrl());
-        selectedMember.updateProfileImgUrl(newProfileImgUrl);
-    }
-
-    @Transactional
-    public void deleteProfileImg(Long memberId) {
-        Member selectedMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GeneralException(MemberErrorStatus.MEMBER_NOT_FOUND));
-
-        if (!selectedMember.getProfileImgUrl().equals("https://homeat-dev-s3.s3.ap-northeast-2.amazonaws.com/homeat/default/default_icon.png"))
-            s3Service.fileDelete(selectedMember.getProfileImgUrl());
-        selectedMember.updateProfileImgUrl("https://homeat-dev-s3.s3.ap-northeast-2.amazonaws.com/homeat/default/default_icon.png");
-    }
-
-    @Transactional
-    public void withdraw(Long memberId) {
-        Member selectedMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GeneralException(MemberErrorStatus.MEMBER_NOT_FOUND));
-        selectedMember.withdraw();
-    }
-
-    @Transactional
-    public void reactivate(Long memberId) {
-        Member selectedMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GeneralException(MemberErrorStatus.MEMBER_NOT_FOUND));
-        selectedMember.reactivate();
     }
 }

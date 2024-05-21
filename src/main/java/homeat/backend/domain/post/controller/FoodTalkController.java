@@ -6,10 +6,12 @@ import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkSaveDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
+import homeat.backend.domain.post.entity.Tag;
 import homeat.backend.domain.post.service.FoodTalkService;
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
+import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,28 +46,27 @@ public class FoodTalkController {
      * 집밥토크 저장
      */
     @Operation(summary = "집밥토크 저장 api")
-    @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ApiPayload<FoodResponseDTO.FoodTalkSaveDTO> saveFoodTalk(@RequestBody @Valid FoodRequestDTO.FoodTalkSaveDTO dto,
-                                                                    @AuthenticationPrincipal CustomUserDetails authentication) {
-
-        Member member = memberQueryService.mypageMember(authentication.getUserId());
-        FoodTalkSaveDTO result = foodTalkService.saveFoodTalk(dto, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
-    }
-
-    /**
-     * 집밥토크 사진 업로드
-     */
-    @Operation(summary = "집밥토크 사진 저장 api")
-    @PostMapping(value = "/upload/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<String> uploadImages(@PathVariable("id") Long id,
-                                          @RequestPart("imgUrl") List<MultipartFile> multipartFiles) {
-        if (multipartFiles == null) {
-            throw new IllegalArgumentException("사진이 없습니다");
+    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiPayload<?> saveFoodTalk(@RequestParam(value = "name", required = false) String name,
+                                      @RequestParam(value = "memo",required = false) String memo,
+                                      @RequestParam(value = "tag",required = false) Tag tag,
+                                      @RequestParam(value = "imgUrl",required = false) List<MultipartFile> multipartFiles,
+                                      @AuthenticationPrincipal CustomUserDetails authentication) {
+        if (name == null) {
+            throw new GeneralException(PostErrorStatus.POST_NAME_PAYMENT_REQUIRED);
         }
-        String result = foodTalkService.uploadImages(id, multipartFiles);
-
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
+        if (memo == null) {
+            throw new GeneralException(PostErrorStatus.POST_MEMO_PAYMENT_REQUIRED);
+        }
+        if (tag == null) {
+            throw new GeneralException(PostErrorStatus.POST_TAG_PAYMENT_REQUIRED);
+        }
+        if (multipartFiles == null) {
+            throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
+        }
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
+        foodTalkService.saveFoodTalk(name, memo, tag,multipartFiles, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
 

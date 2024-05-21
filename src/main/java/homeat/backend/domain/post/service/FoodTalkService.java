@@ -1,5 +1,6 @@
 package homeat.backend.domain.post.service;
 
+import homeat.backend.domain.post.controller.PostErrorStatus;
 import homeat.backend.domain.post.dto.FoodRequestDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkCommentViewDTO;
@@ -17,6 +18,7 @@ import homeat.backend.domain.post.entity.FoodTalkComment;
 import homeat.backend.domain.post.entity.FoodTalkLove;
 import homeat.backend.domain.post.entity.FoodTalkReply;
 import homeat.backend.domain.post.entity.Save;
+import homeat.backend.domain.post.entity.Tag;
 import homeat.backend.domain.post.repository.FoodLoveRepository;
 import homeat.backend.domain.post.repository.FoodPictureRepository;
 import homeat.backend.domain.post.repository.FoodRecipePictureRepository;
@@ -25,6 +27,7 @@ import homeat.backend.domain.post.repository.FoodTalkCommentRepository;
 import homeat.backend.domain.post.repository.FoodTalkReplyRepository;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,36 +57,20 @@ public class FoodTalkService {
 
     // 게시글 작성
     @Transactional
-    public FoodResponseDTO.FoodTalkSaveDTO saveFoodTalk(FoodRequestDTO.FoodTalkSaveDTO dto, Member member) {
+    public void saveFoodTalk(String name, String memo, Tag tag, List<MultipartFile> multipartFiles, Member member) {
 
-        FoodTalk foodTalk = FoodTalk.builder()
-                .member(member)
-                .name(dto.getName())
-                .memo(dto.getMemo())
-                .tag(dto.getTag())
-                .save(Save.저장)
-                .build();
-        foodTalkRepository.save(foodTalk);
-
-        FoodTalkSaveDTO result = FoodTalkSaveDTO.builder()
-                .id(foodTalk.getId())
-                .nickname(foodTalk.getMember().getNickname())
-                .name(dto.getName())
-                .memo(dto.getMemo())
-                .tag(dto.getTag())
-                .build();
-
-        return result;
-    }
-
-    @Transactional
-    public String uploadImages(Long id, List<MultipartFile> multipartFiles) {
         List<String> imgPaths = s3Service.upload(multipartFiles);
         System.out.println("IMG 경로들 : " + imgPaths);
         postBlankCheck(imgPaths);
 
-        FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+        FoodTalk foodTalk = FoodTalk.builder()
+                .member(member)
+                .name(name)
+                .memo(memo)
+                .tag(tag)
+                .save(Save.저장)
+                .build();
+        foodTalkRepository.save(foodTalk);
 
         for (String imgUrl : imgPaths) {
             FoodPicture foodPicture = FoodPicture.builder()
@@ -92,14 +79,11 @@ public class FoodTalkService {
                     .build();
             foodPictureRepository.save(foodPicture);
         }
-
-
-        return id + " 번 게시물 사진저장완료";
     }
 
     private void postBlankCheck(List<String> imgPaths) {
         if(imgPaths == null || imgPaths.isEmpty()){ //.isEmpty()도 되는지 확인해보기
-            throw new IllegalArgumentException("사진 입력 오류입니다.");
+            throw new GeneralException(PostErrorStatus.POST_IMAGE_NOT_FOUND);
         }
     }
 

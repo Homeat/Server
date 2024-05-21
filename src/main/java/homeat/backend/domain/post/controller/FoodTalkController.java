@@ -13,6 +13,7 @@ import homeat.backend.domain.user.service.MemberQueryService;
 import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
+import homeat.backend.global.payload.SlicePayload;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import javax.validation.Valid;
@@ -105,9 +106,9 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 최신순 조회 및 검색, lastFoodTalkId 보다 작은 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/latest")
-    public ApiPayload<Slice<FoodTalkTotalView>> getFoodTalkLatest(FoodTalkSearchCondition condition, @RequestParam Long lastFoodTalkId) {
+    public SlicePayload<FoodTalkTotalView> getFoodTalkLatest(FoodTalkSearchCondition condition, @RequestParam Long lastFoodTalkId) {
         Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkLatest(condition, lastFoodTalkId);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK,result);
+        return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
@@ -115,9 +116,9 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 오래된 순 조회 및 검색, lastFoodTalkId 보다 큰 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/oldest")
-    public ApiPayload<Slice<FoodTalkTotalView>> getFoodTalkOldest(FoodTalkSearchCondition condition, @RequestParam Long OldestFoodTalkId) {
+    public SlicePayload<FoodTalkTotalView> getFoodTalkOldest(FoodTalkSearchCondition condition, @RequestParam Long OldestFoodTalkId) {
         Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkOldest(condition, OldestFoodTalkId);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK,result);
+        return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
@@ -125,10 +126,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 공감 순 조회 및 검색, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/love")
-    public ApiPayload<Slice<FoodTalkTotalView>> getFoodTalkByLove(FoodTalkSearchCondition condition, @RequestParam Long id,
+    public SlicePayload<FoodTalkTotalView> getFoodTalkByLove(FoodTalkSearchCondition condition, @RequestParam Long id,
                                                @RequestParam int love) {
         Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkByLove(condition, id, love);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK,result);
+        return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
@@ -136,10 +137,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 조회 순 조회 및 검색, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/view")
-    public ApiPayload<Slice<FoodTalkTotalView>> getFoodTalkByView(FoodTalkSearchCondition condition, @RequestParam Long id,
+    public SlicePayload<FoodTalkTotalView> getFoodTalkByView(FoodTalkSearchCondition condition, @RequestParam Long id,
                                                @RequestParam int view) {
         Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkByView(condition, id, view);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK,result);
+        return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**

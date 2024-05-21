@@ -20,17 +20,14 @@ import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,7 +44,7 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 저장 api")
     @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<?> saveFoodTalk(@RequestParam(value = "name", required = false) String name,
+    public ApiPayload<Long> saveFoodTalk(@RequestParam(value = "name", required = false) String name,
                                       @RequestParam(value = "memo",required = false) String memo,
                                       @RequestParam(value = "tag",required = false) Tag tag,
                                       @RequestParam(value = "imgUrl",required = false) List<MultipartFile> multipartFiles,
@@ -65,8 +62,8 @@ public class FoodTalkController {
             throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
         }
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        foodTalkService.saveFoodTalk(name, memo, tag,multipartFiles, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
+        Long result = foodTalkService.saveFoodTalk(name, memo, tag, multipartFiles, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
     }
 
 
@@ -148,12 +145,20 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 레시피 업로드, List 형식입니다!, id는 집밥토크 게시물 id 입니다.")
     @PostMapping(value = "/recipe/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<String> saveRecipe(@PathVariable("id") Long id, @RequestParam("recipe") String recipe,
-                                        @RequestParam("ingredient") String ingredient, @RequestParam("tip") String tip,
-                                        @RequestParam(value = "files", required = false) List<MultipartFile> files) {
+    public ApiPayload<?> saveRecipe(@RequestParam(value = "id",required = false) Long id,
+                                    @RequestParam(value = "recipe",required = false) String recipe,
+                                    @RequestParam(value = "ingredient",required = false) String ingredient,
+                                    @RequestParam(value = "tip",required = false) String tip,
+                                    @RequestParam(value = "files", required = false) List<MultipartFile> files) {
+        if (id == null) {
+            throw new GeneralException(PostErrorStatus.POST_ID_PAYMENT_REQUIRED);
+        }
+        if (files == null) {
+            throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
+        }
 
-        String result = foodTalkService.saveRecipe(id, recipe, ingredient, tip, files);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
+        foodTalkService.saveRecipe(id, recipe, ingredient, tip, files);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
     /**

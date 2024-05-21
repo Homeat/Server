@@ -57,7 +57,7 @@ public class FoodTalkService {
 
     // 게시글 작성
     @Transactional
-    public void saveFoodTalk(String name, String memo, Tag tag, List<MultipartFile> multipartFiles, Member member) {
+    public Long saveFoodTalk(String name, String memo, Tag tag, List<MultipartFile> multipartFiles, Member member) {
 
         List<String> imgPaths = s3Service.upload(multipartFiles);
         System.out.println("IMG 경로들 : " + imgPaths);
@@ -79,6 +79,9 @@ public class FoodTalkService {
                     .build();
             foodPictureRepository.save(foodPicture);
         }
+
+        return foodTalk.getId();
+
     }
 
     private void postBlankCheck(List<String> imgPaths) {
@@ -247,12 +250,11 @@ public class FoodTalkService {
 
 
     @Transactional
-    public String saveRecipe(Long id, String recipe, String ingredient, String tip, List<MultipartFile> files) {
+    public void saveRecipe(Long id, String recipe, String ingredient, String tip, List<MultipartFile> files) {
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
-        List<FoodRecipe> foodRecipeList = new ArrayList<>();
 
         FoodRecipe foodRecipe = FoodRecipe.builder()
                 .foodTalk(foodTalk)
@@ -263,27 +265,17 @@ public class FoodTalkService {
 
         foodRecipeRepository.save(foodRecipe);
 
-        if (files == null || files.isEmpty()) {
+        List<String> imgPaths = s3Service.upload(files);
+        System.out.println("IMG 경로들 : " + imgPaths);
 
-        } else {
-            List<String> imgPaths = s3Service.upload(files);
-            System.out.println("IMG 경로들 : " + imgPaths);
+        for (String imgUrl : imgPaths) {
+            FoodRecipePicture foodRecipePicture = FoodRecipePicture.builder()
+                    .foodRecipe(foodRecipe)
+                    .url(imgUrl)
+                    .build();
 
-            for (String imgUrl : imgPaths) {
-                FoodRecipePicture foodRecipePicture = FoodRecipePicture.builder()
-                        .foodRecipe(foodRecipe)
-                        .url(imgUrl)
-                        .build();
-
-                foodRecipePictureRepository.save(foodRecipePicture);
-            }
+            foodRecipePictureRepository.save(foodRecipePicture);
         }
-
-
-
-        foodRecipeList.add(foodRecipe);
-
-        return id + " 게시물 레시피 저장 완료";
     }
 
 

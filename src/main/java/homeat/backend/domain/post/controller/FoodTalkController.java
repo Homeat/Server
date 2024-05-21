@@ -144,7 +144,7 @@ public class FoodTalkController {
      * 레시피 업로드
      */
     @Operation(summary = "집밥토크 레시피 업로드, List 형식입니다!, id는 집밥토크 게시물 id 입니다.")
-    @PostMapping(value = "/recipe/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/recipe", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiPayload<?> saveRecipe(@RequestParam(value = "id",required = false) Long id,
                                     @RequestParam(value = "recipe",required = false) String recipe,
                                     @RequestParam(value = "ingredient",required = false) String ingredient,
@@ -165,12 +165,12 @@ public class FoodTalkController {
      * 댓글 작성
      */
     @Operation(summary = "집밥토크 댓글 작성, id는 집밥토크 게시물 id 입니다.")
-    @PostMapping("/comment/{id}")
-    public ApiPayload<String> saveComment(@RequestBody @Valid FoodRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+    @PostMapping("/comment")
+    public ApiPayload<?> saveComment(@RequestBody @Valid FoodRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
 
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = foodTalkService.saveComment(dto, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED,result);
+        foodTalkService.saveComment(dto, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED,null);
     }
 
     /**
@@ -178,32 +178,32 @@ public class FoodTalkController {
      */
     @Operation(summary = "댓글 삭제 api입니다. id는 댓글 아이디입니다.")
     @DeleteMapping("/comment/{commentId}")
-    public ApiPayload<String> deleteComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = foodTalkService.deleteComment(commentId, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+        foodTalkService.deleteComment(commentId, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**
      * 대댓글 작성
      */
     @Operation(summary = "집밥토크 대댓글 작성, id는 댓글 아이디입니다.")
-    @PostMapping("/reply/{id}")
-    public ApiPayload<String> saveReply(@RequestBody @Valid FoodRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+    @PostMapping("/reply")
+    public ApiPayload<?> saveReply(@RequestBody @Valid FoodRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = foodTalkService.saveReply(dto, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
+        foodTalkService.saveReply(dto, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
     /**
      * 대댓글 삭제
      */
     @Operation(summary = "대댓글 삭제, id는 대댓글 아이디입니다")
-    @DeleteMapping("/reply/{id}")
-    public ApiPayload<String> deleteReply(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    @DeleteMapping("/reply/{replyId}")
+    public ApiPayload<?> deleteReply(@PathVariable("replyId") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = foodTalkService.deleteReply(id, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+        foodTalkService.deleteReply(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**
@@ -211,10 +211,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시물 공감하기 api입니다. id는 집밥토크 게시물 id 입니다")
     @PostMapping("/love/{id}")
-    public ApiPayload<String> saveLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> saveLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = foodTalkService.saveLove(id, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+        foodTalkService.saveLove(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**
@@ -222,9 +222,9 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시물 공감 취소하기, id는 집밥토크 게시물 id 입니다")
     @DeleteMapping("/love/{id}")
-    public ApiPayload<String> deleteLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = foodTalkService.deleteLove(id, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+        foodTalkService.deleteLove(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 }

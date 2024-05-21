@@ -280,11 +280,10 @@ public class FoodTalkService {
 
 
     @Transactional
-    public String saveComment(FoodRequestDTO.CommentDTO dto, Member member) {
-
+    public void saveComment(FoodRequestDTO.CommentDTO dto, Member member) {
 
         FoodTalk foodTalk = foodTalkRepository.findById(dto.getId())
-                .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         FoodTalkComment foodTalkComment = FoodTalkComment.builder()
                 .member(member)
@@ -302,21 +301,16 @@ public class FoodTalkService {
         foodTalk.updateCommentSize(commentNum + replyNum);
 
 
-
-        return dto.getId() +  " 번 댓글 저장완료";
-
-
-
     }
 
     @Transactional
-    public String deleteComment(Long commentId, Member member) {
+    public void deleteComment(Long commentId, Member member) {
 
         FoodTalkComment foodTalkComment = foodTalkCommentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException(commentId + " 번의 댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
         if (member != foodTalkComment.getMember()) {
-            throw new IllegalArgumentException("댓글 작성자가 달라 삭제할 수 없습니다");
+            throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
         foodTalkCommentRepository.delete(foodTalkComment);
@@ -327,15 +321,13 @@ public class FoodTalkService {
         int replyNum = foodTalkRepository.countTotalReplyNumber(commentId).intValue();
 
         foodTalk.updateCommentSize(commentNum + replyNum);
-
-        return commentId + "번 댓글 삭제완료";
     }
 
     @Transactional
-    public String saveReply(FoodRequestDTO.CommentDTO dto, Member member) {
+    public void saveReply(FoodRequestDTO.CommentDTO dto, Member member) {
 
         FoodTalkComment foodTalkComment = foodTalkCommentRepository.findById(dto.getId())
-                .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
         FoodTalkReply foodTalkReply = FoodTalkReply.builder()
                 .foodTalkComment(foodTalkComment)
@@ -351,20 +343,16 @@ public class FoodTalkService {
         int replyNum = foodTalkRepository.countTotalReplyNumber(foodTalkComment.getId()).intValue();
 
         foodTalk.updateCommentSize(commentNum + replyNum);
-
-
-
-        return dto.getId() + "번 댓글의 대댓글을 작성완료하였습니다.";
     }
 
     @Transactional
-    public String deleteReply(Long id, Member member) {
+    public void deleteReply(Long id, Member member) {
 
         FoodTalkReply foodTalkReply = foodTalkReplyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
         if (member != foodTalkReply.getMember()) {
-            throw new IllegalArgumentException("댓글 작성자가 달라 삭제할 수 없습니다");
+            throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
         foodTalkReplyRepository.delete(foodTalkReply);
@@ -376,17 +364,16 @@ public class FoodTalkService {
 
         foodTalk.updateCommentSize(commentNum + replyNum);
 
-        return id + "번 대댓글 삭제 완료";
     }
 
     @Transactional
-    public String saveLove(Long id, Member member) {
+    public void saveLove(Long id, Member member) {
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         if (foodTalk.getSetLove()) {
-            throw new IllegalArgumentException("이미 좋아요를 누른 글입니다");
+            throw new GeneralException(PostErrorStatus.POST_SET_LOVE_BAD_REQUEST);
         }
 
         FoodTalkLove foodTalkLove = FoodTalkLove.builder()
@@ -398,14 +385,16 @@ public class FoodTalkService {
         foodTalk.setLove(true);
 
         foodLoveRepository.save(foodTalkLove);
-
-        return id + " 글에 대해 좋아요를 눌렀습니다.";
     }
 
     @Transactional
-    public String deleteLove(Long id, Member member) {
+    public void deleteLove(Long id, Member member) {
         FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
+
+        if (!foodTalk.getSetLove()) {
+            throw new GeneralException(PostErrorStatus.POST_CANCEL_LOVE_BAD_REQUEST);
+        }
 
         FoodTalkLove foodTalkLove = foodLoveRepository.findByFoodTalkAndMember(foodTalk, member);
 
@@ -413,7 +402,5 @@ public class FoodTalkService {
         foodTalk.plusLove(foodTalk.getLove() - 1);
 
         foodLoveRepository.delete(foodTalkLove);
-
-        return id + "번 글에 대해 좋아요를 취소했습니다.";
     }
 }

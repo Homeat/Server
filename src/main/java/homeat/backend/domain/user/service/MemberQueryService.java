@@ -12,17 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MemberQueryService {
-
     private final MemberRepository memberRepository;
-    private final MemberInfoRepository memberInfoRepository;
 
     @Transactional
     public Member mypageMember(Long id) {
         return memberRepository.findById(id).orElseThrow();
-    }
-
-    @Transactional
-    public MemberInfo mypageMemberInfo(Long memberId) {
-        return memberInfoRepository.findMemberInfoByMemberId(memberId);
     }
 }

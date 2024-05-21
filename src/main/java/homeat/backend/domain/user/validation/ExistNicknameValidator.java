@@ -1,8 +1,7 @@
 package homeat.backend.domain.user.validation;
 
-import homeat.backend.domain.user.annotation.ExistEmail;
 import homeat.backend.domain.user.annotation.ExistNickname;
-import homeat.backend.domain.user.handler.MemberErrorStatus;
+import homeat.backend.domain.user.controller.MemberErrorStatus;
 import homeat.backend.domain.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,5 @@
 package homeat.backend.domain.homeatreport.dto;
 
-import homeat.backend.domain.user.entity.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

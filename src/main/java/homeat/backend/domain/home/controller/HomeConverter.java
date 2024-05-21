@@ -2,7 +2,6 @@ package homeat.backend.domain.home.controller;
 
 import homeat.backend.domain.home.dto.HomeResponseDTO;
 import homeat.backend.domain.home.entity.DailyExpense;
-import homeat.backend.domain.homeatreport.entity.Week;
 
 public class HomeConverter {
 

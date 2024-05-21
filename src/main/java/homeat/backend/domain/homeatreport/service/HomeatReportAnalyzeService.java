@@ -2,27 +2,25 @@ package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
-import homeat.backend.domain.home.entity.DailyExpense;
-import homeat.backend.domain.home.repository.DailyExpenseRepo;
 import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeResponseDTO;
 import homeat.backend.domain.homeatreport.dto.ReportWeeklyResponseDTO;
-import homeat.backend.domain.homeatreport.dto.WeekOfDayReturn;
+import homeat.backend.domain.homeatreport.entity.Week_Analyze;
+import homeat.backend.domain.homeatreport.repository.querydsl.WeekRepositoryCustom;
 import homeat.backend.domain.user.entity.Gender;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.domain.user.repository.MemberInfoRepository;
 import homeat.backend.domain.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Period;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,109 +30,82 @@ public class HomeatReportAnalyzeService {
     private final FinanceDataRepository financeDataRepository;
     private final MemberInfoRepository memberInfoRepository;
     private final MemberRepository memberRepository;
-    private final DailyExpenseRepo dailyExpenseRepository;
+    private final WeekRepositoryCustom weekRepositoryCustom;
 
     // 소비분석 중 상단의 월별 분석
     public ReportMonthlyAnalyzeResponseDTO getMonthlyAnalyze(Integer input_year, Integer input_month, Member member) {
 
-        // input year과 month에 대한 FinanceDataList
+        // input_year과 input_month에 대한 FinanceData
         FinanceData inputFinanceData = financeDataRepository.findByMemberIdAndCreatedYearAndCreatedMonth(member.getId(), input_year, input_month);
         Long input_month_jipbap_price = inputFinanceData.getMonth_jipbap_price();
         Long input_month_out_price = inputFinanceData.getMonth_out_price();
 
         /**
-         * 외식/배달 비용 퍼센트
+         * 파이 차트 비율 계산
          */
-        double total = input_month_jipbap_price + input_month_out_price; // 총합 계산
-        double jipbap_ratio = (input_month_jipbap_price / total) * 100.0; // 집밥 가격 비율 계산
-        double out_ratio = (input_month_out_price / total) * 100.0; // 외식/배달 가격 비율 계산
+        double total = input_month_jipbap_price + input_month_out_price; // 총합
+        double jipbap_ratio = (input_month_jipbap_price / total) * 100.0; // 집밥 가격 비율
+        double out_ratio = (input_month_out_price / total) * 100.0; // 외식/배달 가격 비율
 
         int jipbap_ratio_int = (int)Math.round(jipbap_ratio);
         int out_ratio_int = (int)Math.round(out_ratio);
 
-        FinanceData previousFinanceData = null;
-
         Integer previous_year = input_year;
         Integer previous_month = input_month;
         Long currentId = inputFinanceData.getId();
-        String save_percent = null;
-        Double calc_percent = null;
+        Double save_percent = null;
 
-        while(currentId > 0) {
-            currentId--;
-            if (previous_month == 1) {
-                previous_year--;
-                previous_month = 12;
-            } else {
-                previous_month--;
-            }
-
-            previousFinanceData = financeDataRepository.findByMemberIdAndCreatedYearAndCreatedMonth(member.getId(), previous_year, previous_month);
-
-            /**
-             * 전달 대비 절약 퍼센트
-             */
-            // previousFinanceData가 존재하고 지출 합이 0이 아닌 경우, save_percent 계산 후 루프 탈출
-            if (previousFinanceData != null && (previousFinanceData.getMonth_jipbap_price() + previousFinanceData.getMonth_out_price()) != 0) {
-                calc_percent = 1 - (double)((input_month_jipbap_price + input_month_out_price) / (previousFinanceData.getMonth_jipbap_price() + previousFinanceData.getMonth_out_price()));
-                save_percent = String.valueOf(calc_percent);
-                break;
-            }
-
-            // 더 조회할 FinanceData가 없는 경우
-            if (currentId <= 0) {
-                save_percent = "이전 데이터가 존재하지 않습니다.";
-                break;
-            }
+        Long previousId = currentId--;
+        Optional<FinanceData> optionalPreviousFinanceData = financeDataRepository.findFinanceDataById(previousId);
+        ReportMonthlyAnalyzeResponseDTO reportMonthlyAnalyzeResponseDTO;
+        if (optionalPreviousFinanceData.isEmpty()) {
+            System.err.println("Error: Previous FinanceData not Found.");
+            //throw new RuntimeException("Error: Previous FinanceData not Found.")
         }
-        ReportMonthlyAnalyzeResponseDTO reportMonthlyAnalyzeResponseDTO = new ReportMonthlyAnalyzeResponseDTO(input_month_jipbap_price, input_month_out_price, jipbap_ratio_int, out_ratio_int, save_percent);
+
+        FinanceData previousFinanceData = optionalPreviousFinanceData.get();
+        if (previous_month == 1) {
+            previous_year--;
+            previous_month = 12;
+        } else {
+            previous_month--;
+        }
+        // 찾은 previousFinanceData의 Date가 일치하지 않을 경우 exception
+        if (previousFinanceData.getCreatedAt().getYear() == previous_year && previousFinanceData.getCreatedAt().getMonthValue() == previous_month) {
+            System.err.println("Error: Date of Previous FinanceData Unmatched");
+            //throw new RuntimeException("Error: Date of Previous FinanceData Unmatched")
+        }
+        if (previousFinanceData.getMonth_jipbap_price() + previousFinanceData.getMonth_out_price() == 0 || inputFinanceData.getMonth_jipbap_price() + inputFinanceData.getMonth_out_price() == 0) { // 이번달 또는 저번달 지출이 없는 경우
+            reportMonthlyAnalyzeResponseDTO = new ReportMonthlyAnalyzeResponseDTO(1, -1L, -1L, -1, -1, -1D);
+        }
+        else {
+            Long previous_month_jipbap_price = previousFinanceData.getMonth_jipbap_price();
+            Long previous_month_out_price = previousFinanceData.getMonth_out_price();
+            save_percent = 1 - (double)((input_month_jipbap_price + input_month_out_price) /(previous_month_jipbap_price + previous_month_out_price));
+            save_percent *= 100;
+
+            reportMonthlyAnalyzeResponseDTO = new ReportMonthlyAnalyzeResponseDTO(0, input_month_jipbap_price, input_month_out_price, jipbap_ratio_int, out_ratio_int, save_percent);
+        }
         return reportMonthlyAnalyzeResponseDTO;
     }
 
-    // 소비분석 중 하단의 주별 분석
+    // 소비분석 하단의 주별 분석
     public ReportWeeklyResponseDTO getWeeklyAnalyze(Integer input_year, Integer input_month, Integer input_day, Member member) {
+        MemberInfo memberInfo = memberInfoRepository.findMemberInfoByMember(member).orElseThrow(); // 특정 멤버의 memberInfo 엔티티
+        System.out.println("Member's Name:" + memberInfo.getMember().getNickname());
 
-        MemberInfo memberInfo = memberInfoRepository.findMemberInfoByMemberIdOptional(member.getId()) // 특정 멤버의 memberInfo 엔티티
-                .orElseThrow(() -> new NoSuchElementException("조회된 memberInfo가 없습니다."));
-        System.out.println("member name: " + memberInfo.getMember().getNickname());
-        LocalDate birth = memberInfo.getBirth();
-        Integer birth_year = birth.getYear();
-        Integer birth_month = birth.getMonthValue();
-        Integer birth_day = birth.getDayOfMonth();
+        // 생년을 LocalDate 객체 생성
+        Integer birthYear = memberInfo.getBirth().getYear();
 
-        // 생년월일을 나타내는 LocalDate 객체 생성
-        LocalDate birthday = LocalDate.of(birth_year, birth_month, birth_day);
+        // 현재 year을 나타내는 LocalDate 객체 생성
+        Integer currentYear = LocalDate.now().getYear();
 
-        // 현재 날짜를 나타내는 LocalDate 객체 생성
-        LocalDate currentDate = LocalDate.now();
+        Integer age = currentYear - birthYear + 1; // 한국식 나이
+        Integer ageIndex = age/10; // 연령대. 1이면 10대
+        String ageRange = ageIndex*10+"대";
 
-        // 생년월일로부터 현재까지의 기간 계산
-        Period period = Period.between(birthday, currentDate);
-
-        // 만 나이 계산
-        Integer age = period.getYears(); // 특정 멤버의 나이
-        System.out.println("age: "+age);
-
-        String age_range_str = age_range_calc(age); // 연령대
-        Integer[] ageRange = new Integer[2];
-        Integer ageQuotient = age/10;
-        Integer ageRemainder = age%10;
-
-        // 연령대 범위 계산. 초반: _0~_2, 중반: _3~_6, 후반: _7~_9
-        if (ageRemainder >= 0 && ageRemainder <= 2) {
-            ageRange[0] = ageQuotient * 10;
-            ageRange[1] = ageQuotient * 10 + 2;
-        } else if (ageRemainder >= 3 && ageRemainder <= 6) {
-            ageRange[0] = ageQuotient * 10 + 3;
-            ageRange[1] = ageQuotient * 10 + 6;
-        } else {
-            ageRange[0] = ageQuotient * 10 + 7;
-            ageRange[1] = ageQuotient * 10 + 9;
-        }
-
-        Integer[] birth_range = new Integer[2];
-        birth_range[0] = currentDate.getYear() - ageRange[1] + 1;
-        birth_range[1] = currentDate.getYear() - ageRange[0] + 1;
+        Long income = memberInfo.getIncome(); // 특정 멤버의 수입
+        String income_str = "소득 " + (income/10000) +"만원 이하";
 
         Gender gender = memberInfo.getGender(); // 특정 멤버의 성별
         String gender_kor = "";
@@ -145,145 +116,57 @@ public class HomeatReportAnalyzeService {
         } else {
             gender_kor = " ";
         }
-        Long income = memberInfo.getIncome(); // 특정 멤버의 수입
-        String income_str = "소득 "+(income/10000)+"만원 이하";
 
-        List<Member> members = memberRepository.findMemberByCriteria(birth_range, gender, income)
+        // 비교군 설정
+        List<Member> members = memberRepository.findMemberByCriteria(ageIndex, gender, income)
                 .orElseThrow(() -> new NoSuchElementException("비교할 회원이 존재하지 않습니다.")); // 특정 멤버의 연령대, 성별, 수입이 비슷한 멤버들
+        System.out.println("조건 충족 멤버 수: " + members.size());
+        System.out.println(ageIndex*10 + "대 " + income_str + gender_kor);
 
-        System.out.println("birth rance: "+birth_range[0]+"~"+birth_range[1]);
-        System.out.println("income: "+income);
-        System.out.println("조건 충족 멤버 수: "+members.size());
+        Long jipbapPrices = 0L;
+        Long outPrices = 0L;
 
-        WeekOfDayReturn weekOfDay = WeekOfMonth(input_year, input_month, input_day);
-        LocalDate startDayOfWeek = weekOfDay.getStartOfWeek();
-        LocalDate endDayOfWeek = weekOfDay.getEndOfWeek();
+        // 입력된 날짜를 기준으로 해당 날짜가 포함된 주가 해당 달의 몇 번째 주인지 구하기
+        LocalDate date = LocalDate.of(input_year, input_month, input_day);
+        Integer weekIdx = findWeekIdx(date);
 
-        Long average_jipbap_price = getDailyExpenseJipbapPrice(members, startDayOfWeek, endDayOfWeek);
-        System.out.println("average 집밥: "+average_jipbap_price);
-        Long average_out_price = getDailyExpenseOutPrice(members, startDayOfWeek, endDayOfWeek);
-        System.out.println("average 외식: "+average_out_price);
+        for (Member m : members) {
+            Week_Analyze weekAnalyze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(m.getId(), weekIdx, input_year, input_month)
+                    .orElseThrow(() -> new NoSuchElementException(m.getNickname()+"의 Week Analyze가 존재하지 않습니다."));
 
-        Long week_jipbap_price = 0L;
-        Long week_out_price = 0L;
-        List<DailyExpense> dailyExpenseList = dailyExpenseRepository.findDailyExpenseByMemberIdAndDateBetween(member.getId(), startDayOfWeek, endDayOfWeek);
-        for (DailyExpense dailyExpense:dailyExpenseList) {
-            week_jipbap_price += dailyExpense.getTodayJipbapPrice();
-            week_out_price += dailyExpense.getTodayOutPrice();
+            jipbapPrices += weekAnalyze.getWeek_jipbap_price(); // 멤버들의 집밥 가격 누적
+            outPrices += weekAnalyze.getWeek_out_price(); // 멤버들의 외식 배달 가격 누적
+
         }
+        Long average_jipbap = jipbapPrices / members.size(); // 비교군 멤버들의 평균 집밥 지출 비용
+        Long average_out = outPrices / members.size(); // 비교군 멤버들의 평균 외식 배달 지출 비용
 
-        ReportWeeklyResponseDTO reportWeeklyResponseDTO = new ReportWeeklyResponseDTO(age_range_str, income_str, gender_kor, member.getNickname(), week_jipbap_price-average_jipbap_price, week_out_price-average_out_price, average_jipbap_price, week_jipbap_price, average_out_price, week_out_price);
+        Week_Analyze memberWeekAnaylze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(member.getId(), weekIdx, input_year, input_month)
+                .orElseThrow(() -> new NoSuchElementException(member.getNickname()+"의 Week Analyze가 존재하지 않습니다."));
+        Long jipbap_save = average_jipbap - memberWeekAnaylze.getWeek_jipbap_price(); // 주어진 멤버가 n째주에 절약한 집밥 비용
+        Long out_save = average_out - memberWeekAnaylze.getWeek_out_price(); // 주어진 멤버가 n째주에 절약한 외식 배달 비용
+
+        ReportWeeklyResponseDTO reportWeeklyResponseDTO = new ReportWeeklyResponseDTO(ageRange, income_str, gender_kor, member.getNickname(), jipbap_save, out_save, average_jipbap, memberWeekAnaylze.getWeek_jipbap_price(), average_out, memberWeekAnaylze.getWeek_out_price());
         return reportWeeklyResponseDTO;
     }
 
-
-    public static String age_range_calc(Integer age) {
-
-        String age_range;
-
-        int age_quotient = age / 10;
-        int age_remainder = age % 10;
-
-        // 나이대 분류
-        if (age_remainder >= 0 && age_remainder <= 2) {
-            age_range = age_quotient * 10 + "대 초반";
-        } else if (age_remainder >= 3 && age_remainder <= 6) {
-            age_range = age_quotient * 10 + "대 중반";
-        } else {
-            age_range = age_quotient * 10 + "대 후반";
-        }
-
-        return age_range;
-    }
-
     /**
-     * 툭정 날짜에 대한 n주차와 주의 시작일과 마지막일 반환
-     * @param year
-     * @param month
-     * @param day
-     * @return
+     * 주어진 date를 기준으로 해당 date가 포함된 주가 해당 month에서 몇 번째 주차인지 반환
+     * @param date
+     * @return weekIdx
      */
-    public static WeekOfDayReturn WeekOfMonth(Integer year, Integer month, Integer day) {
-
-        int idx = 0;
-        Integer this_idx = 0;
-        LocalDate this_startOfWeek = null;
-        LocalDate this_endOfWeek = null;
-
-        // 현재 달의 1일과 마지막 날 구하기
-        LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
-        LocalDate lastDayOfMonth = firstDayOfMonth.with(TemporalAdjusters.lastDayOfMonth());
-
-        // 현재 달의 1일과 마지막 날의 주의 시작일과 마지막일 찾기
-        LocalDate startOfFirstWeek = firstDayOfMonth.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
-        LocalDate endOfLastWeek = lastDayOfMonth.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
-
-        // 주의 첫째주부터 마지막주까지의 시작일과 마지막일 출력
-        LocalDate startOfWeek = startOfFirstWeek;
-        while (!startOfWeek.isAfter(endOfLastWeek)) {
-            idx++;
-            LocalDate endOfWeek = startOfWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
-
-            if (startOfWeek.getMonthValue() != month) { // 1일을 포함하는 주가 전달과 겹치는 경우
-                startOfWeek = startOfWeek.with(TemporalAdjusters.firstDayOfNextMonth());
-            } else if (endOfWeek.getMonthValue() != month) { // 첫째주가 아니면서 주의 마지막 날의 month가 다음달인 경우
-                endOfWeek = LocalDate.of(year, month, lastDayOfMonth.getDayOfMonth());
-            }
-
-            LocalDate input_date = LocalDate.of(year, month, day);
-            if (input_date.isAfter(startOfWeek) & input_date.isBefore(endOfWeek)) {
-                System.out.println(idx + "번째주");
-                System.out.println("Start of Week: " + startOfWeek + " - End of Week: " + endOfWeek);
-                this_idx = idx;
-                this_startOfWeek = startOfWeek;
-                this_endOfWeek = endOfWeek;
-
-            }
-
-            if (startOfWeek.getMonthValue() > month) {
-                break;
-            }
-
-            startOfWeek = endOfWeek.plusDays(1);
-
+    public Integer findWeekIdx(LocalDate date) {
+        LocalDate nextSunday = date.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        Integer weekIdx = 0;
+        if (nextSunday.getMonthValue() != date.getMonthValue()) { // 주어진 date와 다음주 일요일의 month가 다를 경우(마지막 주에 다음 달로 넘어간 경우)
+            LocalDate prevSunday = date.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY));
+            weekIdx = (prevSunday.getDayOfMonth() - 1) / 7 + 2; // 최근 일요일 기준 weekIdx를 구하여 1을 더함
         }
-        return new WeekOfDayReturn(this_idx, this_startOfWeek, this_endOfWeek);
-    }
-
-    /**
-     * members 평균 집밥 지출량
-     */
-    public Long getDailyExpenseJipbapPrice(List<Member> members, LocalDate startOfWeek, LocalDate endOfWeek) {
-        Long jipbap_prices = 0L;
-
-        for (Member member : members) {
-            List<DailyExpense> dailyExpenseList = dailyExpenseRepository.findDailyExpenseByMemberIdAndDateBetween(member.getId(), startOfWeek, endOfWeek);
-            for (DailyExpense dailyExpense:dailyExpenseList) {
-                jipbap_prices += dailyExpense.getTodayJipbapPrice();
-            }
+        else { // 마지막 주가 아닌 경우
+            weekIdx = (nextSunday.getDayOfMonth() - 1) / 7 + 1; // 다가오는 일요일 기준 weekIdx를 구함
         }
-        if (members.size() != 0) {
-            jipbap_prices = jipbap_prices / members.size();
-        }
-        return jipbap_prices;
-    }
 
-    /**
-     * members 평균 외식/배달 지출량
-     */
-    public Long getDailyExpenseOutPrice(List<Member> members, LocalDate startOfWeek, LocalDate endOfWeek) {
-        Long out_prices = 0L;
-
-        for (Member member : members) {
-            List<DailyExpense> dailyExpenseList = dailyExpenseRepository.findDailyExpenseByMemberIdAndDateBetween(member.getId(), startOfWeek, endOfWeek);
-            for (DailyExpense dailyExpense:dailyExpenseList) {
-                out_prices += dailyExpense.getTodayOutPrice();
-            }
-        }
-        if (members.size() != 0 ) {
-            out_prices = out_prices / members.size();
-        }
-        return out_prices;
+        return weekIdx;
     }
 
 }

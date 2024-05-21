@@ -6,7 +6,6 @@ import homeat.backend.domain.post.dto.FoodResponseDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkCommentViewDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkRecipeViewDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkReplyViewDTO;
-import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkSaveDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
@@ -31,11 +30,12 @@ import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -88,15 +88,13 @@ public class FoodTalkService {
     }
 
     @Transactional
-    public String deleteFoodTalk(Long id, Member member) {
-
-
+    public void deleteFoodTalk(Long id, Member member) {
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         if (member != foodTalk.getMember()) {
-            throw new IllegalArgumentException("작성자가 아니라서 삭제할 수 없습니다");
+            throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
         for (FoodPicture foodPicture : foodTalk.getFoodPictures()) {
@@ -104,46 +102,38 @@ public class FoodTalkService {
         }
 
         // 레시피 s3 삭제
-        if (foodTalk.getFoodRecipes() == null || foodTalk.getFoodRecipes().isEmpty()) {
-
-        } else {
+        if (foodTalk.getFoodRecipes() != null) {
             for (FoodRecipe foodRecipe : foodTalk.getFoodRecipes()) {
-                if (foodRecipe.getFoodRecipePictures() == null || foodRecipe.getFoodRecipePictures().isEmpty()) {
-
-                } else {
+                if (foodRecipe.getFoodRecipePictures() != null) {
                     for (FoodRecipePicture foodRecipePicture : foodRecipe.getFoodRecipePictures()) {
                         s3Service.fileDelete(foodRecipePicture.getUrl());
                     }
                 }
             }
+
         }
 
 
 
         foodTalkRepository.delete(foodTalk);
-
-
-
-
-        return id + " 번 게시글 삭제완료";
     }
 
 
-    @Transactional
-    public ResponseEntity<?> updateFoodTalk(FoodRequestDTO.FoodTalkSaveDTO dto, Long id) {
-        FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
-
-        foodTalk.update(dto.getName(), dto.getMemo(), dto.getTag());
-
-        return ResponseEntity.ok(id + " 번 게시글 수정완료");
-    }
+//    @Transactional
+//    public ResponseEntity<?> updateFoodTalk(FoodRequestDTO.FoodTalkSaveDTO dto, Long id) {
+//        FoodTalk foodTalk = foodTalkRepository.findById(id)
+//                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+//
+//        foodTalk.update(dto.getName(), dto.getMemo(), dto.getTag());
+//
+//        return ResponseEntity.ok(id + " 번 게시글 수정완료");
+//    }
 
     @Transactional
     public FoodResponseDTO.FoodTalkViewDTO getFoodTalk(Long id, Member member) {
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
         if (foodLoveRepository.findByFoodTalkAndMember(foodTalk, member) == null) {
             foodTalk.setLove(false);
         } else {
@@ -153,64 +143,56 @@ public class FoodTalkService {
         foodTalk.plusView(foodTalk.getView() + 1);
 
         // 집밥토크 사진 리스트
-        List<String> foodPictures = new ArrayList<>();
-        for (FoodPicture pictures : foodTalk.getFoodPictures()) {
-            foodPictures.add(pictures.getUrl());
-        }
+        List<String> foodPictures = foodTalk.getFoodPictures().stream()
+                .map(FoodPicture::getUrl)
+                .toList();
 
         // 집밥토크 레시피 리스트
-        List<FoodResponseDTO.FoodTalkRecipeViewDTO> foodTalkRecipeViewDTOList = new ArrayList<>();
-        if (foodTalk.getFoodRecipes().isEmpty()) {
-        } else {
-            int cnt = 1;
-            for (FoodRecipe recipe : foodTalk.getFoodRecipes()) {
-                List<String> recipePictures = new ArrayList<>();
-                for (FoodRecipePicture recipePicture : recipe.getFoodRecipePictures()) {
-                    recipePictures.add(recipePicture.getUrl());
-                }
-                FoodTalkRecipeViewDTO foodTalkRecipeViewDTO = FoodTalkRecipeViewDTO.builder()
-                        .step(cnt++)
-                        .recipe(recipe.getRecipe())
-                        .ingredient(recipe.getIngredient())
-                        .tip(recipe.getTip())
-                        .foodRecipeImages(recipePictures)
-                        .build();
-                foodTalkRecipeViewDTOList.add(foodTalkRecipeViewDTO);
-            }
-        }
+        AtomicInteger cnt = new AtomicInteger(1);
+
+        List<FoodResponseDTO.FoodTalkRecipeViewDTO> foodTalkRecipeViewDTOList = foodTalk.getFoodRecipes().stream()
+                .map(recipe -> {
+                    List<String> recipePictures = recipe.getFoodRecipePictures().stream()
+                            .map(FoodRecipePicture::getUrl)
+                            .collect(Collectors.toList());
+
+                    return FoodTalkRecipeViewDTO.builder()
+                            .step(cnt.getAndIncrement())
+                            .recipe(recipe.getRecipe())
+                            .ingredient(recipe.getIngredient())
+                            .tip(recipe.getTip())
+                            .foodRecipeImages(recipePictures)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
 
         // 집밥토크 댓글 리스트
-        List<FoodResponseDTO.FoodTalkCommentViewDTO> foodTalkCommentViewDTOList = new ArrayList<>();
-        if (foodTalk.getFoodTalkComments().isEmpty()) {
-        } else {
-            for (FoodTalkComment foodTalkComment : foodTalk.getFoodTalkComments()) {
-                List<FoodResponseDTO.FoodTalkReplyViewDTO> foodTalkReplyViewDTOList = new ArrayList<>();
-                if (foodTalkComment.getReplyList().isEmpty()) {
-                } else {
-                    for (FoodTalkReply foodTalkReply : foodTalkComment.getReplyList()) {
-                        FoodTalkReplyViewDTO foodTalkReplyViewDTO = FoodTalkReplyViewDTO.builder()
-                                .createdAt(foodTalkReply.getCreatedAt())
-                                .updatedAt(foodTalkReply.getUpdatedAt())
-                                .replyId(foodTalkReply.getId())
-                                .replyNickName(foodTalkReply.getMember().getNickname())
-                                .content(foodTalkReply.getContent())
-                                .build();
-                        foodTalkReplyViewDTOList.add(foodTalkReplyViewDTO);
-                    }
-                }
-                FoodTalkCommentViewDTO foodTalkCommentViewDTO = FoodTalkCommentViewDTO.builder()
-                        .createdAt(foodTalkComment.getCreatedAt())
-                        .updatedAt(foodTalkComment.getUpdatedAt())
-                        .commentId(foodTalkComment.getId())
-                        .commentNickName(foodTalkComment.getMember().getNickname())
-                        .content(foodTalkComment.getContent())
-                        .foodTalkReplies(foodTalkReplyViewDTOList)
-                        .build();
-                foodTalkCommentViewDTOList.add(foodTalkCommentViewDTO);
-            }
-        }
+        List<FoodResponseDTO.FoodTalkCommentViewDTO> foodTalkCommentViewDTOList = foodTalk.getFoodTalkComments().stream()
+                .map(foodTalkComment -> {
+                    List<FoodResponseDTO.FoodTalkReplyViewDTO> foodTalkReplyViewDTOList = foodTalkComment.getReplyList().stream()
+                            .map(foodTalkReply -> FoodTalkReplyViewDTO.builder()
+                                    .createdAt(foodTalkReply.getCreatedAt())
+                                    .updatedAt(foodTalkReply.getUpdatedAt())
+                                    .replyId(foodTalkReply.getId())
+                                    .replyNickName(foodTalkReply.getMember().getNickname())
+                                    .content(foodTalkReply.getContent())
+                                    .build())
+                            .collect(Collectors.toList());
 
-        FoodTalkViewDTO result = FoodTalkViewDTO.builder()
+                    return FoodTalkCommentViewDTO.builder()
+                            .createdAt(foodTalkComment.getCreatedAt())
+                            .updatedAt(foodTalkComment.getUpdatedAt())
+                            .commentId(foodTalkComment.getId())
+                            .commentNickName(foodTalkComment.getMember().getNickname())
+                            .content(foodTalkComment.getContent())
+                            .foodTalkReplies(foodTalkReplyViewDTOList)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+
+        return FoodTalkViewDTO.builder()
                 .createdAt(foodTalk.getCreatedAt())
                 .updatedAt(foodTalk.getUpdatedAt())
                 .id(foodTalk.getId())
@@ -226,8 +208,6 @@ public class FoodTalkService {
                 .foodTalkRecipes(foodTalkRecipeViewDTOList)
                 .foodTalkComments(foodTalkCommentViewDTOList)
                 .build();
-
-        return result;
     }
 
 

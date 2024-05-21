@@ -12,16 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class FoodRequestDTO {
 
     @Getter
-    public static class FoodTalkSaveDTO {
-        @NotNull
-        private String name;
-        @NotNull
-        private String memo;
-        @NotNull
-        private Tag tag;
-    }
-
-    @Getter
     public static class CommentDTO {
         Long id;
         String content;

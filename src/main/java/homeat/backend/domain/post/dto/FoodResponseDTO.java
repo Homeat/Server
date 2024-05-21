@@ -13,17 +13,6 @@ public class FoodResponseDTO {
 
     @Getter
     @Builder
-    public static class FoodTalkSaveDTO {
-
-        private Long id;
-        private String nickname;
-        private String name;
-        private String memo;
-        private Tag tag;
-    }
-
-    @Getter
-    @Builder
     public static class FoodTalkViewDTO {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;

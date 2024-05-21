@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum PostErrorStatus implements BaseStatus {
+    POST_DELETE_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "POST_4010", "작성자가 아니라 삭제할 권한이 없습니다"),
+
     POST_NAME_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4020", "NAME이 입력되지 않았습니다"),
     POST_MEMO_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4021", "MEMO가 입력되지 않았습니다"),
     POST_TAG_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4022", "TAG가 입력되지 않았습니다"),

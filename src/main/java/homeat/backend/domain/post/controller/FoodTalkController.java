@@ -2,7 +2,6 @@ package homeat.backend.domain.post.controller;
 
 import homeat.backend.domain.post.dto.FoodRequestDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO;
-import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkSaveDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
@@ -75,20 +74,20 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 삭제 api")
     @DeleteMapping("delete/{id}")
-    public ApiPayload<String> deleteFoodTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteFoodTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = foodTalkService.deleteFoodTalk(id, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+        foodTalkService.deleteFoodTalk(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**
      * 게시글 수정
      */
-    @Operation(summary = "집밥토크 게시글 수정 api, 아직 개발 X")
-    @PatchMapping("/update/{id}")
-    public ResponseEntity<?> updateFoodTalk(@RequestBody @Valid FoodRequestDTO.FoodTalkSaveDTO dto, @PathVariable("id") Long id) {
-        return foodTalkService.updateFoodTalk(dto, id);
-    }
+//    @Operation(summary = "집밥토크 게시글 수정 api, 아직 개발 X")
+//    @PatchMapping("/update/{id}")
+//    public ResponseEntity<?> updateFoodTalk(@RequestBody @Valid FoodRequestDTO.FoodTalkSaveDTO dto, @PathVariable("id") Long id) {
+//        return foodTalkService.updateFoodTalk(dto, id);
+//    }
 
     /**
      * 집밥토크 조회

@@ -10,17 +10,6 @@ public class InfoResponseDTO {
 
     @Getter
     @Builder
-    public static class InfoTalkSaveDTO {
-
-        private Long id;
-        private String nickname;
-        private String title;
-        private String content;
-        private List<String> tag;
-    }
-
-    @Getter
-    @Builder
     public static class InfoTalkViewDTO {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;

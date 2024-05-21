@@ -1,9 +1,7 @@
 package homeat.backend.domain.post.controller;
 
-import homeat.backend.domain.post.dto.FoodRequestDTO;
 import homeat.backend.domain.post.dto.InfoRequestDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO;
-import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkSaveDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkTotalView;
@@ -11,6 +9,7 @@ import homeat.backend.domain.post.service.InfoTalkService;
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
+import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,11 +18,9 @@ import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,26 +42,28 @@ public class InfoTalkController {
      * 정보토크 저장
      */
     @Operation(summary = "정보토크 내용 저장 api")
-    @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ApiPayload<InfoResponseDTO.InfoTalkSaveDTO> saveInfoTalk(@RequestBody InfoRequestDTO.InfoTalkDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiPayload<?> saveInfoTalk(@RequestParam(value = "title",required = false) String title,
+                                                                    @RequestParam(value = "content",required = false) String content,
+                                                                    @RequestParam(value = "tags",required = false) List<String> tags,
+                                                                    @RequestParam(value = "imgUrl",required = false) List<MultipartFile> multipartFiles,
+                                                                    @AuthenticationPrincipal CustomUserDetails authentication) {
+
+        if (title == null) {
+            throw new GeneralException(PostErrorStatus.POST_TITLE_PAYMENT_REQUIRED);
+        }
+        if (content == null) {
+            throw new GeneralException(PostErrorStatus.POST_CONTENT_PAYMENT_REQUIRED);
+        }
+        if (multipartFiles == null) {
+            throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
+        }
+
+
 
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        InfoTalkSaveDTO result = infoTalkService.saveInfoTalk(dto, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
-    }
-
-    /**
-     * 정보토크 사진 업로드
-     */
-    @Operation(summary = "정보토크 사진 저장 api")
-    @PostMapping(value = "/upload/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<String> uploadImages(@PathVariable("id") Long id,@RequestPart("imgUrl") List<MultipartFile> multipartFiles) {
-        if (multipartFiles == null) {
-            throw new IllegalArgumentException("사진이 없습니다");
-        }
-        String result = infoTalkService.uploadImages(id, multipartFiles);
-
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+        infoTalkService.saveInfoTalk(title,content,tags,multipartFiles, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
 
@@ -82,11 +81,11 @@ public class InfoTalkController {
     /**
      * 게시글 수정
      */
-    @Operation(summary = "정보토크 게시글 수정 api, 개발X")
-    @PatchMapping("/update/{id}")
-    public ResponseEntity<?> updateInfoTalk(@RequestBody @Valid InfoRequestDTO.InfoTalkDTO dto, @PathVariable("id") Long id) {
-        return infoTalkService.updateInfoTalk(dto, id);
-    }
+//    @Operation(summary = "정보토크 게시글 수정 api, 개발X")
+//    @PatchMapping("/update/{id}")
+//    public ResponseEntity<?> updateInfoTalk(@RequestBody @Valid InfoRequestDTO.InfoTalkDTO dto, @PathVariable("id") Long id) {
+//        return infoTalkService.updateInfoTalk(dto, id);
+//    }
 
     /**
      * 정보토크 조회

@@ -1,20 +1,13 @@
 package homeat.backend.domain.post.service;
 
 import homeat.backend.domain.address.repository.AddressRepository;
-import homeat.backend.domain.post.dto.FoodRequestDTO;
-import homeat.backend.domain.post.dto.FoodResponseDTO;
-import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkCommentViewDTO;
-import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkReplyViewDTO;
 import homeat.backend.domain.post.dto.InfoRequestDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkCommentViewDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkReplyViewDTO;
-import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkSaveDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkTotalView;
-import homeat.backend.domain.post.entity.FoodTalkComment;
-import homeat.backend.domain.post.entity.FoodTalkReply;
 import homeat.backend.domain.post.entity.InfoHashTag;
 import homeat.backend.domain.post.entity.InfoPicture;
 import homeat.backend.domain.post.entity.InfoTalk;
@@ -29,10 +22,10 @@ import homeat.backend.domain.post.repository.InfoTalkLoveRepository;
 import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
 import homeat.backend.domain.user.entity.Member;
-import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,17 +46,17 @@ public class InfoTalkService {
     private final InfoTalkCommentRepository infoTalkCommentRepository;
     private final InfoTalkReplyRepository infoTalkReplyRepository;
     private final InfoTalkLoveRepository infoTalkLoveRepository;
-    private final AddressRepository addressRepository;
     private final S3Service s3Service;
 
     // 정보토크 게시글 작성
     @Transactional
-    public InfoResponseDTO.InfoTalkSaveDTO saveInfoTalk(InfoRequestDTO.InfoTalkDTO dto, Member member) {
-
+    public void saveInfoTalk(String title,String content,List<String> tags,List<MultipartFile> multipartFiles, Member member) {
+        List<String> imgPaths = s3Service.upload(multipartFiles);
+        System.out.println("IMG 경로들 : " + imgPaths);
 
         InfoTalk infoTalk = InfoTalk.builder()
-                .title(dto.getTitle())
-                .content(dto.getContent())
+                .title(title)
+                .content(content)
                 .save(Save.저장)
                 .member(member)
                 .build();
@@ -71,38 +64,20 @@ public class InfoTalkService {
         infoTalkRepository.save(infoTalk);
 
         // 해시태그 리스트
-        List<String> infoTags = new ArrayList<>();
-        if (dto.getTags() != null && !dto.getTags().isEmpty()) {
-            for (String tag : dto.getTags()) {
-                infoTags.add(tag);
-                InfoHashTag infoHashTag = InfoHashTag.builder()
-                        .infoTalk(infoTalk)
-                        .tag(tag)
-                        .build();
-                infoHashTagRepository.save(infoHashTag);
-            }
-
+        if (tags != null) {
+            tags.stream()
+                    .map(tag -> {
+                        InfoHashTag infoHashTag = InfoHashTag.builder()
+                                .infoTalk(infoTalk)
+                                .tag(tag)
+                                .build();
+                        return infoHashTagRepository.save(infoHashTag);
+                    })
+                    .forEach(savedInfoHashTag ->{});
         }
 
-        InfoTalkSaveDTO result = InfoTalkSaveDTO.builder()
-                .id(infoTalk.getId())
-                .nickname(member.getNickname())
-                .title(infoTalk.getTitle())
-                .content(infoTalk.getContent())
-                .tag(infoTags)
-                .build();
 
-        return result;
-    }
 
-    @Transactional
-    public String uploadImages(Long id, List<MultipartFile> multipartFiles) {
-        List<String> imgPaths = s3Service.upload(multipartFiles);
-        System.out.println("IMG 경로들 : " + imgPaths);
-        postBlankCheck(imgPaths);
-
-        InfoTalk infoTalk = infoTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
 
         for (String imgUrl : imgPaths) {
             InfoPicture infoPicture = InfoPicture.builder()
@@ -112,15 +87,6 @@ public class InfoTalkService {
             infoPictureRepository.save(infoPicture);
         }
 
-
-        return id + "번 정보토크 사진 저장완료";
-    }
-
-
-    private void postBlankCheck(List<String> imgPaths) {
-        if(imgPaths == null || imgPaths.isEmpty()){ //.isEmpty()도 되는지 확인해보기
-            throw new IllegalArgumentException("사진 입력 오류입니다.");
-        }
     }
 
     @Transactional

@@ -19,6 +19,8 @@ public enum PostErrorStatus implements BaseStatus {
     POST_TAG_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4022", "TAG가 입력되지 않았습니다"),
     POST_IMAGE_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4023", "IMAGE가 입력되지 않았습니다"),
     POST_ID_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4024", "게시물ID가 입력되지 않았습니다"),
+    POST_TITLE_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4025", "TITLE이 입력되지 않았습니다"),
+    POST_CONTENT_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4026", "CONTENT가 입력되지 않았습니다"),
 
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_4041", "존재하지 않는 게시물입니다"),
     POST_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_4042", "사진이 존재하지 않습니다"),

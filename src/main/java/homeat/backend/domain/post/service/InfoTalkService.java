@@ -1,6 +1,6 @@
 package homeat.backend.domain.post.service;
 
-import homeat.backend.domain.address.repository.AddressRepository;
+import homeat.backend.domain.post.controller.PostErrorStatus;
 import homeat.backend.domain.post.dto.InfoRequestDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkCommentViewDTO;
@@ -22,6 +22,7 @@ import homeat.backend.domain.post.repository.InfoTalkLoveRepository;
 import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -90,13 +90,13 @@ public class InfoTalkService {
     }
 
     @Transactional
-    public String deleteInfoTalk(Long id, Member member) {
+    public void deleteInfoTalk(Long id, Member member) {
 
         InfoTalk infoTalk = infoTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         if (member != infoTalk.getMember()) {
-            throw new IllegalArgumentException("작성자가 아니라서 삭제할 수 없습니다");
+            throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
         for (InfoPicture infoPicture : infoTalk.getInfoPictures()) {
@@ -104,27 +104,25 @@ public class InfoTalkService {
         }
 
         infoTalkRepository.delete(infoTalk);
-
-        return id + " 번 게시글 삭제완료";
     }
 
-    @Transactional
-    public ResponseEntity<?> updateInfoTalk(InfoRequestDTO.InfoTalkDTO dto, Long id) {
-
-        InfoTalk infoTalk = infoTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
-
-        infoTalk.update(dto.getTitle(), dto.getContent());
-
-        return ResponseEntity.ok(id + " 번 게시글 수정완료");
-    }
+//    @Transactional
+//    public ResponseEntity<?> updateInfoTalk(InfoRequestDTO.InfoTalkDTO dto, Long id) {
+//
+//        InfoTalk infoTalk = infoTalkRepository.findById(id)
+//                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+//
+//        infoTalk.update(dto.getTitle(), dto.getContent());
+//
+//        return ResponseEntity.ok(id + " 번 게시글 수정완료");
+//    }
 
     @Transactional
     // 정보토크 게시글 1개 조회
     public InfoResponseDTO.InfoTalkViewDTO getInfoTalk(Long id, Member member) {
 
         InfoTalk infoTalk = infoTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         if (infoTalkLoveRepository.findByInfoTalkAndMember(infoTalk, member) == null) {
             infoTalk.setLove(false);
@@ -135,53 +133,42 @@ public class InfoTalkService {
         infoTalk.plusView(infoTalk.getView() + 1);
 
         // 해시태그 리스트
-        List<String> infoTags = new ArrayList<>();
-        if (!infoTalk.getInfoHashTags().isEmpty()) {
-            for (InfoHashTag infoHashTag : infoTalk.getInfoHashTags()) {
-                infoTags.add(infoHashTag.getTag());
-            }
-        }
+        List<String> infoTags = infoTalk.getInfoHashTags().stream()
+                .map(InfoHashTag::getTag)
+                .collect(Collectors.toList());
+
 
         // 정보토크 사진 리스트
-        List<String> infoImages = new ArrayList<>();
-        if (!infoTalk.getInfoPictures().isEmpty()) {
-            for (InfoPicture infoPicture : infoTalk.getInfoPictures()) {
-                infoImages.add(infoPicture.getUrl());
-            }
-        }
+        List<String> infoImages = infoTalk.getInfoPictures().stream()
+                .map(InfoPicture::getUrl)
+                .collect(Collectors.toList());
 
         // 정보토크 댓글, 대댓글 DTO 생성
-        List<InfoResponseDTO.InfoTalkCommentViewDTO> infoTalkCommentViewDTOList = new ArrayList<>();
-        if (infoTalk.getInfoTalkComments().isEmpty()) {
-        } else {
-            for (InfoTalkComment infoTalkComment : infoTalk.getInfoTalkComments()) {
-                List<InfoResponseDTO.InfoTalkReplyViewDTO> infoTalkReplyViewDTOList = new ArrayList<>();
-                if (infoTalkComment.getReplyList().isEmpty()) {
-                } else {
-                    for (InfoTalkReply infoTalkReply : infoTalkComment.getReplyList()) {
-                        InfoTalkReplyViewDTO infoTalkReplyViewDTO = InfoTalkReplyViewDTO.builder()
-                                .createdAt(infoTalkReply.getCreatedAt())
-                                .updatedAt(infoTalkReply.getUpdatedAt())
-                                .replyId(infoTalkReply.getId())
-                                .replyNickName(infoTalkReply.getMember().getNickname())
-                                .content(infoTalkReply.getContent())
-                                .build();
-                        infoTalkReplyViewDTOList.add(infoTalkReplyViewDTO);
-                    }
-                }
-                InfoTalkCommentViewDTO infoTalkCommentViewDTO = InfoTalkCommentViewDTO.builder()
-                        .createdAt(infoTalkComment.getCreatedAt())
-                        .updatedAt(infoTalkComment.getUpdatedAt())
-                        .commentId(infoTalkComment.getId())
-                        .commentNickName(infoTalkComment.getMember().getNickname())
-                        .content(infoTalkComment.getContent())
-                        .infoTalkReplies(infoTalkReplyViewDTOList)
-                        .build();
-                infoTalkCommentViewDTOList.add(infoTalkCommentViewDTO);
-            }
-        }
+        List<InfoResponseDTO.InfoTalkCommentViewDTO> infoTalkCommentViewDTOList = infoTalk.getInfoTalkComments().stream()
+                .map(infoTalkComment -> {
+                    List<InfoResponseDTO.InfoTalkReplyViewDTO> infoTalkReplyViewDTOList = infoTalkComment.getReplyList().stream()
+                            .map(infoTalkReply -> InfoTalkReplyViewDTO.builder()
+                                    .createdAt(infoTalkReply.getCreatedAt())
+                                    .updatedAt(infoTalkReply.getUpdatedAt())
+                                    .replyId(infoTalkReply.getId())
+                                    .replyNickName(infoTalkReply.getMember().getNickname())
+                                    .content(infoTalkReply.getContent())
+                                    .build())
+                            .collect(Collectors.toList());
 
-        InfoTalkViewDTO result = InfoTalkViewDTO.builder()
+                    return InfoTalkCommentViewDTO.builder()
+                            .createdAt(infoTalkComment.getCreatedAt())
+                            .updatedAt(infoTalkComment.getUpdatedAt())
+                            .commentId(infoTalkComment.getId())
+                            .commentNickName(infoTalkComment.getMember().getNickname())
+                            .content(infoTalkComment.getContent())
+                            .infoTalkReplies(infoTalkReplyViewDTOList)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+
+        return InfoTalkViewDTO.builder()
                 .createdAt(infoTalk.getCreatedAt())
                 .updatedAt(infoTalk.getUpdatedAt())
                 .id(infoTalk.getId())
@@ -197,7 +184,6 @@ public class InfoTalkService {
                 .infoTalkComments(infoTalkCommentViewDTOList)
                 .build();
 
-        return result;
     }
 
     public Slice<InfoTalkTotalView> getInfoTalkLatest(InfoTalkSearchCondition condition, Long lastInfoTalkId) {

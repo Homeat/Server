@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -72,10 +71,10 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 삭제 api")
     @DeleteMapping("delete/{id}")
-    public ApiPayload<String> deleteInfoTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteInfoTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = infoTalkService.deleteInfoTalk(id, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+        infoTalkService.deleteInfoTalk(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**

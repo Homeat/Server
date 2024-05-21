@@ -217,10 +217,10 @@ public class InfoTalkService {
 
 
     @Transactional
-    public String saveComment(InfoRequestDTO.CommentDTO dto, Member member) {
+    public void saveComment(InfoRequestDTO.CommentDTO dto, Member member) {
 
         InfoTalk infoTalk = infoTalkRepository.findById(dto.getId())
-                .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         InfoTalkComment infoTalkComment = InfoTalkComment.builder()
                 .member(member)
@@ -237,16 +237,15 @@ public class InfoTalkService {
 
         infoTalk.updateCommentSize(commentNum + replyNum);
 
-        return dto.getId() + "번 게시글의 댓글을 작성완료하였습니다.";
     }
 
     @Transactional
-    public String deleteComment(Long commentId, Member member) {
+    public void deleteComment(Long commentId, Member member) {
         InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException(commentId + " 번의 댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
         if (member != infoTalkComment.getMember()) {
-            throw new IllegalArgumentException("댓글 작성자가 달라 삭제할 수 없습니다");
+            throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
         infoTalkCommentRepository.delete(infoTalkComment);
@@ -258,13 +257,12 @@ public class InfoTalkService {
 
         infoTalk.updateCommentSize(commentNum + replyNum);
 
-        return commentId + "번 댓글 삭제 완료";
     }
 
     @Transactional
-    public String saveReply(InfoRequestDTO.CommentDTO dto, Member member) {
+    public void saveReply(InfoRequestDTO.CommentDTO dto, Member member) {
         InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(dto.getId())
-                .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
         InfoTalkReply infoTalkReply = InfoTalkReply.builder()
                 .infoTalkComment(infoTalkComment)
@@ -282,17 +280,15 @@ public class InfoTalkService {
         infoTalk.updateCommentSize(commentNum + replyNum);
 
 
-
-        return dto.getId() + "번 댓글의 대댓글 작성을 완료하였습니다.";
     }
 
     @Transactional
-    public String deleteReply(Long id, Member member) {
+    public void deleteReply(Long id, Member member) {
         InfoTalkReply infoTalkReply = infoTalkReplyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
         if (member != infoTalkReply.getMember()) {
-            throw new IllegalArgumentException("댓글 작성자가 달라 삭제할 수 없습니다");
+            throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
         infoTalkReplyRepository.delete(infoTalkReply);
@@ -303,17 +299,15 @@ public class InfoTalkService {
         int replyNum = infoTalkRepository.countTotalReplyNumber(infoTalkReply.getInfoTalkComment().getId()).intValue();
 
         infoTalk.updateCommentSize(commentNum + replyNum);
-
-        return id + "번 대댓글 삭제 완료";
     }
 
     @Transactional
-    public String saveLove(Long id, Member member) {
+    public void saveLove(Long id, Member member) {
         InfoTalk infoTalk = infoTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         if (infoTalk.getSetLove()) {
-            throw new IllegalArgumentException("이미 좋아요를 누른 글입니다");
+            throw new GeneralException(PostErrorStatus.POST_SET_LOVE_BAD_REQUEST);
         }
 
         InfoTalkLove infoTalkLove = InfoTalkLove.builder()
@@ -325,16 +319,18 @@ public class InfoTalkService {
         infoTalk.setLove(true);
 
         infoTalkLoveRepository.save(infoTalkLove);
-
-        return id + "번 글에 대해 좋아요를 눌렀습니다.";
     }
 
     @Transactional
-    public String deleteLove(Long id, Member member) {
+    public void deleteLove(Long id, Member member) {
 
 
         InfoTalk infoTalk = infoTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
+
+        if (!infoTalk.getSetLove()) {
+            throw new GeneralException(PostErrorStatus.POST_CANCEL_LOVE_BAD_REQUEST);
+        }
 
         InfoTalkLove infoTalkLove = infoTalkLoveRepository.findByInfoTalkAndMember(infoTalk, member);
 
@@ -343,6 +339,5 @@ public class InfoTalkService {
 
         infoTalkLoveRepository.delete(infoTalkLove);
 
-        return id + "번 글에 대해 좋아요를 취소했습니다.";
     }
 }

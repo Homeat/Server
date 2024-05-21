@@ -144,11 +144,11 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 댓글 작성, id는 정보토크 게시물 id 입니다.")
     @PostMapping("/comment")
-    public ApiPayload<String> saveComment(@RequestBody @Valid InfoRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> saveComment(@RequestBody @Valid InfoRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
 
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = infoTalkService.saveComment(dto, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
+        infoTalkService.saveComment(dto, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
     /**
@@ -156,10 +156,10 @@ public class InfoTalkController {
      */
     @Operation(summary = "댓글 삭제 api입니다. id는 댓글 아이디입니다.")
     @DeleteMapping("/comment/{commentId}")
-    public ApiPayload<String> deleteComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = infoTalkService.deleteComment(commentId, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+        infoTalkService.deleteComment(commentId, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**
@@ -167,10 +167,10 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 대댓글 작성, id는 댓글 아이디입니다.")
     @PostMapping("/reply")
-    public ApiPayload<String> saveReply(@RequestBody @Valid InfoRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> saveReply(@RequestBody @Valid InfoRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = infoTalkService.saveReply(dto, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
+        infoTalkService.saveReply(dto, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
     /**
@@ -178,10 +178,10 @@ public class InfoTalkController {
      */
     @Operation(summary = "대댓글 삭제, id는 대댓글 아이디입니다")
     @DeleteMapping("/reply/{replyId}")
-    public ApiPayload<String> deleteReply(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteReply(@PathVariable("replyId") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = infoTalkService.deleteReply(id, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+        infoTalkService.deleteReply(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**
@@ -189,10 +189,10 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 게시물 공감하기 api입니다. id는 정보토크 게시물 id 입니다")
     @PostMapping("/love/{id}")
-    public ApiPayload<String> saveLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> saveLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = infoTalkService.saveLove(id, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+        infoTalkService.saveLove(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**
@@ -200,10 +200,10 @@ public class InfoTalkController {
      */
     @Operation(summary = "정보토크 게시물 공감 취소하기, id는 정보토크 게시물 id 입니다")
     @DeleteMapping("/love/{id}")
-    public ApiPayload<String> deleteLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        String result = infoTalkService.deleteLove(id, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+        infoTalkService.deleteLove(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
 

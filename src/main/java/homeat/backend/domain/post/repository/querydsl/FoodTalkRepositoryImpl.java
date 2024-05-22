@@ -15,6 +15,7 @@ import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.entity.Tag;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -56,12 +57,12 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
-        List<FoodTalkTotalView> content = new ArrayList<>();
-        for (FoodTalk foodTalk : result.getResults()) {
-          content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
-                    foodTalk.getName(), foodTalk.getView(), foodTalk.getLove()));
-
-        }
+        List<FoodTalkTotalView> content = result.getResults().stream()
+                .map(foodTalk ->
+                    new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
+                            foodTalk.getName(), foodTalk.getView(), foodTalk.getLove())
+                )
+                .collect(Collectors.toList());
 
         return checkEndPage(pageable, content);
 
@@ -82,12 +83,12 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
-        List<FoodTalkTotalView> content = new ArrayList<>();
-        for (FoodTalk foodTalk : result.getResults()) {
-          content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
-                    foodTalk.getName(), foodTalk.getView(), foodTalk.getLove()));
-
-        }
+        List<FoodTalkTotalView> content = result.getResults().stream()
+                .map(foodTalk ->
+                        new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
+                                foodTalk.getName(), foodTalk.getView(), foodTalk.getLove())
+                )
+                .collect(Collectors.toList());
 
         return checkEndPage(pageable, content);
     }
@@ -106,13 +107,12 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
-        List<FoodTalkTotalView> content = new ArrayList<>();
-        for (FoodTalk foodTalk : result.getResults()) {
-          content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
-                    foodTalk.getName(), foodTalk.getView(), foodTalk.getLove()));
-
-  
-        }
+        List<FoodTalkTotalView> content = result.getResults().stream()
+                .map(foodTalk ->
+                        new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
+                                foodTalk.getName(), foodTalk.getView(), foodTalk.getLove())
+                )
+                .collect(Collectors.toList());
 
         return checkEndPage(pageable, content);
 
@@ -140,13 +140,12 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
-        List<FoodTalkTotalView> content = new ArrayList<>();
-        for (FoodTalk foodTalk : result.getResults()) {
-          content.add(new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
-                    foodTalk.getName(), foodTalk.getView(), foodTalk.getLove()));
-          
-
-        }
+        List<FoodTalkTotalView> content = result.getResults().stream()
+                .map(foodTalk ->
+                        new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
+                                foodTalk.getName(), foodTalk.getView(), foodTalk.getLove())
+                )
+                .collect(Collectors.toList());
 
         return checkEndPage(pageable, content);
     }

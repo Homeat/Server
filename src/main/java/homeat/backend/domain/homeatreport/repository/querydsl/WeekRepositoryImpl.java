@@ -4,11 +4,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.analyze.entity.QFinanceData;
 import homeat.backend.domain.homeatreport.entity.QWeek_Analyze;
 import homeat.backend.domain.homeatreport.entity.QWeek_Check;
-import homeat.backend.domain.homeatreport.entity.Week_Analyze;
-import homeat.backend.domain.homeatreport.entity.Week_Check;
-import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.homeatreport.entity.WeekAnalyze;
+import homeat.backend.domain.homeatreport.entity.WeekCheck;
 import homeat.backend.domain.user.entity.QMember;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
@@ -32,7 +30,7 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
      * @return
      */
     @Override
-    public Optional<Week_Analyze> findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(Long memberId, Integer weekIdx, Integer input_year, Integer input_month) {
+    public Optional<WeekAnalyze> findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(Long memberId, Integer weekIdx, Integer input_year, Integer input_month) {
         QWeek_Analyze qWeekAnalyze = QWeek_Analyze.week_Analyze;
         QFinanceData qFinanceData = QFinanceData.financeData;
         QMember qMember = QMember.member;
@@ -48,7 +46,7 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
     }
 
     @Override
-    public Optional<Week_Check> findWeekByMemberIdOrderByWeekCheckIdDesc(Long member_id) {
+    public Optional<WeekCheck> findWeekByMemberIdOrderByWeekCheckIdDesc(Long member_id) {
         QWeek_Check qWeekCheck = QWeek_Check.week_Check;
         QFinanceData qFinanceData = QFinanceData.financeData;
         QMember qMember = QMember.member;
@@ -60,7 +58,7 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
                 .fetchFirst()); // 정렬된 순서에서 첫번째만 조회
     }
 
-    private Slice<Week_Check> checkEndPageWeek(Pageable pageable, List<Week_Check> results) {
+    private Slice<WeekCheck> checkEndPageWeek(Pageable pageable, List<WeekCheck> results) {
         boolean hasNext = false;
         if(results.size() > pageable.getPageSize()) {
             hasNext = true;
@@ -70,13 +68,13 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
     }
 
     @Override
-    public Slice<Week_Check> findWeekByMemberIdAsc(Long member_id, Long lastWeekCheckId, Pageable pageable) {
+    public Slice<WeekCheck> findWeekByMemberIdAsc(Long member_id, Long lastWeekCheckId, Pageable pageable) {
 
         QWeek_Check qWeekCheck = QWeek_Check.week_Check;
         QFinanceData qFinanceData = QFinanceData.financeData;
         QMember qMember = QMember.member;
 
-        List<Week_Check> weekChecks = queryFactory.selectFrom(qWeekCheck)
+        List<WeekCheck> weekChecks = queryFactory.selectFrom(qWeekCheck)
                 .leftJoin(qWeekCheck.financeData, qFinanceData)
                 .leftJoin(qFinanceData.member, qMember)
                 .where(qMember.id.eq(member_id)
@@ -95,7 +93,7 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
      * @return
      */
     @Override
-    public List<Week_Check> findAllByMemberIdOrderByWeekCheckIdAsc(Long memberId) {
+    public List<WeekCheck> findAllByMemberIdOrderByWeekCheckIdAsc(Long memberId) {
         QWeek_Check qWeekCheck = QWeek_Check.week_Check;
         QFinanceData qFinanceData = QFinanceData.financeData;
         QMember qMember = QMember.member;
@@ -114,7 +112,7 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
      * @return
      */
     @Override
-    public Optional<Week_Analyze> findTopByMemberOrderByIdDesc(Long memberId) {
+    public Optional<WeekAnalyze> findTopByMemberOrderByIdDesc(Long memberId) {
         QWeek_Analyze qWeekAnalyze = QWeek_Analyze.week_Analyze;
         QFinanceData qFinanceData = QFinanceData.financeData;
         QMember qMember = QMember.member;

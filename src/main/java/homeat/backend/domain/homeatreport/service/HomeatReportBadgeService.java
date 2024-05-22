@@ -1,20 +1,18 @@
 package homeat.backend.domain.homeatreport.service;
 
+import homeat.backend.domain.homeatreport.controller.HomeatReportErrorStatus;
 import homeat.backend.domain.homeatreport.dto.ReportBadgeResponseDTO;
-import homeat.backend.domain.homeatreport.dto.ReportTierNicknameResponseDTO;
 import homeat.backend.domain.homeatreport.entity.TierStatus;
-import homeat.backend.domain.homeatreport.entity.WeekStatus;
-import homeat.backend.domain.homeatreport.entity.Week_Check;
+import homeat.backend.domain.homeatreport.entity.WeekCheck;
 import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
 import homeat.backend.domain.homeatreport.repository.querydsl.WeekRepositoryCustom;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,19 +27,19 @@ public class HomeatReportBadgeService {
 
     public List<ReportBadgeResponseDTO> getHomeatBadge(Member member, Long lastWeekId) {
 
-        Optional<Week_Check> optionalWeekCheck = weekRepositoryCustom.findWeekByMemberIdOrderByWeekCheckIdDesc(member.getId());
+        Optional<WeekCheck> optionalWeekCheck = weekRepositoryCustom.findWeekByMemberIdOrderByWeekCheckIdDesc(member.getId());
         if (optionalWeekCheck.isEmpty()) {
-            throw new RuntimeException("주별조회(WeekCheck) 엔티티를 찾을 수 없습니다.");
+            throw new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND);
         }
 
-        Week_Check weekCheck = optionalWeekCheck.get();
+        WeekCheck weekCheck = optionalWeekCheck.get();
         TierStatus tierStatus = weekCheck.getHomeat_tier();
         String nickname = member.getNickname();
 
+
+        // ** 수정 요망 **
         Pageable pageable = PageRequest.of(0, 9);
-        Slice<Week_Check> weekCheckPage = weekRepositoryCustom.findWeekByMemberIdAsc(member.getId(), lastWeekId, pageable);
-
-
+        Slice<WeekCheck> weekCheckPage = weekRepositoryCustom.findWeekByMemberIdAsc(member.getId(), lastWeekId, pageable);
         List<ReportBadgeResponseDTO> reportBadgeResponseDTOList = weekCheckPage.getContent().stream()
                 .map(week -> new ReportBadgeResponseDTO(
                         tierStatus.toString(),
@@ -62,20 +60,20 @@ public class HomeatReportBadgeService {
     public List<ReportBadgeResponseDTO> getHomaetBadge(Member member) {
 
         // member id를 사용하여 가장 최신에 만들어진 Week Check 엔티티를 가져옴.
-        Optional<Week_Check> optionalWeekCheck = weekRepositoryCustom.findWeekByMemberIdOrderByWeekCheckIdDesc(member.getId());
+        Optional<WeekCheck> optionalWeekCheck = weekRepositoryCustom.findWeekByMemberIdOrderByWeekCheckIdDesc(member.getId());
         if (optionalWeekCheck.isEmpty()) {
             throw new RuntimeException("주별조회(WeekCheck) 엔티티를 찾을 수 없습니다.");
         }
 
-        Week_Check weekCheck = optionalWeekCheck.get();
+        WeekCheck weekCheck = optionalWeekCheck.get();
         TierStatus tierStatus = weekCheck.getHomeat_tier();
         String nickname = member.getNickname();
 
 
-        List<Week_Check> existWeeks = weekRepositoryCustom.findAllByMemberIdOrderByWeekCheckIdAsc(member.getId()); // 주어진 멤버의 존재하는 모든 WeekCheck 엔티티를 가져옴.
+        List<WeekCheck> existWeeks = weekRepositoryCustom.findAllByMemberIdOrderByWeekCheckIdAsc(member.getId()); // 주어진 멤버의 존재하는 모든 WeekCheck 엔티티를 가져옴.
         List<ReportBadgeResponseDTO> reportBadgeResponseDTOList = new ArrayList<>(); // ReportBadgeResponseDTO 객체를 담을 리스트 생성
 
-        for (Week_Check week:existWeeks) {
+        for (WeekCheck week:existWeeks) {
 
             Long week_id = week.getId(); // week n주차
             Long goal_price = week.getGoal_price(); // 목표 금액

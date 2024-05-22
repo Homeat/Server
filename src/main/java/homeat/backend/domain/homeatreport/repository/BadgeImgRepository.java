@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface BadgeImgRepository extends JpaRepository<Badge_img, Long> {
 
-    Badge_img findBadge_imgById(Long Badge_img_id);
+    Optional<Badge_img> findBadge_imgById(Long Badge_img_id);
 }

@@ -2,11 +2,12 @@ package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
-import homeat.backend.domain.homeatreport.entity.Week_Analyze;
+import homeat.backend.domain.homeatreport.controller.HomeatReportErrorStatus;
+import homeat.backend.domain.homeatreport.entity.WeekAnalyze;
 import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
-import homeat.backend.domain.homeatreport.repository.querydsl.WeekRepositoryCustom;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.repository.MemberRepository;
+import homeat.backend.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class WeekAnalyzeGenerationService {
                 generateNewWeekAnalyze(financeData);
             }
             else { // financeData가 없는 경우 해당 멤버의 id 출력
-                System.out.println("FinanceData for member " + member.getId() + " does not exist");
+                throw new GeneralException(HomeatReportErrorStatus.REPORT_FINANCE_DATA_NOT_FOUND);
             }
         }
 
@@ -65,7 +66,7 @@ public class WeekAnalyzeGenerationService {
 
         Integer currentWeekIdx = homeatReportAnalyzeService.findWeekIdx(LocalDate.now()); // 생성되는 date를 기준으로 currentWeekIdx 구하기
 
-        Week_Analyze newWeekAnalyze = Week_Analyze.builder()
+        WeekAnalyze newWeekAnalyze = WeekAnalyze.builder()
                 .financeData(financeData)
                 .weekIdx(currentWeekIdx)
                 .build();

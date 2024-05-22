@@ -2,15 +2,17 @@ package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
+import homeat.backend.domain.homeatreport.controller.HomeatReportErrorStatus;
 import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeResponseDTO;
 import homeat.backend.domain.homeatreport.dto.ReportWeeklyResponseDTO;
-import homeat.backend.domain.homeatreport.entity.Week_Analyze;
+import homeat.backend.domain.homeatreport.entity.WeekAnalyze;
 import homeat.backend.domain.homeatreport.repository.querydsl.WeekRepositoryCustom;
 import homeat.backend.domain.user.entity.Gender;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.domain.user.repository.MemberInfoRepository;
 import homeat.backend.domain.user.repository.MemberRepository;
+import homeat.backend.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +38,8 @@ public class HomeatReportAnalyzeService {
     public ReportMonthlyAnalyzeResponseDTO getMonthlyAnalyze(Integer input_year, Integer input_month, Member member) {
 
         // input_year과 input_month에 대한 FinanceData
-        FinanceData inputFinanceData = financeDataRepository.findByMemberIdAndCreatedYearAndCreatedMonth(member.getId(), input_year, input_month);
+        FinanceData inputFinanceData = financeDataRepository.findByMemberIdAndCreatedYearAndCreatedMonth(member.getId(), input_year, input_month)
+                .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_FINANCE_DATA_NOT_FOUND));
         Long input_month_jipbap_price = inputFinanceData.getMonth_jipbap_price();
         Long input_month_out_price = inputFinanceData.getMonth_out_price();
 
@@ -59,8 +62,7 @@ public class HomeatReportAnalyzeService {
         Optional<FinanceData> optionalPreviousFinanceData = financeDataRepository.findFinanceDataById(previousId);
         ReportMonthlyAnalyzeResponseDTO reportMonthlyAnalyzeResponseDTO;
         if (optionalPreviousFinanceData.isEmpty()) {
-            System.err.println("Error: Previous FinanceData not Found.");
-            //throw new RuntimeException("Error: Previous FinanceData not Found.")
+           throw new GeneralException(HomeatReportErrorStatus.REPORT_PREVIOUS_FINANCE_DATA_UNPROCESSABLE_ENTITY);
         }
 
         FinanceData previousFinanceData = optionalPreviousFinanceData.get();
@@ -72,12 +74,15 @@ public class HomeatReportAnalyzeService {
         }
         // 찾은 previousFinanceData의 Date가 일치하지 않을 경우 exception
         if (previousFinanceData.getCreatedAt().getYear() == previous_year && previousFinanceData.getCreatedAt().getMonthValue() == previous_month) {
-            System.err.println("Error: Date of Previous FinanceData Unmatched");
-            //throw new RuntimeException("Error: Date of Previous FinanceData Unmatched")
+            throw new GeneralException(HomeatReportErrorStatus.REPORT_PREVIOUS_FINANCE_DATA_UNPROCESSABLE_ENTITY);
         }
-        if (previousFinanceData.getMonth_jipbap_price() + previousFinanceData.getMonth_out_price() == 0 || inputFinanceData.getMonth_jipbap_price() + inputFinanceData.getMonth_out_price() == 0) { // 이번달 또는 저번달 지출이 없는 경우
-            reportMonthlyAnalyzeResponseDTO = new ReportMonthlyAnalyzeResponseDTO(1, -1L, -1L, -1, -1, -1D);
+        if (previousFinanceData.getMonth_jipbap_price() + previousFinanceData.getMonth_out_price() == 0) { // 이번달 지출이 없는 경우
+            throw new GeneralException(HomeatReportErrorStatus.REPORT_PREV_ZERO_EXPENSE_UNPROCESSABLE_ENTITY);
         }
+        if (inputFinanceData.getMonth_jipbap_price() + inputFinanceData.getMonth_out_price() == 0) { // 저번달 지출이 없는 경우
+            throw new GeneralException(HomeatReportErrorStatus.REPORT_CURR_ZERO_EXPENSE_UNPROCESSABLE_ENTITY);
+        }
+
         else {
             Long previous_month_jipbap_price = previousFinanceData.getMonth_jipbap_price();
             Long previous_month_out_price = previousFinanceData.getMonth_out_price();
@@ -119,7 +124,7 @@ public class HomeatReportAnalyzeService {
 
         // 비교군 설정
         List<Member> members = memberRepository.findMemberByCriteria(ageIndex, gender, income)
-                .orElseThrow(() -> new NoSuchElementException("비교할 회원이 존재하지 않습니다.")); // 특정 멤버의 연령대, 성별, 수입이 비슷한 멤버들
+                .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_MEMBER_GROUP_NOT_FOUND)); // 특정 멤버의 연령대, 성별, 수입이 비슷한 멤버들
         System.out.println("조건 충족 멤버 수: " + members.size());
         System.out.println(ageIndex*10 + "대 " + income_str + gender_kor);
 
@@ -131,8 +136,8 @@ public class HomeatReportAnalyzeService {
         Integer weekIdx = findWeekIdx(date);
 
         for (Member m : members) {
-            Week_Analyze weekAnalyze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(m.getId(), weekIdx, input_year, input_month)
-                    .orElseThrow(() -> new NoSuchElementException(m.getNickname()+"의 Week Analyze가 존재하지 않습니다.(group error)"));
+            WeekAnalyze weekAnalyze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(m.getId(), weekIdx, input_year, input_month)
+                    .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
 
             jipbapPrices += weekAnalyze.getWeek_jipbap_price(); // 멤버들의 집밥 가격 누적
             outPrices += weekAnalyze.getWeek_out_price(); // 멤버들의 외식 배달 가격 누적
@@ -141,8 +146,8 @@ public class HomeatReportAnalyzeService {
         Long average_jipbap = jipbapPrices / members.size(); // 비교군 멤버들의 평균 집밥 지출 비용
         Long average_out = outPrices / members.size(); // 비교군 멤버들의 평균 외식 배달 지출 비용
 
-        Week_Analyze memberWeekAnaylze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(member.getId(), weekIdx, input_year, input_month)
-                .orElseThrow(() -> new NoSuchElementException(member.getNickname()+"의 Week Analyze가 존재하지 않습니다.(individual error)"));
+        WeekAnalyze memberWeekAnaylze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(member.getId(), weekIdx, input_year, input_month)
+                .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
         Long jipbap_save = average_jipbap - memberWeekAnaylze.getWeek_jipbap_price(); // 주어진 멤버가 n째주에 절약한 집밥 비용
         Long out_save = average_out - memberWeekAnaylze.getWeek_out_price(); // 주어진 멤버가 n째주에 절약한 외식 배달 비용
 

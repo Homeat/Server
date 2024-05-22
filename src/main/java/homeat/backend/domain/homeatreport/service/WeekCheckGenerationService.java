@@ -2,14 +2,16 @@ package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
+import homeat.backend.domain.homeatreport.controller.HomeatReportErrorStatus;
 import homeat.backend.domain.homeatreport.entity.Badge_img;
 import homeat.backend.domain.homeatreport.entity.TierStatus;
+import homeat.backend.domain.homeatreport.entity.WeekCheck;
 import homeat.backend.domain.homeatreport.entity.WeekStatus;
-import homeat.backend.domain.homeatreport.entity.Week_Check;
 import homeat.backend.domain.homeatreport.repository.BadgeImgRepository;
 import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.repository.MemberRepository;
+import homeat.backend.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -61,8 +63,8 @@ public class WeekCheckGenerationService {
 
         // 직전 WeekCheck 데이터에 따른 새로운 WeekCheck 데이터 최신화
         // 회원가입 시, WeekCheck 엔티티가 생성되기 때문에 previousWeek가 없는 이슈 방지
-        Week_Check previousWeekCheck = weekCheckRepository.findTopByFinanceDataOrderByIdDesc(financeData)
-                .orElseThrow(() -> new NoSuchElementException("No previousWeekCheck found"));
+        WeekCheck previousWeekCheck = weekCheckRepository.findTopByFinanceDataOrderByIdDesc(financeData)
+                .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_PREV_WEEK_CHECK_NOT_FOUND));
 
         // 새로운 Week_Check의 goal_price를 이전 주 Week_Check의 next_goal_price로 지정
         Long goal_price = previousWeekCheck.getNext_goal_price();
@@ -70,7 +72,7 @@ public class WeekCheckGenerationService {
         // 새로운 Week_Check의 next_goal_price를 새로운 goal_price와 동일하게 지정
         Long next_goal_price = previousWeekCheck.getNext_goal_price();
 
-        // 직전 Week_Check 엔티티의 weekStatus 결정
+        // 직전 WeekCheck 엔티티의 weekStatus 결정
         FinanceData previousFinanceData = previousWeekCheck.getFinanceData();
         Long previousExceedPrice = previousWeekCheck.getExceed_price();
         Long badge_num = previousFinanceData.getNum_homeat_badge();
@@ -102,11 +104,12 @@ public class WeekCheckGenerationService {
             weekCheckRepository.save(previousWeekCheck);
         }
 
-        Badge_img badge_img = badgeImgRepository.findBadge_imgById(badge_num);
+        Badge_img badge_img = badgeImgRepository.findBadge_imgById(badge_num)
+                .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_BADGE_IMG_NOT_FOUND));
 
 
         // 매주 월요일 00시 00분에 WeekCheck 엔티티 새로 생성(월요일~일요일이 각 엔티티 유효 기간)
-        Week_Check newWeekCheck = Week_Check.builder()
+        WeekCheck newWeekCheck = WeekCheck.builder()
                 .goal_price(goal_price)
                 .next_goal_price(next_goal_price)
                 .financeData(financeData)

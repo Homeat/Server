@@ -5,8 +5,8 @@ import homeat.backend.domain.address.entity.Address;
 import homeat.backend.domain.address.repository.AddressRepository;
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
-import homeat.backend.domain.homeatreport.entity.Week_Analyze;
-import homeat.backend.domain.homeatreport.entity.Week_Check;
+import homeat.backend.domain.homeatreport.entity.WeekAnalyze;
+import homeat.backend.domain.homeatreport.entity.WeekCheck;
 import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
 import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
 import homeat.backend.domain.mypage.dto.MyPageRequest;
@@ -49,8 +49,8 @@ public class MyPageService {
         memberInfoRepository.save(newMemberInfo);
 
         FinanceData newFinanceData = MyPageMapper.toFinanceData(selectedMember);
-        Week_Check newWeekCheck = MyPageMapper.toWeekCheck(newFinanceData, request.getGoalPrice());
-        Week_Analyze newWeekAnalyze = MyPageMapper.toWeekAnalyze(newFinanceData);
+        WeekCheck newWeekCheck = MyPageMapper.toWeekCheck(newFinanceData, request.getGoalPrice());
+        WeekAnalyze newWeekAnalyze = MyPageMapper.toWeekAnalyze(newFinanceData);
 
         financeDataRepository.save(newFinanceData);
         weekCheckRepository.save(newWeekCheck);

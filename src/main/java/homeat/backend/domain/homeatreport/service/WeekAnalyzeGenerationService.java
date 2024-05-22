@@ -9,13 +9,11 @@ import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -30,7 +28,7 @@ public class WeekAnalyzeGenerationService {
     private final MemberRepository memberRepository;
     private final FinanceDataRepository financeDataRepository;
     private final WeekAnalyzeRepository weekAnalyzeRepository;
-    private final WeekRepositoryCustom weekRepositoryCustom;
+    private final HomeatReportAnalyzeService homeatReportAnalyzeService;
 
     @Scheduled(cron = "0 0 0 1 * ?") // 매달 1일 자정에 실행
     public void runOnFirstDayOfMonth() {
@@ -65,17 +63,7 @@ public class WeekAnalyzeGenerationService {
 
         System.out.println(financeData.getMember().getId()+"th member handling");
 
-        Week_Analyze previousWeekAnalyze = weekRepositoryCustom.findTopByMemberOrderByIdDesc(financeData.getMember().getId())
-                .orElseThrow(() -> new NoSuchElementException("Previous Week Analyze not found."));
-
-        Integer previousWeekIdx = previousWeekAnalyze.getWeekIdx();
-        Integer currentWeekIdx;
-        if (previousWeekAnalyze.getCreatedAt().getMonthValue() != LocalDate.now().getMonthValue()) { // 저번주와 이번주의 month가 다른 경우
-            currentWeekIdx = 1; // 새로 생성될 이번주의 weekIdx를 1로 설정
-        }
-        else { // 저번주와 이번주가 같은 month인 경우
-            currentWeekIdx = previousWeekIdx + 1; // 저번주의 weekIdx + 1
-        }
+        Integer currentWeekIdx = homeatReportAnalyzeService.findWeekIdx(LocalDate.now()); // 생성되는 date를 기준으로 currentWeekIdx 구하기
 
         Week_Analyze newWeekAnalyze = Week_Analyze.builder()
                 .financeData(financeData)

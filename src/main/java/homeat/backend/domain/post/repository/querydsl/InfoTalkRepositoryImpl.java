@@ -24,6 +24,7 @@ import homeat.backend.domain.post.entity.QInfoTalkComment;
 import homeat.backend.domain.post.entity.QInfoTalkReply;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -74,12 +75,14 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
-        List<InfoTalkTotalView> content = new ArrayList<>();
-        for (InfoTalk infoTalk : result.getResults()) {
-            content.add(new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
-                    infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                    infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber()));
-        }
+        List<InfoTalkTotalView> content = result.getResults().stream()
+                .map(infoTalk ->
+                        new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
+                                infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
+                                infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber())
+                )
+                .collect(Collectors.toList());
+
 
         return checkEndPage(pageable, content);
     }
@@ -98,12 +101,13 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
-        List<InfoTalkTotalView> content = new ArrayList<>();
-        for (InfoTalk infoTalk : result.getResults()) {
-            content.add(new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
-                    infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                    infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber()));
-        }
+        List<InfoTalkTotalView> content = result.getResults().stream()
+                .map(infoTalk ->
+                        new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
+                                infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
+                                infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber())
+                )
+                .collect(Collectors.toList());
 
         return checkEndPage(pageable, content);
     }
@@ -123,12 +127,13 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
-        List<InfoTalkTotalView> content = new ArrayList<>();
-        for (InfoTalk infoTalk : result.getResults()) {
-            content.add(new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
-                    infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                    infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber()));
-        }
+        List<InfoTalkTotalView> content = result.getResults().stream()
+                .map(infoTalk ->
+                        new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
+                                infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
+                                infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber())
+                )
+                .collect(Collectors.toList());
 
         return checkEndPage(pageable, content);
     }
@@ -147,12 +152,13 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
-        List<InfoTalkTotalView> content = new ArrayList<>();
-        for (InfoTalk infoTalk : result.getResults()) {
-            content.add(new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
-                    infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                    infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber()));
-        }
+        List<InfoTalkTotalView> content = result.getResults().stream()
+                .map(infoTalk ->
+                        new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
+                                infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
+                                infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber())
+                )
+                .collect(Collectors.toList());
 
         return checkEndPage(pageable, content);
     }

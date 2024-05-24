@@ -1,28 +1,33 @@
 package homeat.backend.domain.post.controller;
 
-import homeat.backend.domain.post.dto.CommentDTO;
-import homeat.backend.domain.post.dto.FoodTalkDTO;
+import homeat.backend.domain.post.dto.FoodRequestDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
+import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
+import homeat.backend.domain.post.entity.Tag;
 import homeat.backend.domain.post.service.FoodTalkService;
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
+import homeat.backend.global.exception.GeneralException;
+import homeat.backend.global.payload.ApiPayload;
+import homeat.backend.global.payload.CommonSuccessStatus;
+import homeat.backend.global.payload.SlicePayload;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,26 +43,27 @@ public class FoodTalkController {
      * 집밥토크 저장
      */
     @Operation(summary = "집밥토크 저장 api")
-    @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> saveFoodTalk(@RequestBody @Valid FoodTalkDTO dto,
-                                          @AuthenticationPrincipal CustomUserDetails authentication) {
-
-        Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.saveFoodTalk(dto, member);
-    }
-
-    /**
-     * 집밥토크 사진 업로드
-     */
-    @Operation(summary = "집밥토크 사진 저장 api")
-    @PostMapping(value = "/upload/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadImages(@PathVariable("id") Long id,
-                                          @RequestPart("imgUrl") List<MultipartFile> multipartFiles) {
-        if (multipartFiles == null) {
-            throw new IllegalArgumentException("사진이 없습니다");
+    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiPayload<Long> saveFoodTalk(@RequestParam(value = "name", required = false) String name,
+                                      @RequestParam(value = "memo",required = false) String memo,
+                                      @RequestParam(value = "tag",required = false) Tag tag,
+                                      @RequestParam(value = "imgUrl",required = false) List<MultipartFile> multipartFiles,
+                                      @AuthenticationPrincipal CustomUserDetails authentication) {
+        if (name == null) {
+            throw new GeneralException(PostErrorStatus.POST_NAME_PAYMENT_REQUIRED);
         }
-
-        return foodTalkService.uploadImages(id, multipartFiles);
+        if (memo == null) {
+            throw new GeneralException(PostErrorStatus.POST_MEMO_PAYMENT_REQUIRED);
+        }
+        if (tag == null) {
+            throw new GeneralException(PostErrorStatus.POST_TAG_PAYMENT_REQUIRED);
+        }
+        if (multipartFiles == null) {
+            throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
+        }
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
+        Long result = foodTalkService.saveFoodTalk(name, memo, tag, multipartFiles, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
     }
 
 
@@ -66,31 +72,30 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 삭제 api")
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<?> deleteFoodTalk(@PathVariable("id") Long id,
-                                            @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteFoodTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-
-        return foodTalkService.deleteFoodTalk(id, member);
+        foodTalkService.deleteFoodTalk(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**
      * 게시글 수정
      */
-    @Operation(summary = "집밥토크 게시글 수정 api, 아직 개발 X")
-    @PatchMapping("/update/{id}")
-    public ResponseEntity<?> updateFoodTalk(@RequestBody @Valid FoodTalkDTO dto, @PathVariable("id") Long id) {
-        return foodTalkService.updateFoodTalk(dto, id);
-    }
+//    @Operation(summary = "집밥토크 게시글 수정 api, 아직 개발 X")
+//    @PatchMapping("/update/{id}")
+//    public ResponseEntity<?> updateFoodTalk(@RequestBody @Valid FoodRequestDTO.FoodTalkSaveDTO dto, @PathVariable("id") Long id) {
+//        return foodTalkService.updateFoodTalk(dto, id);
+//    }
 
     /**
      * 집밥토크 조회
      */
     @Operation(summary = "집밥토크 게시글 1개 조회 api")
     @GetMapping("{id}")
-    public ResponseEntity<?> getFoodTalk(@PathVariable("id") Long id,
-                                         @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<FoodResponseDTO.FoodTalkViewDTO> getFoodTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.getFoodTalk(id, member);
+        FoodTalkViewDTO result = foodTalkService.getFoodTalk(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
@@ -98,8 +103,9 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 최신순 조회 및 검색, lastFoodTalkId 보다 작은 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/latest")
-    public ResponseEntity<?> getFoodTalkLatest(FoodTalkSearchCondition condition, @RequestParam Long lastFoodTalkId) {
-        return foodTalkService.getFoodTalkLatest(condition, lastFoodTalkId);
+    public SlicePayload<FoodTalkTotalView> getFoodTalkLatest(FoodTalkSearchCondition condition, @RequestParam Long lastFoodTalkId) {
+        Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkLatest(condition, lastFoodTalkId);
+        return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
@@ -107,8 +113,9 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 오래된 순 조회 및 검색, lastFoodTalkId 보다 큰 6개 게시물을 보여줍니다.")
     @GetMapping("/posts/oldest")
-    public ResponseEntity<?> getFoodTalkOldest(FoodTalkSearchCondition condition, @RequestParam Long OldestFoodTalkId) {
-        return foodTalkService.getFoodTalkOldest(condition, OldestFoodTalkId);
+    public SlicePayload<FoodTalkTotalView> getFoodTalkOldest(FoodTalkSearchCondition condition, @RequestParam Long OldestFoodTalkId) {
+        Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkOldest(condition, OldestFoodTalkId);
+        return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
@@ -116,9 +123,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 공감 순 조회 및 검색, 공감 내림차순 6개 게시물을 보여줍니다. 만약 공감이 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/love")
-    public ResponseEntity<?> getFoodTalkByLove(FoodTalkSearchCondition condition, @RequestParam Long id,
+    public SlicePayload<FoodTalkTotalView> getFoodTalkByLove(FoodTalkSearchCondition condition, @RequestParam Long id,
                                                @RequestParam int love) {
-        return foodTalkService.getFoodTalkByLove(condition, id, love);
+        Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkByLove(condition, id, love);
+        return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
@@ -126,33 +134,42 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 조회 순 조회 및 검색, 조회 내림차순 6개 게시물을 보여줍니다. 만약 조회수 같을 시 ID 내림차순입니다.")
     @GetMapping("/posts/view")
-    public ResponseEntity<?> getFoodTalkByView(FoodTalkSearchCondition condition, @RequestParam Long id,
+    public SlicePayload<FoodTalkTotalView> getFoodTalkByView(FoodTalkSearchCondition condition, @RequestParam Long id,
                                                @RequestParam int view) {
-        return foodTalkService.getFoodTalkByView(condition, id, view);
+        Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkByView(condition, id, view);
+        return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
 
     /**
      * 레시피 업로드
      */
     @Operation(summary = "집밥토크 레시피 업로드, List 형식입니다!, id는 집밥토크 게시물 id 입니다.")
-    @PostMapping(value = "/recipe/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> saveRecipe(@PathVariable("id") Long id, @RequestParam("recipe") String recipe,
-                                        @RequestParam("ingredient") String ingredient, @RequestParam("tip") String tip,
-                                        @RequestParam(value = "files", required = false) List<MultipartFile> files) {
+    @PostMapping(value = "/recipe", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiPayload<?> saveRecipe(@RequestParam(value = "id",required = false) Long id,
+                                    @RequestParam(value = "recipe",required = false) String recipe,
+                                    @RequestParam(value = "ingredient",required = false) String ingredient,
+                                    @RequestParam(value = "tip",required = false) String tip,
+                                    @RequestParam(value = "files", required = false) List<MultipartFile> files) {
+        if (id == null) {
+            throw new GeneralException(PostErrorStatus.POST_ID_PAYMENT_REQUIRED);
+        }
+        if (files == null) {
+            throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
+        }
 
-        return foodTalkService.saveRecipe(id, recipe, ingredient, tip, files);
+        foodTalkService.saveRecipe(id, recipe, ingredient, tip, files);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
     /**
      * 댓글 작성
      */
     @Operation(summary = "집밥토크 댓글 작성, id는 집밥토크 게시물 id 입니다.")
-    @PostMapping("/comment/{id}")
-    public ResponseEntity<?> saveComment(@RequestBody @Valid CommentDTO dto,
-                                         @AuthenticationPrincipal CustomUserDetails authentication) {
-
+    @PostMapping("/comment")
+    public ApiPayload<?> saveComment(@RequestBody @Valid FoodRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.saveComment(dto, member);
+        foodTalkService.saveComment(dto, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED,null);
     }
 
     /**
@@ -160,32 +177,32 @@ public class FoodTalkController {
      */
     @Operation(summary = "댓글 삭제 api입니다. id는 댓글 아이디입니다.")
     @DeleteMapping("/comment/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable("commentId") Long commentId,
-                                           @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.deleteComment(commentId, member);
+        foodTalkService.deleteComment(commentId, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**
      * 대댓글 작성
      */
     @Operation(summary = "집밥토크 대댓글 작성, id는 댓글 아이디입니다.")
-    @PostMapping("/reply/{id}")
-    public ResponseEntity<?> saveReply(@RequestBody @Valid CommentDTO dto,
-                                       @AuthenticationPrincipal CustomUserDetails authentication) {
+    @PostMapping("/reply")
+    public ApiPayload<?> saveReply(@RequestBody @Valid FoodRequestDTO.CommentDTO dto, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.saveReply(dto, member);
+        foodTalkService.saveReply(dto, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
     /**
      * 대댓글 삭제
      */
     @Operation(summary = "대댓글 삭제, id는 대댓글 아이디입니다")
-    @DeleteMapping("/reply/{id}")
-    public ResponseEntity<?> deleteReply(@PathVariable("id") Long id,
-                                         @AuthenticationPrincipal CustomUserDetails authentication) {
+    @DeleteMapping("/reply/{replyId}")
+    public ApiPayload<?> deleteReply(@PathVariable("replyId") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.deleteReply(id, member);
+        foodTalkService.deleteReply(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**
@@ -193,10 +210,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시물 공감하기 api입니다. id는 집밥토크 게시물 id 입니다")
     @PostMapping("/love/{id}")
-    public ResponseEntity<?> saveLove(@PathVariable("id") Long id,
-                                      @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> saveLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.saveLove(id, member);
+        foodTalkService.saveLove(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
     /**
@@ -204,16 +221,10 @@ public class FoodTalkController {
      */
     @Operation(summary = "집밥토크 게시물 공감 취소하기, id는 집밥토크 게시물 id 입니다")
     @DeleteMapping("/love/{id}")
-    public ResponseEntity<?> deleteLove(@PathVariable("id") Long id,
-                                        @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        return foodTalkService.deleteLove(id, member);
+        foodTalkService.deleteLove(id, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
-    /**
-     * 집밥토크 게시물 신고하기
-     */
-    @Operation(summary = "집밥토크 게시물 신고하기, postId는 집밥토크 게시물 id입니다.")
-    @PostMapping("/report/{postId}")
-    public
 }

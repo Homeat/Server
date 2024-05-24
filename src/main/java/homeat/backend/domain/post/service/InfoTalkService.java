@@ -179,6 +179,7 @@ public class InfoTalkService {
                 .view(infoTalk.getView())
                 .commentNumber(infoTalk.getCommentNumber())
                 .setLove(infoTalk.getSetLove())
+                .status(infoTalk.getStatus())
                 .infoPictureImages(infoImages)
                 .infoTalkComments(infoTalkCommentViewDTOList)
                 .build();

@@ -103,5 +103,9 @@ public class FoodTalk extends BaseEntity {
         this.status = Status.신고;
     }
 
+    public void plusReport(int nowReport) {
+        this.reportNumber = nowReport;
+    }
+
 
 }

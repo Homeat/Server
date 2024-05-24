@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 public enum PostErrorStatus implements BaseStatus {
     POST_SET_LOVE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "POST_4000", "이미 좋아요를 누른 글입니다."),
     POST_CANCEL_LOVE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "POST_4001", "이미 좋아요를 취소한 글입니다."),
+    POST_REPORT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "POST_4002", "이미 신고한 글입니다."),
 
     POST_DELETE_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "POST_4010", "작성자가 아니라 삭제할 권한이 없습니다"),
 

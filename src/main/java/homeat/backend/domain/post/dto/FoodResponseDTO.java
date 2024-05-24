@@ -50,6 +50,7 @@ public class FoodResponseDTO {
         private Long commentId;
         private String commentNickName;
         private String content;
+        private Status status;
         private List<FoodResponseDTO.FoodTalkReplyViewDTO> foodTalkReplies;
     }
 
@@ -61,6 +62,7 @@ public class FoodResponseDTO {
         private Long replyId;
         private String replyNickName;
         private String content;
+        private Status status;
     }
 
 

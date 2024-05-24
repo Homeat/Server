@@ -14,8 +14,10 @@ import homeat.backend.domain.post.entity.FoodRecipe;
 import homeat.backend.domain.post.entity.FoodRecipePicture;
 import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.entity.FoodTalkComment;
+import homeat.backend.domain.post.entity.FoodTalkCommentReport;
 import homeat.backend.domain.post.entity.FoodTalkLove;
 import homeat.backend.domain.post.entity.FoodTalkReply;
+import homeat.backend.domain.post.entity.FoodTalkReplyReport;
 import homeat.backend.domain.post.entity.FoodTalkReport;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.entity.Tag;
@@ -23,7 +25,9 @@ import homeat.backend.domain.post.repository.FoodLoveRepository;
 import homeat.backend.domain.post.repository.FoodPictureRepository;
 import homeat.backend.domain.post.repository.FoodRecipePictureRepository;
 import homeat.backend.domain.post.repository.FoodRecipeRepository;
+import homeat.backend.domain.post.repository.FoodTalkCommentReportRepository;
 import homeat.backend.domain.post.repository.FoodTalkCommentRepository;
+import homeat.backend.domain.post.repository.FoodTalkReplyReportRepository;
 import homeat.backend.domain.post.repository.FoodTalkReplyRepository;
 import homeat.backend.domain.post.repository.FoodTalkReportRepository;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
@@ -54,6 +58,8 @@ public class FoodTalkService {
     private final FoodTalkReplyRepository foodTalkReplyRepository;
     private final FoodLoveRepository foodLoveRepository;
     private final FoodTalkReportRepository foodTalkReportRepository;
+    private final FoodTalkCommentReportRepository foodTalkCommentReportRepository;
+    private final FoodTalkReplyReportRepository foodTalkReplyReportRepository;
     private final S3Service s3Service;
 
 
@@ -182,6 +188,7 @@ public class FoodTalkService {
                                     .replyId(foodTalkReply.getId())
                                     .replyNickName(foodTalkReply.getMember().getNickname())
                                     .content(foodTalkReply.getContent())
+                                    .status(Status.저장)
                                     .build())
                             .collect(Collectors.toList());
 
@@ -191,6 +198,7 @@ public class FoodTalkService {
                             .commentId(foodTalkComment.getId())
                             .commentNickName(foodTalkComment.getMember().getNickname())
                             .content(foodTalkComment.getContent())
+                            .status(Status.저장)
                             .foodTalkReplies(foodTalkReplyViewDTOList)
                             .build();
                 })
@@ -292,6 +300,7 @@ public class FoodTalkService {
                 .member(member)
                 .foodTalk(foodTalk)
                 .content(dto.getContent())
+                .status(Status.저장)
                 .build();
 
         foodTalkCommentRepository.save(foodTalkComment);
@@ -336,6 +345,7 @@ public class FoodTalkService {
                 .foodTalkComment(foodTalkComment)
                 .member(member)
                 .content(dto.getContent())
+                .status(Status.저장)
                 .build();
 
         foodTalkReplyRepository.save(foodTalkReply);
@@ -427,6 +437,53 @@ public class FoodTalkService {
                 foodTalk.reported();
             }
         }
+
+    }
+
+    @Transactional
+    public void reportFoodTalkComment(Long commentId, Member member) {
+        FoodTalkComment foodTalkComment = foodTalkCommentRepository.findById(commentId)
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
+
+        if (foodTalkCommentReportRepository.findByFoodTalkCommentAndMember(foodTalkComment, member) != null) {
+            throw new GeneralException(PostErrorStatus.POST_COMMENT_REPORT_BAD_REQUEST);
+        } else {
+            FoodTalkCommentReport foodTalkCommentReport = FoodTalkCommentReport.builder()
+                    .foodTalkComment(foodTalkComment)
+                    .member(member)
+                    .build();
+            foodTalkCommentReportRepository.save(foodTalkCommentReport);
+
+            foodTalkComment.plusReport(foodTalkComment.getReportNumber() + 1);
+
+            if (foodTalkComment.getReportNumber() >= 10) {
+                foodTalkComment.reported();
+            }
+        }
+    }
+
+    @Transactional
+    public void reportFoodTalkReply(Long replyId, Member member) {
+        FoodTalkReply foodTalkReply = foodTalkReplyRepository.findById(replyId)
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_REPLY_NOT_FOUND));
+
+        if (foodTalkReplyReportRepository.findByFoodTalkReplyAndMember(foodTalkReply, member) != null) {
+            throw new GeneralException(PostErrorStatus.POST_REPLY_REPORT_BAD_REQUEST);
+        } else {
+            FoodTalkReplyReport foodTalkReplyReport = FoodTalkReplyReport.builder()
+                    .foodTalkReply(foodTalkReply)
+                    .member(member)
+                    .build();
+
+            foodTalkReplyReportRepository.save(foodTalkReplyReport);
+
+            foodTalkReply.plusReport(foodTalkReply.getReportNumber() + 1);
+
+            if (foodTalkReply.getReportNumber() >= 10) {
+                foodTalkReply.reported();
+            }
+        }
+
 
     }
 }

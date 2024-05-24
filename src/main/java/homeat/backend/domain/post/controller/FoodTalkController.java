@@ -241,11 +241,35 @@ public class FoodTalkController {
      * 집밥토크 신고하기
      */
     @Operation(summary = "집밥토크 게시물 신고하기, postId는 집밥토크 게시물 id입니다.")
-    @PostMapping("/report/{postId})")
+    @PostMapping("/report/post/{postId})")
     public ApiPayload<?> reportFoodTalk(@PathVariable("postId") Long postId,
                                         @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         foodTalkService.reportFoodTalk(postId, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    /**
+     * 집밥토크 댓글 신고하기
+     */
+    @Operation(summary = "집밥토크 댓글 신고하기, commentId는 집밥토크 댓글 id입니다.")
+    @PostMapping("/report/comment/{commentId})")
+    public ApiPayload<?> reportFoodTalkComment(@PathVariable("commentId") Long commentId,
+                                        @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
+        foodTalkService.reportFoodTalkComment(commentId, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    /**
+     * 집밥토크 대댓글 신고하기
+     */
+    @Operation(summary = "집밥토크 대댓글 신고하기, replyId는 집밥토크 대댓글 id입니다.")
+    @PostMapping("/report/reply/{replyId})")
+    public ApiPayload<?> reportFoodTalkReply(@PathVariable("replyId") Long replyId,
+                                               @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
+        foodTalkService.reportFoodTalkReply(replyId, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 

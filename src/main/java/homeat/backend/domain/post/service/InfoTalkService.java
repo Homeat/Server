@@ -8,18 +8,22 @@ import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkReplyViewDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkTotalView;
+import homeat.backend.domain.post.entity.FoodTalk;
+import homeat.backend.domain.post.entity.FoodTalkReport;
 import homeat.backend.domain.post.entity.InfoHashTag;
 import homeat.backend.domain.post.entity.InfoPicture;
 import homeat.backend.domain.post.entity.InfoTalk;
 import homeat.backend.domain.post.entity.InfoTalkComment;
 import homeat.backend.domain.post.entity.InfoTalkLove;
 import homeat.backend.domain.post.entity.InfoTalkReply;
+import homeat.backend.domain.post.entity.InfoTalkReport;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.repository.InfoHashTagRepository;
 import homeat.backend.domain.post.repository.InfoPictureRepository;
 import homeat.backend.domain.post.repository.InfoTalkCommentRepository;
 import homeat.backend.domain.post.repository.InfoTalkLoveRepository;
 import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
+import homeat.backend.domain.post.repository.InfoTalkReportRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.global.exception.GeneralException;
@@ -45,6 +49,7 @@ public class InfoTalkService {
     private final InfoTalkCommentRepository infoTalkCommentRepository;
     private final InfoTalkReplyRepository infoTalkReplyRepository;
     private final InfoTalkLoveRepository infoTalkLoveRepository;
+    private final InfoTalkReportRepository infoTalkReportRepository;
     private final S3Service s3Service;
 
     // 정보토크 게시글 작성
@@ -338,6 +343,29 @@ public class InfoTalkService {
         infoTalk.plusLove(infoTalk.getLove() - 1);
 
         infoTalkLoveRepository.delete(infoTalkLove);
+
+    }
+
+    @Transactional
+    public void reportInfoTalk(Long postId, Member member) {
+        InfoTalk infoTalk = infoTalkRepository.findById(postId)
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
+
+        if (infoTalkReportRepository.findByInfoTalkAndMember(infoTalk, member) != null) {
+            throw new GeneralException(PostErrorStatus.POST_REPORT_BAD_REQUEST);
+        } else {
+            InfoTalkReport infoTalkReport = InfoTalkReport.builder()
+                    .infoTalk(infoTalk)
+                    .member(member)
+                    .build();
+            infoTalkReportRepository.save(infoTalkReport);
+
+            infoTalk.plusReport(infoTalk.getReportNumber() + 1);
+
+            if (infoTalk.getReportNumber() >= 10) {
+                infoTalk.reported();
+            }
+        }
 
     }
 }

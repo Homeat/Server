@@ -206,5 +206,17 @@ public class InfoTalkController {
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
+    /**
+     * 정보토크 신고하기
+     */
+    @Operation(summary = "정보토크 게시물 신고하기, postId는 정보토크 게시물 id입니다.")
+    @PostMapping("/report/{postId})")
+    public ApiPayload<?> reportInfoTalk(@PathVariable("postId") Long postId,
+                                        @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
+        infoTalkService.reportInfoTalk(postId, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
 
 }

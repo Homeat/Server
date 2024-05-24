@@ -100,4 +100,8 @@ public class InfoTalk extends BaseEntity {
     public void reported() {
         this.status = Status.신고;
     }
+
+    public void plusReport(int nowReport) {
+        this.reportNumber = nowReport;
+    }
 }

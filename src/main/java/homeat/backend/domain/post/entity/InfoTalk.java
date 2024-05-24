@@ -52,11 +52,15 @@ public class InfoTalk extends BaseEntity {
     private Integer view = 0;
     @Builder.Default
     private Integer commentNumber = 0;
+
+    @Builder.Default
+    private Integer reportNumber = 0;
+
     @Builder.Default
     private Boolean setLove = false;
 
     @Enumerated(EnumType.STRING)
-    private Save save;
+    private Status status;
 
     @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
     @Builder.Default
@@ -91,5 +95,9 @@ public class InfoTalk extends BaseEntity {
 
     public void plusLove(int nowLove) {
         this.love = nowLove;
+    }
+
+    public void reported() {
+        this.status = Status.신고;
     }
 }

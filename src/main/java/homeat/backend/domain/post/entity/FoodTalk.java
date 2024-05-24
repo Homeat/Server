@@ -22,7 +22,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
@@ -57,10 +56,13 @@ public class FoodTalk extends BaseEntity {
     private Integer commentNumber = 0;
 
     @Builder.Default
+    private Integer reportNumber = 0;
+
+    @Builder.Default
     private Boolean setLove = false;
 
     @Enumerated(EnumType.STRING)
-    private Save save;
+    private Status status;
 
     @OneToMany(mappedBy = "foodTalk", cascade = CascadeType.ALL)
     @Builder.Default
@@ -95,6 +97,10 @@ public class FoodTalk extends BaseEntity {
 
     public void setLove(boolean nowState) {
         this.setLove = nowState;
+    }
+
+    public void reported() {
+        this.status = Status.신고;
     }
 
 

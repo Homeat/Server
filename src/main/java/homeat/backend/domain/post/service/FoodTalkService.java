@@ -1,16 +1,23 @@
 package homeat.backend.domain.post.service;
 
-import homeat.backend.domain.post.dto.CommentDTO;
+import homeat.backend.domain.post.controller.PostErrorStatus;
+import homeat.backend.domain.post.dto.FoodRequestDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkCommentViewDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkRecipeViewDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkReplyViewDTO;
+import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
+import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
 import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.FoodRecipe;
 import homeat.backend.domain.post.entity.FoodRecipePicture;
 import homeat.backend.domain.post.entity.FoodTalk;
-import homeat.backend.domain.post.dto.FoodTalkDTO;
 import homeat.backend.domain.post.entity.FoodTalkComment;
 import homeat.backend.domain.post.entity.FoodTalkLove;
 import homeat.backend.domain.post.entity.FoodTalkReply;
-import homeat.backend.domain.post.entity.Save;
+import homeat.backend.domain.post.entity.Status;
+import homeat.backend.domain.post.entity.Tag;
 import homeat.backend.domain.post.repository.FoodLoveRepository;
 import homeat.backend.domain.post.repository.FoodPictureRepository;
 import homeat.backend.domain.post.repository.FoodRecipePictureRepository;
@@ -19,16 +26,16 @@ import homeat.backend.domain.post.repository.FoodTalkCommentRepository;
 import homeat.backend.domain.post.repository.FoodTalkReplyRepository;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
 import homeat.backend.domain.user.entity.Member;
-import homeat.backend.domain.user.repository.MemberRepository;
+import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,29 +57,20 @@ public class FoodTalkService {
 
     // 게시글 작성
     @Transactional
-    public ResponseEntity<?> saveFoodTalk(FoodTalkDTO dto, Member member) {
+    public Long saveFoodTalk(String name, String memo, Tag tag, List<MultipartFile> multipartFiles, Member member) {
 
-        FoodTalk foodTalk = FoodTalk.builder()
-                .member(member)
-                .name(dto.getName())
-                .memo(dto.getMemo())
-                .tag(dto.getTag())
-                .save(Save.저장)
-                .build();
-        foodTalkRepository.save(foodTalk);
-
-
-        return ResponseEntity.ok().body(foodTalk);
-    }
-
-    @Transactional
-    public ResponseEntity<?> uploadImages(Long id, List<MultipartFile> multipartFiles) {
         List<String> imgPaths = s3Service.upload(multipartFiles);
         System.out.println("IMG 경로들 : " + imgPaths);
         postBlankCheck(imgPaths);
 
-        FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+        FoodTalk foodTalk = FoodTalk.builder()
+                .member(member)
+                .name(name)
+                .memo(memo)
+                .tag(tag)
+                .status(Status.저장)
+                .build();
+        foodTalkRepository.save(foodTalk);
 
         for (String imgUrl : imgPaths) {
             FoodPicture foodPicture = FoodPicture.builder()
@@ -82,26 +80,24 @@ public class FoodTalkService {
             foodPictureRepository.save(foodPicture);
         }
 
+        return foodTalk.getId();
 
-        return ResponseEntity.ok(foodTalk.getId() + "번 집밥토크 사진 저장완료");
     }
 
     private void postBlankCheck(List<String> imgPaths) {
         if(imgPaths == null || imgPaths.isEmpty()){ //.isEmpty()도 되는지 확인해보기
-            throw new IllegalArgumentException("사진 입력 오류입니다.");
+            throw new GeneralException(PostErrorStatus.POST_IMAGE_NOT_FOUND);
         }
     }
 
     @Transactional
-    public ResponseEntity<?> deleteFoodTalk(Long id, Member member) {
-
-
+    public void deleteFoodTalk(Long id, Member member) {
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         if (member != foodTalk.getMember()) {
-            throw new IllegalArgumentException("작성자가 아니라서 삭제할 수 없습니다");
+            throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
         for (FoodPicture foodPicture : foodTalk.getFoodPictures()) {
@@ -109,46 +105,38 @@ public class FoodTalkService {
         }
 
         // 레시피 s3 삭제
-        if (foodTalk.getFoodRecipes() == null || foodTalk.getFoodRecipes().isEmpty()) {
-
-        } else {
+        if (foodTalk.getFoodRecipes() != null) {
             for (FoodRecipe foodRecipe : foodTalk.getFoodRecipes()) {
-                if (foodRecipe.getFoodRecipePictures() == null || foodRecipe.getFoodRecipePictures().isEmpty()) {
-
-                } else {
+                if (foodRecipe.getFoodRecipePictures() != null) {
                     for (FoodRecipePicture foodRecipePicture : foodRecipe.getFoodRecipePictures()) {
                         s3Service.fileDelete(foodRecipePicture.getUrl());
                     }
                 }
             }
+
         }
 
 
 
         foodTalkRepository.delete(foodTalk);
-
-
-
-
-        return ResponseEntity.ok(id + " 번 게시글 삭제완료");
     }
 
 
+//    @Transactional
+//    public ResponseEntity<?> updateFoodTalk(FoodRequestDTO.FoodTalkSaveDTO dto, Long id) {
+//        FoodTalk foodTalk = foodTalkRepository.findById(id)
+//                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+//
+//        foodTalk.update(dto.getName(), dto.getMemo(), dto.getTag());
+//
+//        return ResponseEntity.ok(id + " 번 게시글 수정완료");
+//    }
+
     @Transactional
-    public ResponseEntity<?> updateFoodTalk(FoodTalkDTO dto, Long id) {
-        FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
-
-        foodTalk.update(dto.getName(), dto.getMemo(), dto.getTag());
-
-        return ResponseEntity.ok(id + " 번 게시글 수정완료");
-    }
-
-    @Transactional
-    public ResponseEntity<?> getFoodTalk(Long id, Member member) {
+    public FoodResponseDTO.FoodTalkViewDTO getFoodTalk(Long id, Member member) {
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
         if (foodLoveRepository.findByFoodTalkAndMember(foodTalk, member) == null) {
             foodTalk.setLove(false);
         } else {
@@ -157,51 +145,116 @@ public class FoodTalkService {
 
         foodTalk.plusView(foodTalk.getView() + 1);
 
-        return ResponseEntity.ok().body(foodTalk);
+        // 집밥토크 사진 리스트
+        List<String> foodPictures = foodTalk.getFoodPictures().stream()
+                .map(FoodPicture::getUrl)
+                .toList();
+
+        // 집밥토크 레시피 리스트
+        AtomicInteger cnt = new AtomicInteger(1);
+
+        List<FoodResponseDTO.FoodTalkRecipeViewDTO> foodTalkRecipeViewDTOList = foodTalk.getFoodRecipes().stream()
+                .map(recipe -> {
+                    List<String> recipePictures = recipe.getFoodRecipePictures().stream()
+                            .map(FoodRecipePicture::getUrl)
+                            .collect(Collectors.toList());
+
+                    return FoodTalkRecipeViewDTO.builder()
+                            .step(cnt.getAndIncrement())
+                            .recipe(recipe.getRecipe())
+                            .ingredient(recipe.getIngredient())
+                            .tip(recipe.getTip())
+                            .foodRecipeImages(recipePictures)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+
+        // 집밥토크 댓글 리스트
+        List<FoodResponseDTO.FoodTalkCommentViewDTO> foodTalkCommentViewDTOList = foodTalk.getFoodTalkComments().stream()
+                .map(foodTalkComment -> {
+                    List<FoodResponseDTO.FoodTalkReplyViewDTO> foodTalkReplyViewDTOList = foodTalkComment.getReplyList().stream()
+                            .map(foodTalkReply -> FoodTalkReplyViewDTO.builder()
+                                    .createdAt(foodTalkReply.getCreatedAt())
+                                    .updatedAt(foodTalkReply.getUpdatedAt())
+                                    .replyId(foodTalkReply.getId())
+                                    .replyNickName(foodTalkReply.getMember().getNickname())
+                                    .content(foodTalkReply.getContent())
+                                    .build())
+                            .collect(Collectors.toList());
+
+                    return FoodTalkCommentViewDTO.builder()
+                            .createdAt(foodTalkComment.getCreatedAt())
+                            .updatedAt(foodTalkComment.getUpdatedAt())
+                            .commentId(foodTalkComment.getId())
+                            .commentNickName(foodTalkComment.getMember().getNickname())
+                            .content(foodTalkComment.getContent())
+                            .foodTalkReplies(foodTalkReplyViewDTOList)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+
+        return FoodTalkViewDTO.builder()
+                .createdAt(foodTalk.getCreatedAt())
+                .updatedAt(foodTalk.getUpdatedAt())
+                .id(foodTalk.getId())
+                .postNickName(member.getNickname())
+                .name(foodTalk.getName())
+                .memo(foodTalk.getMemo())
+                .tag(foodTalk.getTag())
+                .love(foodTalk.getLove())
+                .view(foodTalk.getView())
+                .commentNumber(foodTalk.getCommentNumber())
+                .setLove(foodTalk.getSetLove())
+                .foodPictureImages(foodPictures)
+                .foodTalkRecipes(foodTalkRecipeViewDTOList)
+                .foodTalkComments(foodTalkCommentViewDTOList)
+                .build();
     }
 
 
-    public ResponseEntity<?> getFoodTalkLatest(FoodTalkSearchCondition condition, Long lastFoodTalkId) {
+    public Slice<FoodTalkTotalView> getFoodTalkLatest(FoodTalkSearchCondition condition, Long lastFoodTalkId) {
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByIdLessThanOrderByIdDesc(condition,lastFoodTalkId,pageable));
+        return foodTalkRepository.findByIdLessThanOrderByIdDesc(condition, lastFoodTalkId, pageable);
 
 
     }
 
-    public ResponseEntity<?> getFoodTalkOldest(FoodTalkSearchCondition condition, Long OldestFoodTalkId) {
+    public Slice<FoodTalkTotalView> getFoodTalkOldest(FoodTalkSearchCondition condition, Long OldestFoodTalkId) {
 
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByIdGreaterThanOrderByIdAsc(condition,OldestFoodTalkId, pageable));
+
+        return foodTalkRepository.findByIdGreaterThanOrderByIdAsc(condition, OldestFoodTalkId, pageable);
     }
 
-    public ResponseEntity<?> getFoodTalkByLove(FoodTalkSearchCondition condition, Long id, int love) {
+    public Slice<FoodTalkTotalView> getFoodTalkByLove(FoodTalkSearchCondition condition, Long id, int love) {
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByLoveLessThanOrderByLoveDesc(condition,id,love, pageable));
+        return foodTalkRepository.findByLoveLessThanOrderByLoveDesc(condition,id,love, pageable);
 
 
     }
 
-    public ResponseEntity<?> getFoodTalkByView(FoodTalkSearchCondition condition, Long id, int view) {
+    public Slice<FoodTalkTotalView> getFoodTalkByView(FoodTalkSearchCondition condition, Long id, int view) {
 
         Pageable pageable = PageRequest.of(0, 6);
 
-        return ResponseEntity.ok().body(foodTalkRepository.findByViewLessThanOrderByViewDesc(condition,id,view, pageable));
+        return foodTalkRepository.findByViewLessThanOrderByViewDesc(condition,id,view, pageable);
     }
 
 
     @Transactional
-    public ResponseEntity<?> saveRecipe(Long id, String recipe, String ingredient, String tip, List<MultipartFile> files) {
+    public void saveRecipe(Long id, String recipe, String ingredient, String tip, List<MultipartFile> files) {
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
-        List<FoodRecipe> foodRecipeList = new ArrayList<>();
 
         FoodRecipe foodRecipe = FoodRecipe.builder()
                 .foodTalk(foodTalk)
@@ -212,36 +265,25 @@ public class FoodTalkService {
 
         foodRecipeRepository.save(foodRecipe);
 
-        if (files == null || files.isEmpty()) {
+        List<String> imgPaths = s3Service.upload(files);
+        System.out.println("IMG 경로들 : " + imgPaths);
 
-        } else {
-            List<String> imgPaths = s3Service.upload(files);
-            System.out.println("IMG 경로들 : " + imgPaths);
+        for (String imgUrl : imgPaths) {
+            FoodRecipePicture foodRecipePicture = FoodRecipePicture.builder()
+                    .foodRecipe(foodRecipe)
+                    .url(imgUrl)
+                    .build();
 
-            for (String imgUrl : imgPaths) {
-                FoodRecipePicture foodRecipePicture = FoodRecipePicture.builder()
-                        .foodRecipe(foodRecipe)
-                        .url(imgUrl)
-                        .build();
-
-                foodRecipePictureRepository.save(foodRecipePicture);
-            }
+            foodRecipePictureRepository.save(foodRecipePicture);
         }
-
-
-
-        foodRecipeList.add(foodRecipe);
-
-        return ResponseEntity.ok().body(foodRecipeList);
     }
 
 
     @Transactional
-    public ResponseEntity<?> saveComment(CommentDTO dto, Member member) {
-
+    public void saveComment(FoodRequestDTO.CommentDTO dto, Member member) {
 
         FoodTalk foodTalk = foodTalkRepository.findById(dto.getId())
-                .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         FoodTalkComment foodTalkComment = FoodTalkComment.builder()
                 .member(member)
@@ -258,20 +300,17 @@ public class FoodTalkService {
 
         foodTalk.updateCommentSize(commentNum + replyNum);
 
-        return ResponseEntity.ok().body(foodTalkComment);
-
-
 
     }
 
     @Transactional
-    public ResponseEntity<?> deleteComment(Long commentId, Member member) {
+    public void deleteComment(Long commentId, Member member) {
 
         FoodTalkComment foodTalkComment = foodTalkCommentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException(commentId + " 번의 댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
         if (member != foodTalkComment.getMember()) {
-            throw new IllegalArgumentException("댓글 작성자가 달라 삭제할 수 없습니다");
+            throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
         foodTalkCommentRepository.delete(foodTalkComment);
@@ -282,15 +321,13 @@ public class FoodTalkService {
         int replyNum = foodTalkRepository.countTotalReplyNumber(commentId).intValue();
 
         foodTalk.updateCommentSize(commentNum + replyNum);
-
-        return ResponseEntity.ok(commentId + "번 댓글 삭제 완료");
     }
 
     @Transactional
-    public ResponseEntity<?> saveReply(CommentDTO dto, Member member) {
+    public void saveReply(FoodRequestDTO.CommentDTO dto, Member member) {
 
         FoodTalkComment foodTalkComment = foodTalkCommentRepository.findById(dto.getId())
-                .orElseThrow(() -> new IllegalArgumentException(dto.getId() + " 번의 댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
         FoodTalkReply foodTalkReply = FoodTalkReply.builder()
                 .foodTalkComment(foodTalkComment)
@@ -306,20 +343,16 @@ public class FoodTalkService {
         int replyNum = foodTalkRepository.countTotalReplyNumber(foodTalkComment.getId()).intValue();
 
         foodTalk.updateCommentSize(commentNum + replyNum);
-
-
-
-        return ResponseEntity.ok().body(foodTalkReply);
     }
 
     @Transactional
-    public ResponseEntity<?> deleteReply(Long id, Member member) {
+    public void deleteReply(Long id, Member member) {
 
         FoodTalkReply foodTalkReply = foodTalkReplyRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 댓글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
         if (member != foodTalkReply.getMember()) {
-            throw new IllegalArgumentException("댓글 작성자가 달라 삭제할 수 없습니다");
+            throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
         foodTalkReplyRepository.delete(foodTalkReply);
@@ -331,17 +364,16 @@ public class FoodTalkService {
 
         foodTalk.updateCommentSize(commentNum + replyNum);
 
-        return ResponseEntity.ok(id + "번 댓글 삭제 완료");
     }
 
     @Transactional
-    public ResponseEntity<?> saveLove(Long id, Member member) {
+    public void saveLove(Long id, Member member) {
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         if (foodTalk.getSetLove()) {
-            throw new IllegalArgumentException("이미 좋아요를 누른 글입니다");
+            throw new GeneralException(PostErrorStatus.POST_SET_LOVE_BAD_REQUEST);
         }
 
         FoodTalkLove foodTalkLove = FoodTalkLove.builder()
@@ -353,14 +385,16 @@ public class FoodTalkService {
         foodTalk.setLove(true);
 
         foodLoveRepository.save(foodTalkLove);
-
-        return ResponseEntity.ok(id + " 글에 대해 좋아요를 눌렀습니다.");
     }
 
     @Transactional
-    public ResponseEntity<?> deleteLove(Long id, Member member) {
+    public void deleteLove(Long id, Member member) {
         FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
+
+        if (!foodTalk.getSetLove()) {
+            throw new GeneralException(PostErrorStatus.POST_CANCEL_LOVE_BAD_REQUEST);
+        }
 
         FoodTalkLove foodTalkLove = foodLoveRepository.findByFoodTalkAndMember(foodTalk, member);
 
@@ -368,7 +402,5 @@ public class FoodTalkService {
         foodTalk.plusLove(foodTalk.getLove() - 1);
 
         foodLoveRepository.delete(foodTalkLove);
-
-        return ResponseEntity.ok(id + " 글에 대해 좋아요를 취소했습니다.");
     }
 }

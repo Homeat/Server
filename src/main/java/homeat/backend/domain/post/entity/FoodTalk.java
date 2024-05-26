@@ -76,6 +76,10 @@ public class FoodTalk extends BaseEntity {
     @Builder.Default
     private List<FoodTalkComment> foodTalkComments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "foodTalk", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<FoodTalkReport> foodTalkReports = new ArrayList<>();
+
     public void update(String name, String memo, Tag tag) {
 
         this.name = name;

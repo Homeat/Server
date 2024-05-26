@@ -57,6 +57,10 @@ public class FoodTalkComment extends BaseEntity {
     @Builder.Default
     private List<FoodTalkReply> replyList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "foodTalkComment", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<FoodTalkCommentReport> foodTalkCommentReports = new ArrayList<>();
+
     public void reported() {
         this.status = Status.신고;
     }

@@ -374,4 +374,5 @@ public class FoodTalkController {
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
+
 }

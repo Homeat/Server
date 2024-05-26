@@ -74,6 +74,10 @@ public class InfoTalk extends BaseEntity {
     @Builder.Default
     private List<InfoTalkComment> infoTalkComments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<InfoTalkReport> infoTalkReports = new ArrayList<>();
+
 
     public void update(String title, String content) {
 

@@ -57,6 +57,10 @@ public class InfoTalkComment extends BaseEntity {
     @Builder.Default
     private List<InfoTalkReply> replyList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "infoTalkComment", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<InfoTalkCommentReport> infoTalkCommentReports = new ArrayList<>();
+
     public void reported() {
         this.status = Status.신고;
     }

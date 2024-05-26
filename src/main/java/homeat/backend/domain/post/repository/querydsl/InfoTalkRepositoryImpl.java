@@ -22,6 +22,7 @@ import homeat.backend.domain.post.entity.QInfoPicture;
 import homeat.backend.domain.post.entity.QInfoTalk;
 import homeat.backend.domain.post.entity.QInfoTalkComment;
 import homeat.backend.domain.post.entity.QInfoTalkReply;
+import homeat.backend.domain.post.entity.Status;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,6 +69,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 .selectFrom(infoTalk)
                 .where(
                         infoTalk.id.lt(lastInfoTalkId),
+                        infoTalk.status.eq(Status.저장),
                         search(condition.getSearch())
                 )
                 .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
@@ -94,6 +96,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 .selectFrom(infoTalk)
                 .where(
                         infoTalk.id.gt(oldestInfoTalkId),
+                        foodTalk.status.eq(Status.저장),
                         search(condition.getSearch())
                 )
                 .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
@@ -119,6 +122,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 .selectFrom(infoTalk)
                 .where(
                         infoTalk.love.lt(love).or(infoTalk.love.eq(love).and(infoTalk.id.lt(id))),
+                        foodTalk.status.eq(Status.저장),
                         search(condition.getSearch())
 
                 )
@@ -145,6 +149,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
                 .selectFrom(infoTalk)
                 .where(
                         infoTalk.view.lt(view).or(infoTalk.view.eq(view).and(infoTalk.id.lt(id))),
+                        foodTalk.status.eq(Status.저장),
                         search(condition.getSearch())
                 )
                 .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()

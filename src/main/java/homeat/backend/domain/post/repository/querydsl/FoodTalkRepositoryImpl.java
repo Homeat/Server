@@ -12,6 +12,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
 import homeat.backend.domain.post.entity.FoodTalk;
+import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.entity.Tag;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.id.lt(lastFoodTalkId),
+                        foodTalk.status.eq(Status.저장),
                         search(condition.getSearch()),
                         tagEq(condition.getTag())
                 )
@@ -76,6 +78,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.id.gt(OldestFoodTalkId),
+                        foodTalk.status.eq(Status.저장),
                         search(condition.getSearch()),
                         tagEq(condition.getTag())
                 )
@@ -99,6 +102,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.love.lt(love).or(foodTalk.love.eq(love).and(foodTalk.id.lt(id))),
+                        foodTalk.status.eq(Status.저장),
                         search(condition.getSearch()),
                         tagEq(condition.getTag())
 
@@ -133,6 +137,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
                 .selectFrom(foodTalk)
                 .where(
                         foodTalk.view.lt(view).or(foodTalk.view.eq(view).and(foodTalk.id.lt(id))),
+                        foodTalk.status.eq(Status.저장),
                         search(condition.getSearch()),
                         tagEq(condition.getTag())
                 )

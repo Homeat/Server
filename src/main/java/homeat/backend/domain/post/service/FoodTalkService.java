@@ -69,7 +69,6 @@ public class FoodTalkService {
 
         List<String> imgPaths = s3Service.upload(multipartFiles);
         System.out.println("IMG 경로들 : " + imgPaths);
-        postBlankCheck(imgPaths);
 
         FoodTalk foodTalk = FoodTalk.builder()
                 .member(member)
@@ -90,12 +89,6 @@ public class FoodTalkService {
 
         return foodTalk.getId();
 
-    }
-
-    private void postBlankCheck(List<String> imgPaths) {
-        if(imgPaths == null || imgPaths.isEmpty()){ //.isEmpty()도 되는지 확인해보기
-            throw new GeneralException(PostErrorStatus.POST_IMAGE_NOT_FOUND);
-        }
     }
 
     @Transactional

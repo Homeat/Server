@@ -8,20 +8,25 @@ import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkReplyViewDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkTotalView;
-import homeat.backend.domain.post.entity.FoodTalk;
-import homeat.backend.domain.post.entity.FoodTalkReport;
+import homeat.backend.domain.post.entity.FoodTalkCommentReport;
+import homeat.backend.domain.post.entity.FoodTalkReply;
+import homeat.backend.domain.post.entity.FoodTalkReplyReport;
 import homeat.backend.domain.post.entity.InfoHashTag;
 import homeat.backend.domain.post.entity.InfoPicture;
 import homeat.backend.domain.post.entity.InfoTalk;
 import homeat.backend.domain.post.entity.InfoTalkComment;
+import homeat.backend.domain.post.entity.InfoTalkCommentReport;
 import homeat.backend.domain.post.entity.InfoTalkLove;
 import homeat.backend.domain.post.entity.InfoTalkReply;
+import homeat.backend.domain.post.entity.InfoTalkReplyReport;
 import homeat.backend.domain.post.entity.InfoTalkReport;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.repository.InfoHashTagRepository;
 import homeat.backend.domain.post.repository.InfoPictureRepository;
+import homeat.backend.domain.post.repository.InfoTalkCommentReportRepository;
 import homeat.backend.domain.post.repository.InfoTalkCommentRepository;
 import homeat.backend.domain.post.repository.InfoTalkLoveRepository;
+import homeat.backend.domain.post.repository.InfoTalkReplyReportRepository;
 import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
 import homeat.backend.domain.post.repository.InfoTalkReportRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
@@ -50,6 +55,8 @@ public class InfoTalkService {
     private final InfoTalkReplyRepository infoTalkReplyRepository;
     private final InfoTalkLoveRepository infoTalkLoveRepository;
     private final InfoTalkReportRepository infoTalkReportRepository;
+    private final InfoTalkCommentReportRepository infoTalkCommentReportRepository;
+    private final InfoTalkReplyReportRepository infoTalkReplyReportRepository;
     private final S3Service s3Service;
 
     // 정보토크 게시글 작성
@@ -231,6 +238,7 @@ public class InfoTalkService {
                 .member(member)
                 .infoTalk(infoTalk)
                 .content(dto.getContent())
+                .status(Status.저장)
                 .build();
 
         infoTalkCommentRepository.save(infoTalkComment);
@@ -273,6 +281,7 @@ public class InfoTalkService {
                 .infoTalkComment(infoTalkComment)
                 .member(member)
                 .content(dto.getContent())
+                .status(Status.저장)
                 .build();
 
         infoTalkReplyRepository.save(infoTalkReply);
@@ -290,7 +299,7 @@ public class InfoTalkService {
     @Transactional
     public void deleteReply(Long id, Member member) {
         InfoTalkReply infoTalkReply = infoTalkReplyRepository.findById(id)
-                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_REPLY_NOT_FOUND));
 
         if (member != infoTalkReply.getMember()) {
             throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
@@ -364,6 +373,55 @@ public class InfoTalkService {
 
             if (infoTalk.getReportNumber() >= 10) {
                 infoTalk.reported();
+            }
+        }
+
+    }
+
+    @Transactional
+    public void reportInfoTalkComment(Long commentId, Member member) {
+        InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(commentId)
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
+
+        if (infoTalkCommentReportRepository.findByInfoTalkCommentAndMember(infoTalkComment, member) != null) {
+            throw new GeneralException(PostErrorStatus.POST_COMMENT_REPORT_BAD_REQUEST);
+        } else {
+            InfoTalkCommentReport infoTalkCommentReport = InfoTalkCommentReport.builder()
+                    .infoTalkComment(infoTalkComment)
+                    .member(member)
+                    .build();
+            infoTalkCommentReportRepository.save(infoTalkCommentReport);
+
+            infoTalkComment.plusReport(infoTalkComment.getReportNumber() + 1);
+
+            if (infoTalkComment.getReportNumber() >= 10) {
+                infoTalkComment.reported();
+            }
+        }
+    }
+
+
+
+    @Transactional
+    public void reportInfoTalkReply(Long replyId, Member member) {
+
+        InfoTalkReply infoTalkReply = infoTalkReplyRepository.findById(replyId)
+                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_REPLY_NOT_FOUND));
+
+        if (infoTalkReplyReportRepository.findByInfoTalkReplyAndMember(infoTalkReply, member) != null) {
+            throw new GeneralException(PostErrorStatus.POST_REPLY_REPORT_BAD_REQUEST);
+        } else {
+            InfoTalkReplyReport infoTalkReplyReport = InfoTalkReplyReport.builder()
+                    .infoTalkReply(infoTalkReply)
+                    .member(member)
+                    .build();
+
+            infoTalkReplyReportRepository.save(infoTalkReplyReport);
+
+            infoTalkReply.plusReport(infoTalkReply.getReportNumber() + 1);
+
+            if (infoTalkReply.getReportNumber() >= 10) {
+                infoTalkReply.reported();
             }
         }
 

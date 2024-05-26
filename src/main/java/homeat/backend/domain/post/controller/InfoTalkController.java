@@ -218,5 +218,29 @@ public class InfoTalkController {
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
+    /**
+     * 정보토크 댓글 신고하기
+     */
+    @Operation(summary = "집밥토크 댓글 신고하기, commentId는 정보토크 댓글 id입니다.")
+    @PostMapping("/report/comment/{commentId})")
+    public ApiPayload<?> reportFoodTalkComment(@PathVariable("commentId") Long commentId,
+                                               @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
+        infoTalkService.reportInfoTalkComment(commentId, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    /**
+     * 정보토크 대댓글 신고하기
+     */
+    @Operation(summary = "정보토크 대댓글 신고하기, replyId는 정보토크 대댓글 id입니다.")
+    @PostMapping("/report/reply/{replyId})")
+    public ApiPayload<?> reportFoodTalkReply(@PathVariable("replyId") Long replyId,
+                                             @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
+        infoTalkService.reportInfoTalkReply(replyId, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
 
 }

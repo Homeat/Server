@@ -5,6 +5,8 @@ import homeat.backend.domain.user.entity.Member;
 import homeat.backend.global.common.domain.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -39,4 +41,18 @@ public class InfoTalkReply extends BaseEntity {
     private Member member;
 
     private String content;
+
+    @Builder.Default
+    private Integer reportNumber = 0;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    public void reported() {
+        this.status = Status.신고;
+    }
+
+    public void plusReport(int nowReport) {
+        this.reportNumber = nowReport;
+    }
 }

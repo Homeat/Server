@@ -8,6 +8,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -45,7 +47,25 @@ public class FoodTalkComment extends BaseEntity {
 
     private String content;
 
+    @Builder.Default
+    private Integer reportNumber = 0;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
     @OneToMany(mappedBy = "foodTalkComment", cascade = CascadeType.ALL)
     @Builder.Default
     private List<FoodTalkReply> replyList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "foodTalkComment", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<FoodTalkCommentReport> foodTalkCommentReports = new ArrayList<>();
+
+    public void reported() {
+        this.status = Status.신고;
+    }
+
+    public void plusReport(int nowReport) {
+        this.reportNumber = nowReport;
+    }
 }

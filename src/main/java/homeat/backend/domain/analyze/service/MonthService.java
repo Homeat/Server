@@ -6,8 +6,8 @@ import homeat.backend.domain.homeatreport.entity.Week_Analyze;
 import homeat.backend.domain.homeatreport.entity.Week_Check;
 import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
 import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
-import homeat.backend.domain.user.entity.Member;
-import homeat.backend.domain.user.repository.MemberRepository;
+import homeat.backend.domain.user.entity.MemberInfo;
+import homeat.backend.domain.user.repository.MemberInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MonthService {
 
-    private final MemberRepository memberRepository;
+    private final MemberInfoRepository memberInfoRepository;
     private final FinanceDataRepository financeDataRepository;
     private final WeekCheckRepository weekCheckRepository;
     private final WeekAnalyzeRepository weekAnalyzeRepository;
@@ -37,19 +37,19 @@ public class MonthService {
     @Transactional
     @Scheduled(cron = "0 0 0 1 * ?")
     public void createMonthlyFinanceData() {
-        List<Member> members = memberRepository.findAll();
+        List<MemberInfo> membersInfos = memberInfoRepository.findAll();
         LocalDate today = LocalDate.now();
         LocalDate lastMonth = today.minusMonths(1);
 
-        members.forEach(member -> {
+        membersInfos.forEach(memberInfo -> {
             Optional<FinanceData> existingFinanceData =
-                    financeDataRepository.findByMemberAndCreatedAt(member, today);
+                    financeDataRepository.findByMemberAndCreatedAt(memberInfo.getMember(), today);
 
             // 회원가입 날짜가 1일 경우 예외처리
             if (existingFinanceData.isEmpty()) {
 
                 Optional<FinanceData> lastMonthFinanceData =
-                        financeDataRepository.findByMemberAndCreatedAt(member, lastMonth);
+                        financeDataRepository.findByMemberAndCreatedAt(memberInfo.getMember(), lastMonth);
 
                 Long numHomeatBadge = 0L;
                 if (lastMonthFinanceData.isPresent()) {
@@ -57,7 +57,7 @@ public class MonthService {
                 }
 
                 FinanceData financeData = FinanceData.builder()
-                        .member(member)
+                        .member(memberInfo.getMember())
                         .num_homeat_badge(numHomeatBadge)
                         .build();
 

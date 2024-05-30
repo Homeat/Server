@@ -2,6 +2,7 @@ package homeat.backend.domain.post.service;
 
 import homeat.backend.domain.post.controller.PostErrorStatus;
 import homeat.backend.domain.post.dto.FoodRequestDTO;
+import homeat.backend.domain.post.dto.FoodRequestDTO.FoodRecipeRequest;
 import homeat.backend.domain.post.dto.FoodResponseDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkCommentViewDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkRecipeViewDTO;
@@ -65,7 +66,7 @@ public class FoodTalkService {
 
     // 게시글 작성
     @Transactional
-    public Long saveFoodTalk(String name, String memo, Tag tag, List<MultipartFile> multipartFiles, Member member) {
+    public void saveFoodTalk(String name, String memo, Tag tag, List<MultipartFile> multipartFiles, Member member, FoodRecipeRequest foodRecipeRequest) {
 
         List<String> imgPaths = s3Service.upload(multipartFiles);
         System.out.println("IMG 경로들 : " + imgPaths);
@@ -86,8 +87,39 @@ public class FoodTalkService {
                     .build();
             foodPictureRepository.save(foodPicture);
         }
+        if (foodRecipeRequest.getFoodRecipeDTOS() != null) {
+            foodRecipeRequest.getFoodRecipeDTOS().forEach(foodRecipeDTO -> {
+                if (foodRecipeDTO.getRecipe() == null || foodRecipeDTO.getRecipe().isEmpty()) {
+                    throw new GeneralException(PostErrorStatus.POST_RECIPE_PAYMENT_REQUIRED);
+                }
+                if (foodRecipeDTO.getRecipePicture() == null || foodRecipeDTO.getRecipePicture().isEmpty()) {
+                    throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
+                }
 
-        return foodTalk.getId();
+
+                FoodRecipe foodRecipe = FoodRecipe.builder()
+                        .foodTalk(foodTalk)
+                        .recipe(foodRecipeDTO.getRecipe())
+                        .ingredient(foodRecipeDTO.getIngredient())
+                        .build();
+                foodRecipeRepository.save(foodRecipe);
+
+                String imgUrl = s3Service.singleUpload(foodRecipeDTO.getRecipePicture());
+
+                FoodRecipePicture foodRecipePicture = FoodRecipePicture.builder()
+                        .foodRecipe(foodRecipe)
+                        .url(imgUrl)
+                        .build();
+                foodRecipePictureRepository.save(foodRecipePicture);
+            });
+
+        }
+
+
+
+
+
+
 
     }
 
@@ -164,7 +196,6 @@ public class FoodTalkService {
                             .step(cnt.getAndIncrement())
                             .recipe(recipe.getRecipe())
                             .ingredient(recipe.getIngredient())
-                            .tip(recipe.getTip())
                             .foodRecipeImages(recipePictures)
                             .build();
                 })
@@ -264,7 +295,6 @@ public class FoodTalkService {
                 .foodTalk(foodTalk)
                 .recipe(recipe)
                 .ingredient(ingredient)
-                .tip(tip)
                 .build();
 
         foodRecipeRepository.save(foodRecipe);

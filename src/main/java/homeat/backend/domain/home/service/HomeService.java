@@ -147,7 +147,12 @@ public class HomeService {
             // 목표 금액에 대한 이번 주 남은 사용 퍼센트
             int remainingPercent = 100;
             if (thisWeekTotal != null) {
-                remainingPercent = Math.max(0, (int) (remainingPercent - (double) thisWeekTotal / thisWeekGoalPrice * 100));
+                remainingPercent -= (int) ((double) thisWeekTotal / thisWeekGoalPrice * 100);
+
+                // -100보다 작은 경우 -100으로 설정
+                if (remainingPercent < -100) {
+                    remainingPercent = -100;
+                }
             }
 
             // 목표 금액 & 전주 대비 이번 주 절약 퍼센트 & 사용 금액 & 목표 금액 대비 사용 금액 퍼센트

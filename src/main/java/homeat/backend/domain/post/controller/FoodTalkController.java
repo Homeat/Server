@@ -51,8 +51,8 @@ public class FoodTalkController {
     @Operation(summary = "집밥토크 및 레시피 통합 저장 api")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "생성됨"),
-            @ApiResponse(responseCode = "400", description = "COMMON_400 : 잘못된 요청", content = {@Content()}),
-            @ApiResponse(responseCode = "402", description = "POST_4020 : NAME이 입력되지 않았습니다\n\nPOST_4021 : MEMO가 입력되지 않았습니다\n\nPOST_4022 : TAG가 입력되지 않았습니다\n\nPOST_4023 : IMAGE가 입력되지 않았습니다", content = {@Content()}),
+            @ApiResponse(responseCode = "400", description = "COMMON_400 : 잘못된 요청\n\nPOST_4005 : 사진 입력 오류", content = {@Content()}),
+            @ApiResponse(responseCode = "402", description = "POST_4020 : NAME이 입력되지 않았습니다\n\nPOST_4021 : MEMO가 입력되지 않았습니다\n\nPOST_4022 : TAG가 입력되지 않았습니다\n\nPOST_4023 : IMAGE가 입력되지 않았습니다\n\nPOST_4027 : RECIPE가 입력되지 않았습니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -62,16 +62,16 @@ public class FoodTalkController {
                                          @ModelAttribute List<MultipartFile> foodPictures,
                                          @ModelAttribute FoodRecipeRequest foodRecipeRequest,
                                          @AuthenticationPrincipal CustomUserDetails authentication) {
-        if (name == null) {
+        if (name == null || name.isEmpty()) {
             throw new GeneralException(PostErrorStatus.POST_NAME_PAYMENT_REQUIRED);
         }
-        if (memo == null) {
+        if (memo == null || memo.isEmpty()) {
             throw new GeneralException(PostErrorStatus.POST_MEMO_PAYMENT_REQUIRED);
         }
         if (tag == null) {
             throw new GeneralException(PostErrorStatus.POST_TAG_PAYMENT_REQUIRED);
         }
-        if (foodPictures == null) {
+        if (foodPictures == null || foodPictures.isEmpty()) {
             throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
         }
         Member member = memberQueryService.mypageMember(authentication.getUserId());

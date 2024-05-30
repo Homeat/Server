@@ -51,7 +51,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "402", description = "POST_4023 : IMAGE가 입력되지 않았습니다\n\nPOST_4025 : TITLE이 입력되지 않았습니다\n\nPOST_4026 : CONTENT가 입력되지 않았습니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
-    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiPayload<?> saveInfoTalk(@RequestParam(value = "title",required = false) String title,
                                                                     @RequestParam(value = "content",required = false) String content,
                                                                     @RequestParam(value = "tags",required = false) List<String> tags,
@@ -86,7 +86,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "404", description = "POST_4040 : 존재하지 않는 게시물입니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("{id}")
     public ApiPayload<?> deleteInfoTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         infoTalkService.deleteInfoTalk(id, member);
@@ -111,7 +111,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "404", description = "POST_4040 : 존재하지 않는 게시물입니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     public ApiPayload<InfoResponseDTO.InfoTalkViewDTO> getInfoTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         InfoTalkViewDTO result = infoTalkService.getInfoTalk(id, member);

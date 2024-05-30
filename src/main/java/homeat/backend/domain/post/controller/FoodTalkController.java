@@ -90,7 +90,7 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "404", description = "POST_4040 : 존재하지 않는 게시물입니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("{id}")
     public ApiPayload<?> deleteFoodTalk(@PathVariable("id") Long id,
                                         @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());

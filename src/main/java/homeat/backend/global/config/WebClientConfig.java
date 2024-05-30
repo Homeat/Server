@@ -17,6 +17,7 @@ public class WebClientConfig {
         return WebClient.builder()
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024))  // default 256KB -> 2MB
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .baseUrl("https://kapi.kakao.com")
                 .build();
     }
 }

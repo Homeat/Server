@@ -20,6 +20,8 @@ import homeat.backend.domain.post.entity.FoodTalkLove;
 import homeat.backend.domain.post.entity.FoodTalkReply;
 import homeat.backend.domain.post.entity.FoodTalkReplyReport;
 import homeat.backend.domain.post.entity.FoodTalkReport;
+import homeat.backend.domain.post.entity.PostPicture;
+import homeat.backend.domain.post.entity.PostType;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.entity.Tag;
 import homeat.backend.domain.post.repository.FoodLoveRepository;
@@ -32,6 +34,7 @@ import homeat.backend.domain.post.repository.FoodTalkReplyReportRepository;
 import homeat.backend.domain.post.repository.FoodTalkReplyRepository;
 import homeat.backend.domain.post.repository.FoodTalkReportRepository;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
+import homeat.backend.domain.post.repository.PostPictureRepository;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.service.S3Service;
@@ -52,15 +55,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class FoodTalkService {
 
     private final FoodTalkRepository foodTalkRepository;
-    private final FoodPictureRepository foodPictureRepository;
     private final FoodRecipeRepository foodRecipeRepository;
-    private final FoodRecipePictureRepository foodRecipePictureRepository;
     private final FoodTalkCommentRepository foodTalkCommentRepository;
     private final FoodTalkReplyRepository foodTalkReplyRepository;
     private final FoodLoveRepository foodLoveRepository;
     private final FoodTalkReportRepository foodTalkReportRepository;
     private final FoodTalkCommentReportRepository foodTalkCommentReportRepository;
     private final FoodTalkReplyReportRepository foodTalkReplyReportRepository;
+    private final PostPictureRepository postPictureRepository;
     private final S3Service s3Service;
 
 
@@ -80,13 +82,14 @@ public class FoodTalkService {
                 .build();
         foodTalkRepository.save(foodTalk);
 
-        for (String imgUrl : imgPaths) {
-            FoodPicture foodPicture = FoodPicture.builder()
-                    .foodTalk(foodTalk)
-                    .url(imgUrl)
+        imgPaths.forEach(img -> {
+            PostPicture postPicture = PostPicture.builder()
+                    .postType(PostType.FoodTalk)
+                    .mappingId(foodTalk.getId())
+                    .url(img)
                     .build();
-            foodPictureRepository.save(foodPicture);
-        }
+            postPictureRepository.save(postPicture);
+        });
         if (foodRecipeRequest.getFoodRecipeDTOS() != null) {
             foodRecipeRequest.getFoodRecipeDTOS().forEach(foodRecipeDTO -> {
                 if (foodRecipeDTO.getRecipe() == null || foodRecipeDTO.getRecipe().isEmpty()) {
@@ -106,11 +109,12 @@ public class FoodTalkService {
 
                 String imgUrl = s3Service.singleUpload(foodRecipeDTO.getRecipePicture());
 
-                FoodRecipePicture foodRecipePicture = FoodRecipePicture.builder()
-                        .foodRecipe(foodRecipe)
+                PostPicture postPicture = PostPicture.builder()
+                        .postType(PostType.FoodTalkRecipe)
+                        .mappingId(foodRecipe.getId())
                         .url(imgUrl)
                         .build();
-                foodRecipePictureRepository.save(foodRecipePicture);
+                postPictureRepository.save(postPicture);
             });
 
         }
@@ -281,35 +285,6 @@ public class FoodTalkService {
         Pageable pageable = PageRequest.of(0, 6);
 
         return foodTalkRepository.findByViewLessThanOrderByViewDesc(condition,id,view, pageable);
-    }
-
-
-    @Transactional
-    public void saveRecipe(Long id, String recipe, String ingredient, String tip, List<MultipartFile> files) {
-
-        FoodTalk foodTalk = foodTalkRepository.findById(id)
-                .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
-
-
-        FoodRecipe foodRecipe = FoodRecipe.builder()
-                .foodTalk(foodTalk)
-                .recipe(recipe)
-                .ingredient(ingredient)
-                .build();
-
-        foodRecipeRepository.save(foodRecipe);
-
-        List<String> imgPaths = s3Service.upload(files);
-        System.out.println("IMG 경로들 : " + imgPaths);
-
-        for (String imgUrl : imgPaths) {
-            FoodRecipePicture foodRecipePicture = FoodRecipePicture.builder()
-                    .foodRecipe(foodRecipe)
-                    .url(imgUrl)
-                    .build();
-
-            foodRecipePictureRepository.save(foodRecipePicture);
-        }
     }
 
 

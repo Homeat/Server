@@ -1,15 +1,13 @@
 package homeat.backend.domain.post.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.global.common.domain.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,19 +19,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FoodRecipePicture extends BaseEntity {
+public class PostPicture extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "foodRecipePicture_id")
+    @Column(name = "post_picture_id")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    private PostType postType;
+
+    private Long mappingId;
+
     private String url;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "food_recipe_id")
-    @JsonIgnore
-    private FoodRecipe foodRecipe;
-
-
 }

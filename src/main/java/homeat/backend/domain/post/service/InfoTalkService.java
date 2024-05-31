@@ -8,9 +8,6 @@ import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkReplyViewDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkTotalView;
-import homeat.backend.domain.post.entity.FoodTalkCommentReport;
-import homeat.backend.domain.post.entity.FoodTalkReply;
-import homeat.backend.domain.post.entity.FoodTalkReplyReport;
 import homeat.backend.domain.post.entity.InfoHashTag;
 import homeat.backend.domain.post.entity.InfoPicture;
 import homeat.backend.domain.post.entity.InfoTalk;
@@ -20,6 +17,8 @@ import homeat.backend.domain.post.entity.InfoTalkLove;
 import homeat.backend.domain.post.entity.InfoTalkReply;
 import homeat.backend.domain.post.entity.InfoTalkReplyReport;
 import homeat.backend.domain.post.entity.InfoTalkReport;
+import homeat.backend.domain.post.entity.PostPicture;
+import homeat.backend.domain.post.entity.PostType;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.repository.InfoHashTagRepository;
 import homeat.backend.domain.post.repository.InfoPictureRepository;
@@ -30,6 +29,7 @@ import homeat.backend.domain.post.repository.InfoTalkReplyReportRepository;
 import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
 import homeat.backend.domain.post.repository.InfoTalkReportRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
+import homeat.backend.domain.post.repository.PostPictureRepository;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.service.S3Service;
@@ -57,6 +57,7 @@ public class InfoTalkService {
     private final InfoTalkReportRepository infoTalkReportRepository;
     private final InfoTalkCommentReportRepository infoTalkCommentReportRepository;
     private final InfoTalkReplyReportRepository infoTalkReplyReportRepository;
+    private final PostPictureRepository postPictureRepository;
     private final S3Service s3Service;
 
     // 정보토크 게시글 작성
@@ -90,13 +91,14 @@ public class InfoTalkService {
 
 
 
-        for (String imgUrl : imgPaths) {
-            InfoPicture infoPicture = InfoPicture.builder()
-                    .infoTalk(infoTalk)
-                    .url(imgUrl)
+        imgPaths.forEach(img -> {
+            PostPicture postPicture = PostPicture.builder()
+                    .postType(PostType.InfoTalk)
+                    .mappingId(infoTalk.getId())
+                    .url(img)
                     .build();
-            infoPictureRepository.save(infoPicture);
-        }
+            postPictureRepository.save(postPicture);
+        });
 
     }
 

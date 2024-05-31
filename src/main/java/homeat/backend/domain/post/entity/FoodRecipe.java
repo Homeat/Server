@@ -40,8 +40,4 @@ public class FoodRecipe extends BaseEntity {
     @JoinColumn(name = "foodtalk_id")
     @JsonIgnore
     private FoodTalk foodTalk;
-
-    @OneToMany(mappedBy = "foodRecipe", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<FoodRecipePicture> foodRecipePictures = new ArrayList<>();
 }

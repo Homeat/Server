@@ -64,10 +64,6 @@ public class InfoTalk extends BaseEntity {
 
     @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<InfoPicture> infoPictures = new ArrayList<>();
-
-    @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
-    @Builder.Default
     private List<InfoHashTag> infoHashTags = new ArrayList<>();
 
     @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)

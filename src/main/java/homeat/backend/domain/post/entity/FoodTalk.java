@@ -66,10 +66,6 @@ public class FoodTalk extends BaseEntity {
 
     @OneToMany(mappedBy = "foodTalk", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<FoodPicture> foodPictures = new ArrayList<>();
-
-    @OneToMany(mappedBy = "foodTalk", cascade = CascadeType.ALL)
-    @Builder.Default
     private List<FoodRecipe> foodRecipes = new ArrayList<>();
 
     @OneToMany(mappedBy = "foodTalk", cascade = CascadeType.ALL)

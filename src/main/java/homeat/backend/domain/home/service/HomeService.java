@@ -323,53 +323,35 @@ public class HomeService {
      * 캘린더 하루 지출 확인
      */
     public HomeResponseDTO.CalendarDayResultDTO getCalendarDay(String year, String month, String day, Member member) {
-        LocalDateTime startDateTime = LocalDateTime.of(Integer.parseInt(year), Integer.parseInt(month), 1, 0, 0);
-        LocalDateTime endDateTime = startDateTime.plusMonths(2).minusSeconds(1);
+        LocalDate targetDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
+
+        // 오늘 날짜
+        LocalDate today = LocalDate.now();
+
+        LocalDateTime startOfWeek = targetDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay();
+        LocalDateTime endOfWeek = targetDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).atTime(23, 59, 59);
 
         // FinanceData 엔티티 조회
-        List<FinanceData> financeDataList = financeDataRepository.findByMember_IdAndCreatedAtBetween(member.getId(), startDateTime, endDateTime);
-        if (financeDataList.size() == 0) {
-            return HomeResponseDTO.CalendarDayResultDTO.builder()
-                    .message("조회할 수 없는 날짜입니다.")
-                    .build();
-        }
-        // 선택 날짜의 주 계산
-        LocalDate targetDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
-        LocalDateTime startOfWeek = targetDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).atStartOfDay();
-        LocalDateTime endOfWeek = targetDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY)).atTime(23, 59, 59);
-
-        FinanceData financeData;
-        if (startOfWeek.getMonth() != endOfWeek.getMonth()) {
-            financeData = financeDataList.size() > 1 ? financeDataList.get(1) : financeDataList.get(0);
-        } else {
-            financeData = financeDataList.get(0);
-        }
+        FinanceData financeData = financeDataRepository.findByMemberAndYearAndMonth(member, year, month)
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터가 없습니다."));
 
         // Week 엔티티 조회
         Week_Check weekCheck = weekCheckRepository.findFirstByFinanceDataAndCreatedAtBetween(financeData, startOfWeek, endOfWeek)
                 .orElseThrow(() -> new NoSuchElementException("해당 Week 데이터가 없습니다."));
 
-        // 일요일부터 선택 날짜까지의 DailyExpense 모두 조회
-        List<DailyExpense> dailyExpenses = dailyExpenseRepo.findDailyExpenseByMemberIdAndDateBetween(member.getId(), startOfWeek.toLocalDate(), targetDate);
+        // 해당 target 날짜 주간의 월요일 ~ 타겟날짜까지
+        List<DailyExpense> weeklyExpenses = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDateBetween(financeData.getId(), startOfWeek.toLocalDate(), targetDate);
 
-        long totalUsedPrice = 0L;
-        for (DailyExpense dailyExpense : dailyExpenses) {
-            totalUsedPrice += dailyExpense.getTodayJipbapPrice();
-            totalUsedPrice += dailyExpense.getTodayOutPrice();
-        }
+        long totalUsedPrice = weeklyExpenses.stream()
+                .mapToLong(expense -> expense.getTodayJipbapPrice() + expense.getTodayOutPrice())
+                .sum();
 
+        Optional<DailyExpense> targetExpenseOpt = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), targetDate);
 
-        // 해당 날짜의 DailyExpense 엔티티 조회
-        Optional<DailyExpense> todayExpenseOpt = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), targetDate);
+        // 해당 날짜 집밥 및 배달/외식 값
+        long todayJipbapPrice = targetExpenseOpt.map(DailyExpense::getTodayJipbapPrice).orElse(0L);
+        long todayOutPrice = targetExpenseOpt.map(DailyExpense::getTodayOutPrice).orElse(0L);
 
-        // DailyExpense 존재하면 값 반환, 없으면 0
-        long todayJipbapPrice = todayExpenseOpt.map(DailyExpense::getTodayJipbapPrice).orElse(0L);
-        long todayOutPrice = todayExpenseOpt.map(DailyExpense::getTodayOutPrice).orElse(0L);
-
-        // 오늘 날짜는 반영이 안될 수 있으므로
-        totalUsedPrice += todayJipbapPrice + todayOutPrice;
-
-        // 총 사용 금액과 목표 금액
         long remainingGoalPrice = weekCheck.getGoal_price() - totalUsedPrice;
 
         boolean canAddExpense = !targetDate.isAfter(today) && !targetDate.isBefore(today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)));

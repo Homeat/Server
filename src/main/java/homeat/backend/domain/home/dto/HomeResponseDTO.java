@@ -58,6 +58,7 @@ public class HomeResponseDTO {
         private long todayJipbapPrice;
         private long todayOutPrice;
         private long remainingGoal;
+        private boolean canAddExpense;
         private String message;
     }
 }

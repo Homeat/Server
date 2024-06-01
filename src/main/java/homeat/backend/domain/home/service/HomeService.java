@@ -372,13 +372,17 @@ public class HomeService {
         // 총 사용 금액과 목표 금액
         long remainingGoalPrice = weekCheck.getGoal_price() - totalUsedPrice;
 
-        HomeResponseDTO.CalendarDayResultDTO result = HomeResponseDTO.CalendarDayResultDTO.builder()
+        boolean canAddExpense = !targetDate.isAfter(today) && !targetDate.isBefore(today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)));
+
+        return HomeResponseDTO.CalendarDayResultDTO.builder()
                 .date(targetDate)
                 .todayJipbapPrice(todayJipbapPrice)
                 .todayOutPrice(todayOutPrice)
                 .remainingGoal(remainingGoalPrice)
+                .canAddExpense(canAddExpense)
                 .message("")
                 .build();
+    }
 
     @Transactional
     public String createPastExpense(HomeRequestDTO.PastExpenseDTO dto, Member member) {

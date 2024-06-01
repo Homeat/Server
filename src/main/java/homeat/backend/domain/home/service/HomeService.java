@@ -380,7 +380,38 @@ public class HomeService {
                 .message("")
                 .build();
 
-        return result;
+    @Transactional
+    public String createPastExpense(HomeRequestDTO.PastExpenseDTO dto, Member member) {
+
+        // 지출 추가 가능한 날짜인지 유효성 검증
+        if (!dto.isCanAddExpense()) {
+            throw new IllegalArgumentException("해당 날짜에는 지출 데이터를 추가할 수 없습니다.");
+        }
+
+        FinanceData financeData = financeDataRepository.findByMemberAndYearAndMonth(member, String.valueOf(dto.getDate().getYear()), String.valueOf(dto.getDate().getMonthValue()))
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터가 없습니다."));
+
+        // 해당 날짜에 기록이 없었다면 row 추가
+        DailyExpense dailyExpense = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), dto.getDate())
+                .orElseGet(() -> DailyExpense.builder()
+                        .financeData(financeData)
+                        .date(dto.getDate())
+                        .todayJipbapPrice(0)
+                        .todayOutPrice(0)
+                        .build());
+
+        if (dto.getType() == CostType.장보기) {
+            financeData.addJipbapPrice(dto.getMoney());
+            dailyExpense.addJipbapPrice(dto.getMoney());
+        } else if (dto.getType() == CostType.배달비 || dto.getType() == CostType.외식비) {
+            financeData.addOutPrice(dto.getMoney());
+            dailyExpense.addOutPrice(dto.getMoney());
+        }
+
+        dailyExpenseRepo.save(dailyExpense);
+        financeDataRepository.save(financeData);
+
+        return "과거 지출 데이터 저장 성공";
     }
 
     /**

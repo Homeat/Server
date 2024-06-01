@@ -117,4 +117,16 @@ public class HomeController {
         HomeResponseDTO.CalendarDayResultDTO result = homeService.getCalendarDay(year, month, day, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
     }
+
+    /**
+     * 과거 지출 추가
+     */
+    @Operation(summary = "과거 지출 추가 api")
+    @PostMapping("/calendar/add-expense")
+    public ApiPayload<String> createPastExpense(@RequestBody HomeRequestDTO.PastExpenseDTO dto,
+                                                @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
+        String message = homeService.createPastExpense(dto, member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, message);
+    }
 }

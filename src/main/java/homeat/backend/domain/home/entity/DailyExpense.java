@@ -6,6 +6,7 @@ import homeat.backend.global.common.domain.BaseEntity;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -31,6 +32,9 @@ public class DailyExpense extends BaseEntity {
     // 오늘 외식(배달 포함) 비용
     @Builder.Default
     private long todayOutPrice = 0;
+
+    @Column(nullable = false)
+    private LocalDate date;
 
     public void addJipbapPrice(long price) {
         this.todayJipbapPrice += price;

@@ -242,6 +242,7 @@ public class HomeService {
                             .financeData(financeData)
                             .todayJipbapPrice(0)
                             .todayOutPrice(0)
+                            .date(todayDate)
                             .build());
 
             // finance, daily 실시간 반영(receipt 추가되는)
@@ -254,7 +255,6 @@ public class HomeService {
             }
 
             dailyExpenseRepo.save(dailyExpense);
-
 
             // receipt 추출
             Receipt receipt = Receipt.builder()

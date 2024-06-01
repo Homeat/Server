@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface FinanceDataRepository extends JpaRepository<FinanceData, Long>, FinanceDataRepositoryCustom {
-    List<FinanceData> findByMember_IdAndCreatedAtBetween(Long memberId, LocalDateTime startDateTime, LocalDateTime endDateTime);
+    Optional<FinanceData> findByMemberAndYearAndMonth(Member member, String year, String month);
     List<FinanceData> findTop2ByMemberOrderByCreatedAtDesc(Member member);
 
     Optional<FinanceData> findTopByMember_IdOrderByCreatedAtDesc(Long member_id);

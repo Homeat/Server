@@ -35,6 +35,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -297,20 +298,24 @@ public class HomeService {
         List<DailyExpense> calendarData = dailyExpenseRepo.findByFinanceDataIdOrderByCreatedAtAsc(financeData.getId());
 
         // 조회된 데이터를 DTO로 변환
-        List<HomeResponseDTO.CalendarResultDTO> result = new ArrayList<>();
-        for (DailyExpense data : calendarData) {
-            long total = data.getTodayOutPrice() + data.getTodayJipbapPrice();
-            if (total != 0) {
-                int jipbapPricePercent = (int)((double)data.getTodayJipbapPrice() / total * 100);
-                int outPricePercent = 100 - jipbapPricePercent;
-                HomeResponseDTO.CalendarResultDTO dto = HomeResponseDTO.CalendarResultDTO.builder()
-                        .date(data.getCreatedAt().toLocalDate())
-                        .todayJipbapPricePercent(jipbapPricePercent)
-                        .todayOutPricePercent(outPricePercent)
-                        .build();
-                result.add(dto);
-            }
-        }
+        List<HomeResponseDTO.CalendarResultDTO> result = calendarData.stream()
+                .map(data -> {
+                    long total = data.getTodayOutPrice() + data.getTodayJipbapPrice();
+                    if (total != 0) {
+                        int jipbapPricePercent = (int) ((double) data.getTodayJipbapPrice() / total * 100);
+                        int outPricePercent = 100 - jipbapPricePercent;
+                        return HomeResponseDTO.CalendarResultDTO.builder()
+                                .date(data.getDate())
+                                .todayJipbapPricePercent(jipbapPricePercent)
+                                .todayOutPricePercent(outPricePercent)
+                                .build();
+                    } else {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
         return result;
     }
 

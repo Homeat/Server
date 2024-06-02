@@ -97,7 +97,7 @@ public class HomeService {
         Long thisWeekGoalPrice = thisWeekCheck.getGoal_price();
 
         int badgeCount = thisMonthFinanceData.getNum_homeat_badge().intValue();
-        badgeCount = Math.min(badgeCount, 9);
+        badgeCount = Math.min(Math.max(badgeCount, 1), 9);  // 0이면 1로, 최대 9로 설정
         Badge_img badgeImg = badgeImgRepository.findBadge_imgById((long) badgeCount);
 
         // 목표 식비가 0원 (default) -> nickname, 뱃지 개수만 반환

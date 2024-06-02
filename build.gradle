@@ -63,6 +63,9 @@ dependencies {
 	// spatial
 	implementation 'com.querydsl:querydsl-spatial'
 	implementation 'org.hibernate:hibernate-spatial'
+
+	// web client
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.named('test') {

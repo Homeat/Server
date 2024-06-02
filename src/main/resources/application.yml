@@ -61,6 +61,10 @@ mail:
         timeout: 5000
         writetimeout: 5000
 
+kakao:
+  admin:
+    key: ${kakao.admin.key}
+
 
 logging:
   level:

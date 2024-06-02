@@ -21,6 +21,10 @@ public enum MemberErrorStatus implements BaseStatus {
 
     MAIL_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MEMBER_4000", "메일을 전송할 수 없습니다"),
     AUTH_CODE_ERROR(HttpStatus.BAD_REQUEST, "MEMBER_4001", "잘못된 코드 알고리즘입니다"),
+
+    KAKAO_BAD_REQUEST(HttpStatus.BAD_REQUEST, "KAKAO_4000", "잘못된 요청입니다."),
+    KAKAO_NICKNAME_MISMATCH(HttpStatus.BAD_REQUEST, "KAKAO_4001", "닉네임이 일치하지 않습니다."),
+    KAKAO_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "KAKAO_5000", "카카오 서버 에러"),
     ;
 
     private final HttpStatus httpStatus;

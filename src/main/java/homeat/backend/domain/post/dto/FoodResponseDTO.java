@@ -1,6 +1,7 @@
 package homeat.backend.domain.post.dto;
 
 import homeat.backend.domain.post.entity.FoodPicture;
+import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.entity.Tag;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +26,7 @@ public class FoodResponseDTO {
         private Integer view;
         private Integer commentNumber;
         private Boolean setLove;
+        private Status status;
         private List<String> foodPictureImages;
         private List<FoodResponseDTO.FoodTalkRecipeViewDTO> foodTalkRecipes;
         private List<FoodResponseDTO.FoodTalkCommentViewDTO> foodTalkComments;
@@ -48,6 +50,7 @@ public class FoodResponseDTO {
         private Long commentId;
         private String commentNickName;
         private String content;
+        private Status status;
         private List<FoodResponseDTO.FoodTalkReplyViewDTO> foodTalkReplies;
     }
 
@@ -59,6 +62,7 @@ public class FoodResponseDTO {
         private Long replyId;
         private String replyNickName;
         private String content;
+        private Status status;
     }
 
 

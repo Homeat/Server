@@ -1,5 +1,6 @@
 package homeat.backend.domain.post.dto;
 
+import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.entity.Tag;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +23,7 @@ public class InfoResponseDTO {
         private Integer view;
         private Integer commentNumber;
         private Boolean setLove;
+        private Status status;
         private List<String> infoPictureImages;
         private List<InfoResponseDTO.InfoTalkCommentViewDTO> infoTalkComments;
     }

@@ -6,10 +6,13 @@ import homeat.backend.domain.homeatreport.controller.HomeatReportErrorStatus;
 import homeat.backend.domain.homeatreport.entity.WeekAnalyze;
 import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.user.entity.MemberInfo;
+import homeat.backend.domain.user.repository.MemberInfoRepository;
 import homeat.backend.domain.user.repository.MemberRepository;
 import homeat.backend.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +22,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
+@Component
 @RequiredArgsConstructor
 public class WeekAnalyzeGenerationService {
     /*
@@ -26,7 +30,7 @@ public class WeekAnalyzeGenerationService {
         - 매달 1일 생성
         - 매주 월요일 생성
      */
-    private final MemberRepository memberRepository;
+    private final MemberInfoRepository memberInfoRepository;
     private final FinanceDataRepository financeDataRepository;
     private final WeekAnalyzeRepository weekAnalyzeRepository;
     private final HomeatReportAnalyzeService homeatReportAnalyzeService;
@@ -43,17 +47,19 @@ public class WeekAnalyzeGenerationService {
 
     public void generateNewWeekAnalyzeMembers() {
 
-        List<Member> members = memberRepository.findAll();
-        System.out.println("The number of numbers: " + members.size());
+        List<MemberInfo> memberInfos = memberInfoRepository.findAll();
+        System.out.println("The number of numbers(+MemberInfo): " + memberInfos.size());
 
-        for (Member member : members) {
-            Optional<FinanceData> optionalFinanceData = financeDataRepository.findTopByMember_IdOrderByCreatedAtDesc(member.getId());
+        for (MemberInfo memberInfo : memberInfos) {
+            Long memberId = memberInfo.getMember().getId();
+            Optional<FinanceData> optionalFinanceData = financeDataRepository.findTopByMember_IdOrderByCreatedAtDesc(memberId);
             // Check: FinanceData랑 잘 매치되는지
             if (optionalFinanceData.isPresent()) { // financeData가 존재하는 경우 새로운 WeekCheck 생성
                 FinanceData financeData = optionalFinanceData.get();
                 generateNewWeekAnalyze(financeData);
             }
             else { // financeData가 없는 경우 해당 멤버의 id 출력
+                System.out.println("GenerateNewWeekAnalyzeMembers Exception");
                 throw new GeneralException(HomeatReportErrorStatus.REPORT_FINANCE_DATA_NOT_FOUND);
             }
         }

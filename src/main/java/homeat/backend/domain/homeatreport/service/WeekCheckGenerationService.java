@@ -9,7 +9,10 @@ import homeat.backend.domain.homeatreport.entity.WeekCheck;
 import homeat.backend.domain.homeatreport.entity.WeekStatus;
 import homeat.backend.domain.homeatreport.repository.BadgeImgRepository;
 import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
+import homeat.backend.domain.homeatreport.repository.querydsl.WeekRepositoryCustom;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.user.entity.MemberInfo;
+import homeat.backend.domain.user.repository.MemberInfoRepository;
 import homeat.backend.domain.user.repository.MemberRepository;
 import homeat.backend.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
@@ -26,26 +29,29 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class WeekCheckGenerationService {
 
-    private final MemberRepository memberRepository;
+    private final MemberInfoRepository memberInfoRepository;
     private final FinanceDataRepository financeDataRepository;
     private final WeekCheckRepository weekCheckRepository;
     private final BadgeImgRepository badgeImgRepository;
+    private final WeekRepositoryCustom weekRepositoryCustom;
 
     @Scheduled(cron = "0 0 0 * * MON")
     public void generateNewWeekCheckMembers() {
 
-        List<Member> members = memberRepository.findAll();
-        System.out.println("The number of members: " + members.size());
+        List<MemberInfo> memberInfos = memberInfoRepository.findAll();
+        System.out.println("The number of memberInfos: " + memberInfos.size());
 
-        for (Member member : members) {
-            Optional<FinanceData> optionalFinanceData = financeDataRepository.findTopByMember_IdOrderByCreatedAtDesc(member.getId());
+        for (MemberInfo memberInfo : memberInfos) {
+            Long memberId = memberInfo.getMember().getId();
+            Optional<FinanceData> optionalFinanceData = financeDataRepository.findTopByMember_IdOrderByCreatedAtDesc(memberId);
             // Check: FinanceData랑 잘 매치되는지
             if (optionalFinanceData.isPresent()) { // financeData가 존재하는 경우 새로운 WeekCheck 생성
                 FinanceData financeData = optionalFinanceData.get();
                 generateNewWeekCheck(financeData);
+                System.out.println(memberId+"Complete");
             }
             else { // financeData가 없는 경우 해당 멤버의 id 출력
-                System.out.println("FinanceData for member " + member.getId() + " does not exist");
+                System.out.println("FinanceData for member " + memberId + " does not exist");
             }
 
         }
@@ -59,11 +65,13 @@ public class WeekCheckGenerationService {
      */
     private void generateNewWeekCheck(FinanceData financeData) {
 
-        System.out.println(financeData.getMember().getId()+"th member handling");
+        Long memberId = financeData.getMember().getId();
+
+        System.out.println(memberId+"th member handling");
 
         // 직전 WeekCheck 데이터에 따른 새로운 WeekCheck 데이터 최신화
         // 회원가입 시, WeekCheck 엔티티가 생성되기 때문에 previousWeek가 없는 이슈 방지
-        WeekCheck previousWeekCheck = weekCheckRepository.findTopByFinanceDataOrderByIdDesc(financeData)
+        WeekCheck previousWeekCheck = weekRepositoryCustom.findWeekCheckTopByMemberIdOrderByIdDesc(memberId)
                 .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_PREV_WEEK_CHECK_NOT_FOUND));
 
         // 새로운 Week_Check의 goal_price를 이전 주 Week_Check의 next_goal_price로 지정

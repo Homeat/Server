@@ -1,9 +1,10 @@
 package homeat.backend.domain.homeatreport.repository.querydsl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.entity.QFinanceData;
-import homeat.backend.domain.homeatreport.entity.QWeek_Analyze;
-import homeat.backend.domain.homeatreport.entity.QWeek_Check;
+import homeat.backend.domain.homeatreport.entity.QWeekAnalyze;
+import homeat.backend.domain.homeatreport.entity.QWeekCheck;
 import homeat.backend.domain.homeatreport.entity.WeekAnalyze;
 import homeat.backend.domain.homeatreport.entity.WeekCheck;
 import homeat.backend.domain.user.entity.QMember;
@@ -31,7 +32,7 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
      */
     @Override
     public Optional<WeekAnalyze> findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(Long memberId, Integer weekIdx, Integer input_year, Integer input_month) {
-        QWeek_Analyze qWeekAnalyze = QWeek_Analyze.week_Analyze;
+        QWeekAnalyze qWeekAnalyze = QWeekAnalyze.weekAnalyze;
         QFinanceData qFinanceData = QFinanceData.financeData;
         QMember qMember = QMember.member;
         return Optional.ofNullable(queryFactory.selectFrom(qWeekAnalyze)
@@ -47,7 +48,7 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
 
     @Override
     public Optional<WeekCheck> findWeekByMemberIdOrderByWeekCheckIdDesc(Long member_id) {
-        QWeek_Check qWeekCheck = QWeek_Check.week_Check;
+        QWeekCheck qWeekCheck = QWeekCheck.weekCheck;
         QFinanceData qFinanceData = QFinanceData.financeData;
         QMember qMember = QMember.member;
         return Optional.ofNullable(queryFactory.selectFrom(qWeekCheck)
@@ -70,7 +71,7 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
     @Override
     public Slice<WeekCheck> findWeekByMemberIdAsc(Long member_id, Long lastWeekCheckId, Pageable pageable) {
 
-        QWeek_Check qWeekCheck = QWeek_Check.week_Check;
+        QWeekCheck qWeekCheck = QWeekCheck.weekCheck;
         QFinanceData qFinanceData = QFinanceData.financeData;
         QMember qMember = QMember.member;
 
@@ -94,7 +95,7 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
      */
     @Override
     public List<WeekCheck> findAllByMemberIdOrderByWeekCheckIdAsc(Long memberId) {
-        QWeek_Check qWeekCheck = QWeek_Check.week_Check;
+        QWeekCheck qWeekCheck = QWeekCheck.weekCheck;
         QFinanceData qFinanceData = QFinanceData.financeData;
         QMember qMember = QMember.member;
         return queryFactory
@@ -107,13 +108,13 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
     }
 
     /**
-     * memberId를 사용하여 특정 멤버의 모든 WeekCheck 엔티티를 최신순으로 정렬한 뒤 맨 위(최신)를 조회
+     * memberId를 사용하여 특정 멤버의 모든 WeekAnalyze 엔티티를 최신순으로 정렬한 뒤 맨 위(최신)를 조회
      * @param memberId
      * @return
      */
     @Override
-    public Optional<WeekAnalyze> findTopByMemberOrderByIdDesc(Long memberId) {
-        QWeek_Analyze qWeekAnalyze = QWeek_Analyze.week_Analyze;
+    public Optional<WeekAnalyze> findWeekAnalyzeTopByMemberOrderByIdDesc(Long memberId) {
+        QWeekAnalyze qWeekAnalyze = QWeekAnalyze.weekAnalyze;
         QFinanceData qFinanceData = QFinanceData.financeData;
         QMember qMember = QMember.member;
 
@@ -122,6 +123,26 @@ public class WeekRepositoryImpl implements WeekRepositoryCustom {
                 .leftJoin(qFinanceData.member, qMember)
                 .where(qMember.id.eq(memberId))
                 .orderBy(qWeekAnalyze.id.desc())
+                .fetchFirst()
+        );
+    }
+
+    /**
+     * memberId를 사용하여 특정 멤버의 모든 WeekCheck 엔티티를 최신순으로 정렬한 뒤 맨 위(최신)를 조회
+     * @param memberId
+     * @return
+     */
+    @Override
+    public Optional<WeekCheck> findWeekCheckTopByMemberIdOrderByIdDesc(Long memberId) {
+        QWeekCheck qWeekCheck = QWeekCheck.weekCheck;
+        QFinanceData qFinanceData = QFinanceData.financeData;
+        QMember qMember = QMember.member;
+
+        return Optional.ofNullable(queryFactory.selectFrom(qWeekCheck)
+                .leftJoin(qWeekCheck.financeData, qFinanceData)
+                .leftJoin(qFinanceData.member, qMember)
+                .where(qMember.id.eq(memberId))
+                .orderBy(qWeekCheck.id.desc())
                 .fetchFirst()
         );
     }

@@ -29,7 +29,7 @@ public class WeekCheckGenerationService {
     private final WeekCheckRepository weekCheckRepository;
     private final BadgeImgRepository badgeImgRepository;
 
-    @Scheduled(cron = "0 0 0 * * MON")
+    @Scheduled(cron = "0 0 0 ? * MON")
     public void generateNewWeekCheckMembers() {
 
         List<MemberInfo> memberInfos = memberInfoRepository.findAll();

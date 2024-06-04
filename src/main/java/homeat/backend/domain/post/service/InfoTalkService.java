@@ -9,7 +9,6 @@ import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkTotalView;
 import homeat.backend.domain.post.entity.InfoHashTag;
-import homeat.backend.domain.post.entity.InfoPicture;
 import homeat.backend.domain.post.entity.InfoTalk;
 import homeat.backend.domain.post.entity.InfoTalkComment;
 import homeat.backend.domain.post.entity.InfoTalkCommentReport;
@@ -21,7 +20,6 @@ import homeat.backend.domain.post.entity.PostPicture;
 import homeat.backend.domain.post.entity.PostType;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.repository.InfoHashTagRepository;
-import homeat.backend.domain.post.repository.InfoPictureRepository;
 import homeat.backend.domain.post.repository.InfoTalkCommentReportRepository;
 import homeat.backend.domain.post.repository.InfoTalkCommentRepository;
 import homeat.backend.domain.post.repository.InfoTalkLoveRepository;
@@ -49,7 +47,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class InfoTalkService {
 
     private final InfoTalkRepository infoTalkRepository;
-    private final InfoPictureRepository infoPictureRepository;
     private final InfoHashTagRepository infoHashTagRepository;
     private final InfoTalkCommentRepository infoTalkCommentRepository;
     private final InfoTalkReplyRepository infoTalkReplyRepository;
@@ -112,23 +109,14 @@ public class InfoTalkService {
             throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
-        for (InfoPicture infoPicture : infoTalk.getInfoPictures()) {
-            s3Service.fileDelete(infoPicture.getUrl());
-        }
+        List<PostPicture> infoTalkPictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(
+                PostType.InfoTalk, infoTalk.getId());
+        infoTalkPictures.forEach(infoTalkPicture -> {
+            s3Service.fileDelete(infoTalkPicture.getUrl());
+        });
 
         infoTalkRepository.delete(infoTalk);
     }
-
-//    @Transactional
-//    public ResponseEntity<?> updateInfoTalk(InfoRequestDTO.InfoTalkDTO dto, Long id) {
-//
-//        InfoTalk infoTalk = infoTalkRepository.findById(id)
-//                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
-//
-//        infoTalk.update(dto.getTitle(), dto.getContent());
-//
-//        return ResponseEntity.ok(id + " 번 게시글 수정완료");
-//    }
 
     @Transactional
     // 정보토크 게시글 1개 조회
@@ -152,8 +140,9 @@ public class InfoTalkService {
 
 
         // 정보토크 사진 리스트
-        List<String> infoImages = infoTalk.getInfoPictures().stream()
-                .map(InfoPicture::getUrl)
+        List<String> infoImages = postPictureRepository.findPostPictureByPostTypeAndMappingId(PostType.InfoTalk,
+                        infoTalk.getId()).stream()
+                .map(PostPicture::getUrl)
                 .collect(Collectors.toList());
 
         // 정보토크 댓글, 대댓글 DTO 생성

@@ -1,29 +1,20 @@
 package homeat.backend.domain.post.repository.querydsl;
 
-import static homeat.backend.domain.post.entity.QFoodTalk.foodTalk;
-import static homeat.backend.domain.post.entity.QFoodTalkComment.foodTalkComment;
-import static homeat.backend.domain.post.entity.QFoodTalkReply.foodTalkReply;
 import static homeat.backend.domain.post.entity.QInfoHashTag.infoHashTag;
-import static homeat.backend.domain.post.entity.QInfoPicture.infoPicture;
 import static homeat.backend.domain.post.entity.QInfoTalk.infoTalk;
 import static homeat.backend.domain.post.entity.QInfoTalkComment.infoTalkComment;
 import static homeat.backend.domain.post.entity.QInfoTalkReply.infoTalkReply;
+import static homeat.backend.domain.post.entity.QPostPicture.postPicture;
 import static org.springframework.util.StringUtils.hasText;
 
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkTotalView;
-import homeat.backend.domain.post.entity.FoodTalk;
-import homeat.backend.domain.post.entity.InfoTalk;
-import homeat.backend.domain.post.entity.QInfoHashTag;
-import homeat.backend.domain.post.entity.QInfoPicture;
-import homeat.backend.domain.post.entity.QInfoTalk;
-import homeat.backend.domain.post.entity.QInfoTalkComment;
-import homeat.backend.domain.post.entity.QInfoTalkReply;
+import homeat.backend.domain.post.entity.PostType;
 import homeat.backend.domain.post.entity.Status;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -54,34 +45,37 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
     }
 
     @Override
-    public InfoTalk findByInfoTalkId(Long id) {
-        return queryFactory
-                .selectFrom(infoTalk)
-                .join(infoTalk.infoPictures, infoPicture).fetchJoin()
-                .where(infoTalk.id.eq(id))
-                .fetchOne();
-    }
-
-    @Override
     public Slice<InfoTalkTotalView> findByIdLessThanOrderByIdDesc(InfoTalkSearchCondition condition, Long lastInfoTalkId,
                                                                   Pageable pageable) {
-        QueryResults<InfoTalk> result = queryFactory
-                .selectFrom(infoTalk)
+        QueryResults<Tuple> result = queryFactory
+                .select(infoTalk.id,
+                        infoTalk.createdAt,
+                        infoTalk.updatedAt,
+                        infoTalk.title,
+                        infoTalk.content,
+                        postPicture.url,
+                        infoTalk.love,
+                        infoTalk.view,
+                        infoTalk.commentNumber)
+                .from(infoTalk)
+                .join(postPicture).on(infoTalk.id.eq(postPicture.mappingId))
+                .leftJoin(infoHashTag).on(infoTalk.id.eq(infoHashTag.infoTalk.id)).fetchJoin()
                 .where(
                         infoTalk.id.lt(lastInfoTalkId),
                         infoTalk.status.eq(Status.저장),
-                        search(condition.getSearch())
+                        search(condition.getSearch()),
+                        postPicture.postType.eq(PostType.InfoTalk)
                 )
-                .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
+                .groupBy(infoTalk.id)
                 .orderBy(infoTalk.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
         List<InfoTalkTotalView> content = result.getResults().stream()
-                .map(infoTalk ->
-                        new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
-                                infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                                infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber())
+                .map(tuple ->
+                        new InfoTalkTotalView(tuple.get(infoTalk.id), tuple.get(infoTalk.createdAt), tuple.get(infoTalk.updatedAt),
+                                tuple.get(infoTalk.title), tuple.get(infoTalk.content), tuple.get(postPicture.url),
+                                tuple.get(infoTalk.love), tuple.get(infoTalk.view), tuple.get(infoTalk.commentNumber))
                 )
                 .collect(Collectors.toList());
 
@@ -92,23 +86,35 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
     @Override
     public Slice<InfoTalkTotalView> findByIdGreaterThanOrderByIdAsc(InfoTalkSearchCondition condition, Long oldestInfoTalkId,
                                                            Pageable pageable) {
-        QueryResults<InfoTalk> result = queryFactory
-                .selectFrom(infoTalk)
+        QueryResults<Tuple> result = queryFactory
+                .select(infoTalk.id,
+                        infoTalk.createdAt,
+                        infoTalk.updatedAt,
+                        infoTalk.title,
+                        infoTalk.content,
+                        postPicture.url,
+                        infoTalk.love,
+                        infoTalk.view,
+                        infoTalk.commentNumber)
+                .from(infoTalk)
+                .join(postPicture).on(infoTalk.id.eq(postPicture.mappingId))
+                .leftJoin(infoHashTag).on(infoTalk.id.eq(infoHashTag.infoTalk.id)).fetchJoin()
                 .where(
                         infoTalk.id.gt(oldestInfoTalkId),
-                        foodTalk.status.eq(Status.저장),
-                        search(condition.getSearch())
+                        infoTalk.status.eq(Status.저장),
+                        search(condition.getSearch()),
+                        postPicture.postType.eq(PostType.InfoTalk)
                 )
-                .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
+                .groupBy(infoTalk.id)
                 .orderBy(infoTalk.id.asc())
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
         List<InfoTalkTotalView> content = result.getResults().stream()
-                .map(infoTalk ->
-                        new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
-                                infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                                infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber())
+                .map(tuple ->
+                        new InfoTalkTotalView(tuple.get(infoTalk.id), tuple.get(infoTalk.createdAt), tuple.get(infoTalk.updatedAt),
+                                tuple.get(infoTalk.title), tuple.get(infoTalk.content), tuple.get(postPicture.url),
+                                tuple.get(infoTalk.love), tuple.get(infoTalk.view), tuple.get(infoTalk.commentNumber))
                 )
                 .collect(Collectors.toList());
 
@@ -118,24 +124,36 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
     @Override
     public Slice<InfoTalkTotalView> findByLoveLessThanOrderByLoveDesc(InfoTalkSearchCondition condition, Long id, int love,
                                                              Pageable pageable) {
-        QueryResults<InfoTalk> result = queryFactory
-                .selectFrom(infoTalk)
+        QueryResults<Tuple> result = queryFactory
+                .select(infoTalk.id,
+                        infoTalk.createdAt,
+                        infoTalk.updatedAt,
+                        infoTalk.title,
+                        infoTalk.content,
+                        postPicture.url,
+                        infoTalk.love,
+                        infoTalk.view,
+                        infoTalk.commentNumber)
+                .from(infoTalk)
+                .join(postPicture).on(infoTalk.id.eq(postPicture.mappingId))
+                .leftJoin(infoHashTag).on(infoTalk.id.eq(infoHashTag.infoTalk.id)).fetchJoin()
                 .where(
                         infoTalk.love.lt(love).or(infoTalk.love.eq(love).and(infoTalk.id.lt(id))),
-                        foodTalk.status.eq(Status.저장),
-                        search(condition.getSearch())
+                        infoTalk.status.eq(Status.저장),
+                        search(condition.getSearch()),
+                        postPicture.postType.eq(PostType.InfoTalk)
 
                 )
-                .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
+                .groupBy(infoTalk.id)
                 .orderBy(infoTalk.love.desc(), infoTalk.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
         List<InfoTalkTotalView> content = result.getResults().stream()
-                .map(infoTalk ->
-                        new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
-                                infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                                infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber())
+                .map(tuple ->
+                        new InfoTalkTotalView(tuple.get(infoTalk.id), tuple.get(infoTalk.createdAt), tuple.get(infoTalk.updatedAt),
+                                tuple.get(infoTalk.title), tuple.get(infoTalk.content), tuple.get(postPicture.url),
+                                tuple.get(infoTalk.love), tuple.get(infoTalk.view), tuple.get(infoTalk.commentNumber))
                 )
                 .collect(Collectors.toList());
 
@@ -145,23 +163,35 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
     @Override
     public Slice<InfoTalkTotalView> findByViewLessThanOrderByViewDesc(InfoTalkSearchCondition condition, Long id, int view,
                                                              Pageable pageable) {
-        QueryResults<InfoTalk> result = queryFactory
-                .selectFrom(infoTalk)
+        QueryResults<Tuple> result = queryFactory
+                .select(infoTalk.id,
+                        infoTalk.createdAt,
+                        infoTalk.updatedAt,
+                        infoTalk.title,
+                        infoTalk.content,
+                        postPicture.url,
+                        infoTalk.love,
+                        infoTalk.view,
+                        infoTalk.commentNumber)
+                .from(infoTalk)
+                .join(postPicture).on(infoTalk.id.eq(postPicture.mappingId))
+                .leftJoin(infoHashTag).on(infoTalk.id.eq(infoHashTag.infoTalk.id)).fetchJoin()
                 .where(
                         infoTalk.view.lt(view).or(infoTalk.view.eq(view).and(infoTalk.id.lt(id))),
-                        foodTalk.status.eq(Status.저장),
-                        search(condition.getSearch())
+                        infoTalk.status.eq(Status.저장),
+                        search(condition.getSearch()),
+                        postPicture.postType.eq(PostType.InfoTalk)
                 )
-                .leftJoin(infoTalk.infoHashTags, infoHashTag).fetchJoin()
+                .groupBy(infoTalk.id)
                 .orderBy(infoTalk.view.desc(), infoTalk.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
         List<InfoTalkTotalView> content = result.getResults().stream()
-                .map(infoTalk ->
-                        new InfoTalkTotalView(infoTalk.getId(), infoTalk.getCreatedAt(), infoTalk.getUpdatedAt(),
-                                infoTalk.getTitle(), infoTalk.getContent(), infoTalk.getInfoPictures().get(0).getUrl(),
-                                infoTalk.getLove(), infoTalk.getView(), infoTalk.getCommentNumber())
+                .map(tuple ->
+                        new InfoTalkTotalView(tuple.get(infoTalk.id), tuple.get(infoTalk.createdAt), tuple.get(infoTalk.updatedAt),
+                                tuple.get(infoTalk.title), tuple.get(infoTalk.content), tuple.get(postPicture.url),
+                                tuple.get(infoTalk.love), tuple.get(infoTalk.view), tuple.get(infoTalk.commentNumber))
                 )
                 .collect(Collectors.toList());
 

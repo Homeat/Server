@@ -10,9 +10,7 @@ import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkReplyViewDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
-import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.FoodRecipe;
-import homeat.backend.domain.post.entity.FoodRecipePicture;
 import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.entity.FoodTalkComment;
 import homeat.backend.domain.post.entity.FoodTalkCommentReport;
@@ -25,8 +23,6 @@ import homeat.backend.domain.post.entity.PostType;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.entity.Tag;
 import homeat.backend.domain.post.repository.FoodLoveRepository;
-import homeat.backend.domain.post.repository.FoodPictureRepository;
-import homeat.backend.domain.post.repository.FoodRecipePictureRepository;
 import homeat.backend.domain.post.repository.FoodRecipeRepository;
 import homeat.backend.domain.post.repository.FoodTalkCommentReportRepository;
 import homeat.backend.domain.post.repository.FoodTalkCommentRepository;
@@ -39,6 +35,7 @@ import homeat.backend.domain.user.entity.Member;
 import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.service.S3Service;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -137,37 +134,26 @@ public class FoodTalkService {
             throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
-        for (FoodPicture foodPicture : foodTalk.getFoodPictures()) {
+        // 집밥토크 사진 s3 삭제
+
+        List<PostPicture> foodPictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(
+                PostType.FoodTalk, foodTalk.getId());
+        foodPictures.forEach(foodPicture -> {
             s3Service.fileDelete(foodPicture.getUrl());
-        }
+        });
 
         // 레시피 s3 삭제
         if (foodTalk.getFoodRecipes() != null) {
-            for (FoodRecipe foodRecipe : foodTalk.getFoodRecipes()) {
-                if (foodRecipe.getFoodRecipePictures() != null) {
-                    for (FoodRecipePicture foodRecipePicture : foodRecipe.getFoodRecipePictures()) {
-                        s3Service.fileDelete(foodRecipePicture.getUrl());
-                    }
-                }
-            }
-
+            foodTalk.getFoodRecipes().forEach(foodRecipe -> {
+                List<PostPicture> foodRecipePictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(
+                        PostType.FoodTalkRecipe, foodRecipe.getId());
+                foodRecipePictures.forEach(foodRecipePicture -> {
+                    s3Service.fileDelete(foodRecipePicture.getUrl());
+                });
+            });
         }
-
-
-
         foodTalkRepository.delete(foodTalk);
     }
-
-
-//    @Transactional
-//    public ResponseEntity<?> updateFoodTalk(FoodRequestDTO.FoodTalkSaveDTO dto, Long id) {
-//        FoodTalk foodTalk = foodTalkRepository.findById(id)
-//                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
-//
-//        foodTalk.update(dto.getName(), dto.getMemo(), dto.getTag());
-//
-//        return ResponseEntity.ok(id + " 번 게시글 수정완료");
-//    }
 
     @Transactional
     public FoodResponseDTO.FoodTalkViewDTO getFoodTalk(Long id, Member member) {
@@ -183,8 +169,9 @@ public class FoodTalkService {
         foodTalk.plusView(foodTalk.getView() + 1);
 
         // 집밥토크 사진 리스트
-        List<String> foodPictures = foodTalk.getFoodPictures().stream()
-                .map(FoodPicture::getUrl)
+        List<String> foodPictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(PostType.FoodTalk,
+                        foodTalk.getId()).stream()
+                .map(PostPicture::getUrl)
                 .toList();
 
         // 집밥토크 레시피 리스트
@@ -192,8 +179,9 @@ public class FoodTalkService {
 
         List<FoodResponseDTO.FoodTalkRecipeViewDTO> foodTalkRecipeViewDTOList = foodTalk.getFoodRecipes().stream()
                 .map(recipe -> {
-                    List<String> recipePictures = recipe.getFoodRecipePictures().stream()
-                            .map(FoodRecipePicture::getUrl)
+                    List<String> recipePictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(PostType.FoodTalkRecipe,
+                                    recipe.getId()).stream()
+                            .map(PostPicture::getUrl)
                             .collect(Collectors.toList());
 
                     return FoodTalkRecipeViewDTO.builder()

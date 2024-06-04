@@ -10,8 +10,6 @@ import org.springframework.data.domain.Slice;
 
 public interface FoodTalkRepositoryCustom {
 
-    FoodTalk findByFoodTalkId(Long id);
-
     Slice<FoodTalkTotalView> findByIdLessThanOrderByIdDesc(FoodTalkSearchCondition condition, Long lastFoodTalkId, Pageable pageable);
 
     Slice<FoodTalkTotalView> findByIdGreaterThanOrderByIdAsc(FoodTalkSearchCondition condition,Long OldestFoodTalkId, Pageable pageable);

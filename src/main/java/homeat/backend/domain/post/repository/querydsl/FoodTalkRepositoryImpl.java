@@ -1,20 +1,20 @@
 package homeat.backend.domain.post.repository.querydsl;
 
-import static homeat.backend.domain.post.entity.QFoodPicture.foodPicture;
 import static homeat.backend.domain.post.entity.QFoodTalk.*;
 import static homeat.backend.domain.post.entity.QFoodTalkComment.foodTalkComment;
 import static homeat.backend.domain.post.entity.QFoodTalkReply.foodTalkReply;
+import static homeat.backend.domain.post.entity.QPostPicture.*;
 import static org.springframework.util.StringUtils.hasText;
 
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
-import homeat.backend.domain.post.entity.FoodTalk;
+import homeat.backend.domain.post.entity.PostType;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.entity.Tag;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -30,39 +30,41 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
-    @Override
-    public FoodTalk findByFoodTalkId(Long id) {
-
-
-
-        return queryFactory
-                .select(foodTalk)
-                .from(foodTalk)
-                .join(foodTalk.foodPictures, foodPicture).fetchJoin()
-                .where(foodTalk.id.eq(id))
-                .fetchOne();
-
-    }
 
     @Override
     public Slice<FoodTalkTotalView> findByIdLessThanOrderByIdDesc(FoodTalkSearchCondition condition, Long lastFoodTalkId,
                                                          Pageable pageable) {
-        QueryResults<FoodTalk> result = queryFactory
-                .selectFrom(foodTalk)
+        QueryResults<Tuple> result = queryFactory
+                .select(
+                        foodTalk.id,
+                        postPicture.url,
+                        foodTalk.name,
+                        foodTalk.view,
+                        foodTalk.love
+                )
+                .from(foodTalk)
+                .join(postPicture).on(foodTalk.id.eq(postPicture.mappingId))
                 .where(
                         foodTalk.id.lt(lastFoodTalkId),
                         foodTalk.status.eq(Status.저장),
                         search(condition.getSearch()),
-                        tagEq(condition.getTag())
+                        tagEq(condition.getTag()),
+                        postPicture.postType.eq(PostType.FoodTalk)
                 )
+                .groupBy(foodTalk.id)
                 .orderBy(foodTalk.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
         List<FoodTalkTotalView> content = result.getResults().stream()
-                .map(foodTalk ->
-                    new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
-                            foodTalk.getName(), foodTalk.getView(), foodTalk.getLove())
+                .map(tuple ->
+                        new FoodTalkTotalView(
+                                tuple.get(foodTalk.id),
+                                tuple.get(postPicture.url),
+                                tuple.get(foodTalk.name),
+                                tuple.get(foodTalk.view),
+                                tuple.get(foodTalk.love)
+                        )
                 )
                 .collect(Collectors.toList());
 
@@ -74,22 +76,37 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
     public Slice<FoodTalkTotalView> findByIdGreaterThanOrderByIdAsc(FoodTalkSearchCondition condition, Long OldestFoodTalkId,
                                                            Pageable pageable) {
 
-        QueryResults<FoodTalk> result = queryFactory
-                .selectFrom(foodTalk)
+        QueryResults<Tuple> result = queryFactory
+                .select(
+                        foodTalk.id,
+                        postPicture.url,
+                        foodTalk.name,
+                        foodTalk.view,
+                        foodTalk.love
+                )
+                .from(foodTalk)
+                .join(postPicture).on(foodTalk.id.eq(postPicture.mappingId))
                 .where(
                         foodTalk.id.gt(OldestFoodTalkId),
                         foodTalk.status.eq(Status.저장),
                         search(condition.getSearch()),
-                        tagEq(condition.getTag())
+                        tagEq(condition.getTag()),
+                        postPicture.postType.eq(PostType.FoodTalk)
                 )
+                .groupBy(foodTalk.id)
                 .orderBy(foodTalk.id.asc())
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
         List<FoodTalkTotalView> content = result.getResults().stream()
-                .map(foodTalk ->
-                        new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
-                                foodTalk.getName(), foodTalk.getView(), foodTalk.getLove())
+                .map(tuple ->
+                        new FoodTalkTotalView(
+                                tuple.get(foodTalk.id),
+                                tuple.get(postPicture.url),
+                                tuple.get(foodTalk.name),
+                                tuple.get(foodTalk.view),
+                                tuple.get(foodTalk.love)
+                        )
                 )
                 .collect(Collectors.toList());
 
@@ -98,23 +115,38 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
 
     @Override
     public Slice<FoodTalkTotalView> findByLoveLessThanOrderByLoveDesc(FoodTalkSearchCondition condition ,Long id, int love, Pageable pageable) {
-        QueryResults<FoodTalk> result = queryFactory
-                .selectFrom(foodTalk)
+        QueryResults<Tuple> result = queryFactory
+                .select(
+                        foodTalk.id,
+                        postPicture.url,
+                        foodTalk.name,
+                        foodTalk.view,
+                        foodTalk.love
+                )
+                .from(foodTalk)
+                .join(postPicture).on(foodTalk.id.eq(postPicture.mappingId))
                 .where(
                         foodTalk.love.lt(love).or(foodTalk.love.eq(love).and(foodTalk.id.lt(id))),
                         foodTalk.status.eq(Status.저장),
                         search(condition.getSearch()),
-                        tagEq(condition.getTag())
+                        tagEq(condition.getTag()),
+                        postPicture.postType.eq(PostType.FoodTalk)
 
                 )
+                .groupBy(foodTalk.id)
                 .orderBy(foodTalk.love.desc(), foodTalk.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
         List<FoodTalkTotalView> content = result.getResults().stream()
-                .map(foodTalk ->
-                        new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
-                                foodTalk.getName(), foodTalk.getView(), foodTalk.getLove())
+                .map(tuple ->
+                        new FoodTalkTotalView(
+                                tuple.get(foodTalk.id),
+                                tuple.get(postPicture.url),
+                                tuple.get(foodTalk.name),
+                                tuple.get(foodTalk.view),
+                                tuple.get(foodTalk.love)
+                        )
                 )
                 .collect(Collectors.toList());
 
@@ -133,22 +165,37 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
 
     @Override
     public Slice<FoodTalkTotalView> findByViewLessThanOrderByViewDesc(FoodTalkSearchCondition condition,Long id, int view, Pageable pageable) {
-        QueryResults<FoodTalk> result = queryFactory
-                .selectFrom(foodTalk)
+        QueryResults<Tuple> result = queryFactory
+                .select(
+                        foodTalk.id,
+                        postPicture.url,
+                        foodTalk.name,
+                        foodTalk.view,
+                        foodTalk.love
+                )
+                .from(foodTalk)
+                .join(postPicture).on(foodTalk.id.eq(postPicture.mappingId))
                 .where(
                         foodTalk.view.lt(view).or(foodTalk.view.eq(view).and(foodTalk.id.lt(id))),
                         foodTalk.status.eq(Status.저장),
                         search(condition.getSearch()),
-                        tagEq(condition.getTag())
+                        tagEq(condition.getTag()),
+                        postPicture.postType.eq(PostType.FoodTalk)
                 )
+                .groupBy(foodTalk.id)
                 .orderBy(foodTalk.view.desc(), foodTalk.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetchResults();
 
         List<FoodTalkTotalView> content = result.getResults().stream()
-                .map(foodTalk ->
-                        new FoodTalkTotalView(foodTalk.getId(), foodTalk.getFoodPictures().get(0).getUrl(),
-                                foodTalk.getName(), foodTalk.getView(), foodTalk.getLove())
+                .map(tuple ->
+                        new FoodTalkTotalView(
+                                tuple.get(foodTalk.id),
+                                tuple.get(postPicture.url),
+                                tuple.get(foodTalk.name),
+                                tuple.get(foodTalk.view),
+                                tuple.get(foodTalk.love)
+                        )
                 )
                 .collect(Collectors.toList());
 

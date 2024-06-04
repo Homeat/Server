@@ -5,6 +5,7 @@ import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.dto.MemberResponse;
 import homeat.backend.domain.user.service.MemberMapper;
 import homeat.backend.domain.user.service.MemberService;
+import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,8 +14,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,14 +48,15 @@ public class MemberController {
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
-//    @Operation(summary = "카카오 회원가입 api")
-//    @PostMapping("/join/kakao")
-//    public ApiPayload<?> joinByKakao(HttpServletRequest request,
-//                                     HttpServletResponse response,
-//                                     @RequestBody @Valid MemberRequest.joinKakaoDto requestDto) {
-//        memberService.insertMemberByKakao(request, response, requestDto);
-//        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
-//    }
+    @Operation(summary = "카카오 회원가입(로그인) api", description = "DB에 가입 내역이 존재하는 경우 바로 로그인\n\n(추후 분리될 가능성 있음)")
+    @PostMapping("/join/kakao")
+    public ApiPayload<?> joinByKakao(HttpServletResponse response,
+                                     @RequestBody @Valid MemberRequest.joinKakaoDto requestDto) {
+        boolean isCreated = memberService.insertMemberByKakao(response, requestDto);
+
+        if (!isCreated) return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
+    }
 
     @Operation(summary = "로그인 api", description = "헤더의 Authorization에 access 토큰, 쿠키에 refresh 토큰 반환")
     @ApiResponses(value = {

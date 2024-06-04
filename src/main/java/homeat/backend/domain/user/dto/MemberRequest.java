@@ -21,6 +21,9 @@ public class MemberRequest {
     public static class joinKakaoDto {
         @Min(0)
         Long kakaoId;
+
+        @NotBlank
+        String nickname;
     }
 
     @Getter

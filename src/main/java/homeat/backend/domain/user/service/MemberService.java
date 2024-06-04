@@ -2,6 +2,8 @@ package homeat.backend.domain.user.service;
 
 import homeat.backend.domain.user.controller.MemberErrorStatus;
 import homeat.backend.domain.user.dto.MemberRequest;
+import homeat.backend.domain.user.dto.MemberResponse;
+import homeat.backend.domain.user.entity.LoginType;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.repository.MemberRepository;
 import homeat.backend.global.exception.GeneralException;
@@ -9,9 +11,13 @@ import homeat.backend.global.security.LoginService;
 import homeat.backend.global.security.jwt.JwtUtil;
 import homeat.backend.global.service.MailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
@@ -27,6 +33,10 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder encoder;
+    private final WebClient webClient;
+
+    @Value("${kakao.admin.key}")
+    private String kakaoAdminKey;
 
     @Transactional
     public void insertMemberByEmail(HttpServletResponse response, MemberRequest.joinEmailDto requestDto) {
@@ -36,13 +46,23 @@ public class MemberService {
         issueToken(savedMember.getId(), response);
     }
 
-//    @Transactional
-//    public void insertMemberByKakao(HttpServletRequest request, HttpServletResponse response, MemberRequest.joinKakaoDto requestDto) {
-//        Member newMember = MemberMapper.toKakaoMember(requestDto.getKakaoId().toString());
-//        Member savedMember = memberRepository.save(newMember);
-//
-//        issueToken(response, savedMember.getId());
-//    }
+    @Transactional
+    public boolean insertMemberByKakao(HttpServletResponse response, MemberRequest.joinKakaoDto requestDto) {
+        boolean isCreated = false;
+        validateKakaoUser(requestDto.getKakaoId(), requestDto.getNickname());
+
+        Member selectedMember = memberRepository.findByEmailAndLoginType(requestDto.getKakaoId().toString(), LoginType.KAKAO)
+                .orElse(null);
+
+        if (selectedMember == null) {
+            Member newMember = MemberMapper.toKakaoMember(requestDto.getKakaoId().toString());
+            selectedMember = memberRepository.save(newMember);
+            isCreated = true;
+        }
+
+        issueToken(selectedMember.getId(), response);
+        return isCreated;
+    }
 
     @Transactional
     public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
@@ -96,5 +116,25 @@ public class MemberService {
         } catch (NoSuchAlgorithmException e) {
             throw new GeneralException(MemberErrorStatus.AUTH_CODE_ERROR);
         }
+    }
+
+    private void validateKakaoUser(Long kakaoId, String nickname) {
+        MemberResponse.joinKakaoDto kakaoUserMeResponse = webClient.get()
+                .uri("/v2/user/me", uriBuilder -> uriBuilder
+                        .queryParam("property_keys", "[\"kakao_account.profile\"]")
+                        .queryParam("target_id_type", "user_id")
+                        .queryParam("target_id", kakaoId.toString())
+                        .build())
+                .header("Authorization", "KakaoAK " + kakaoAdminKey)
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError, clientResponse -> Mono.error(new GeneralException(MemberErrorStatus.KAKAO_BAD_REQUEST)))
+                .onStatus(HttpStatus::is5xxServerError, clientResponse -> Mono.error(new GeneralException(MemberErrorStatus.KAKAO_SERVER_ERROR)))
+                .bodyToMono(MemberResponse.joinKakaoDto.class)
+                .block();
+
+        System.out.println(nickname);
+        System.out.println(kakaoUserMeResponse.getKakaoAccount().getProfile().getNickname());
+        if (!nickname.equals(kakaoUserMeResponse.getKakaoAccount().getProfile().getNickname()))
+            throw new GeneralException(MemberErrorStatus.KAKAO_NICKNAME_MISMATCH);
     }
 }

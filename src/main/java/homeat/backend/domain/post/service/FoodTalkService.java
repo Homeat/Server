@@ -54,6 +54,7 @@ public class FoodTalkService {
     private final PostCommentRepository postCommentRepository;
     private final PostReplyRepository postReplyRepository;
     private final PostReportRepository postReportRepository;
+    private final PostAsyncService postAsyncService;
     private final S3Service s3Service;
 
 
@@ -128,15 +129,19 @@ public class FoodTalkService {
             throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
-        // 집밥토크 사진 s3 삭제
+        // 집밥토크 사진 삭제
+        postAsyncService.deleteFoodPictures(id);
 
-        List<PostPicture> foodPictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(
-                PostType.FoodTalk, foodTalk.getId());
-        foodPictures.forEach(foodPicture -> {
-            s3Service.fileDelete(foodPicture.getUrl());
-        });
+        // 댓글 대댓글 삭제
+        postAsyncService.deleteFoodTalkCommentAndReply(id);
 
-        // 레시피 s3 삭제
+        // 좋아요 삭제
+        postAsyncService.deleteFoodTalkLove(id);
+
+        // 신고 삭제
+        postAsyncService.deleteFoodTalkReport(id);
+
+        // 레시피 사진 삭제
         if (foodTalk.getFoodRecipes() != null) {
             foodTalk.getFoodRecipes().forEach(foodRecipe -> {
                 List<PostPicture> foodRecipePictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(
@@ -144,8 +149,10 @@ public class FoodTalkService {
                 foodRecipePictures.forEach(foodRecipePicture -> {
                     s3Service.fileDelete(foodRecipePicture.getUrl());
                 });
+                postPictureRepository.deleteAll(foodRecipePictures);
             });
         }
+
         foodTalkRepository.delete(foodTalk);
     }
 

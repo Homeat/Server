@@ -51,6 +51,7 @@ public class InfoTalkService {
     private final PostCommentRepository postCommentRepository;
     private final PostReplyRepository postReplyRepository;
     private final PostReportRepository postReportRepository;
+    private final PostAsyncService postAsyncService;
     private final S3Service s3Service;
 
     // 정보토크 게시글 작성
@@ -105,11 +106,19 @@ public class InfoTalkService {
             throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
-        List<PostPicture> infoTalkPictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(
-                PostType.InfoTalk, infoTalk.getId());
-        infoTalkPictures.forEach(infoTalkPicture -> {
-            s3Service.fileDelete(infoTalkPicture.getUrl());
-        });
+        // 집밥토크 사진 삭제
+        postAsyncService.deleteInfoPictures(id);
+
+        // 댓글 대댓글 삭제
+        postAsyncService.deleteInfoTalkCommentAndReply(id);
+
+        // 좋아요 삭제
+        postAsyncService.deleteInfoTalkLove(id);
+
+        // 신고 삭제
+        postAsyncService.deleteInfoTalkReport(id);
+
+
 
         infoTalkRepository.delete(infoTalk);
     }

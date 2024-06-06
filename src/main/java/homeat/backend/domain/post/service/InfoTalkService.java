@@ -12,21 +12,21 @@ import homeat.backend.domain.post.entity.InfoHashTag;
 import homeat.backend.domain.post.entity.InfoTalk;
 import homeat.backend.domain.post.entity.InfoTalkComment;
 import homeat.backend.domain.post.entity.InfoTalkCommentReport;
-import homeat.backend.domain.post.entity.InfoTalkLove;
 import homeat.backend.domain.post.entity.InfoTalkReply;
 import homeat.backend.domain.post.entity.InfoTalkReplyReport;
 import homeat.backend.domain.post.entity.InfoTalkReport;
+import homeat.backend.domain.post.entity.PostLove;
 import homeat.backend.domain.post.entity.PostPicture;
 import homeat.backend.domain.post.entity.PostType;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.repository.InfoHashTagRepository;
 import homeat.backend.domain.post.repository.InfoTalkCommentReportRepository;
 import homeat.backend.domain.post.repository.InfoTalkCommentRepository;
-import homeat.backend.domain.post.repository.InfoTalkLoveRepository;
 import homeat.backend.domain.post.repository.InfoTalkReplyReportRepository;
 import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
 import homeat.backend.domain.post.repository.InfoTalkReportRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
+import homeat.backend.domain.post.repository.PostLoveRepository;
 import homeat.backend.domain.post.repository.PostPictureRepository;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.global.exception.GeneralException;
@@ -50,11 +50,11 @@ public class InfoTalkService {
     private final InfoHashTagRepository infoHashTagRepository;
     private final InfoTalkCommentRepository infoTalkCommentRepository;
     private final InfoTalkReplyRepository infoTalkReplyRepository;
-    private final InfoTalkLoveRepository infoTalkLoveRepository;
     private final InfoTalkReportRepository infoTalkReportRepository;
     private final InfoTalkCommentReportRepository infoTalkCommentReportRepository;
     private final InfoTalkReplyReportRepository infoTalkReplyReportRepository;
     private final PostPictureRepository postPictureRepository;
+    private final PostLoveRepository postLoveRepository;
     private final S3Service s3Service;
 
     // 정보토크 게시글 작성
@@ -125,7 +125,7 @@ public class InfoTalkService {
         InfoTalk infoTalk = infoTalkRepository.findById(id)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
-        if (infoTalkLoveRepository.findByInfoTalkAndMember(infoTalk, member) == null) {
+        if (postLoveRepository.findPostLoveByPostTypeAndMember(PostType.InfoTalk, member).isEmpty()) {
             infoTalk.setLove(false);
         } else {
             infoTalk.setLove(true);
@@ -315,15 +315,17 @@ public class InfoTalkService {
             throw new GeneralException(PostErrorStatus.POST_SET_LOVE_BAD_REQUEST);
         }
 
-        InfoTalkLove infoTalkLove = InfoTalkLove.builder()
-                .infoTalk(infoTalk)
+        PostLove postLove = PostLove.builder()
+                .postType(PostType.InfoTalk)
+                .mappingId(infoTalk.getId())
                 .member(member)
                 .build();
+
 
         infoTalk.plusLove(infoTalk.getLove() + 1);
         infoTalk.setLove(true);
 
-        infoTalkLoveRepository.save(infoTalkLove);
+        postLoveRepository.save(postLove);
     }
 
     @Transactional
@@ -337,12 +339,12 @@ public class InfoTalkService {
             throw new GeneralException(PostErrorStatus.POST_CANCEL_LOVE_BAD_REQUEST);
         }
 
-        InfoTalkLove infoTalkLove = infoTalkLoveRepository.findByInfoTalkAndMember(infoTalk, member);
+        PostLove postLove = postLoveRepository.findPostLoveByPostTypeAndMember(PostType.InfoTalk, member).orElseThrow();
 
         infoTalk.setLove(false);
         infoTalk.plusLove(infoTalk.getLove() - 1);
 
-        infoTalkLoveRepository.delete(infoTalkLove);
+        postLoveRepository.delete(postLove);
 
     }
 

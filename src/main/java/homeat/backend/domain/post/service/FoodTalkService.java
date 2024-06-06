@@ -14,15 +14,14 @@ import homeat.backend.domain.post.entity.FoodRecipe;
 import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.entity.FoodTalkComment;
 import homeat.backend.domain.post.entity.FoodTalkCommentReport;
-import homeat.backend.domain.post.entity.FoodTalkLove;
 import homeat.backend.domain.post.entity.FoodTalkReply;
 import homeat.backend.domain.post.entity.FoodTalkReplyReport;
 import homeat.backend.domain.post.entity.FoodTalkReport;
+import homeat.backend.domain.post.entity.PostLove;
 import homeat.backend.domain.post.entity.PostPicture;
 import homeat.backend.domain.post.entity.PostType;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.entity.Tag;
-import homeat.backend.domain.post.repository.FoodLoveRepository;
 import homeat.backend.domain.post.repository.FoodRecipeRepository;
 import homeat.backend.domain.post.repository.FoodTalkCommentReportRepository;
 import homeat.backend.domain.post.repository.FoodTalkCommentRepository;
@@ -30,9 +29,11 @@ import homeat.backend.domain.post.repository.FoodTalkReplyReportRepository;
 import homeat.backend.domain.post.repository.FoodTalkReplyRepository;
 import homeat.backend.domain.post.repository.FoodTalkReportRepository;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
+import homeat.backend.domain.post.repository.PostLoveRepository;
 import homeat.backend.domain.post.repository.PostPictureRepository;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.global.exception.GeneralException;
+import homeat.backend.global.payload.CommonSuccessStatus;
 import homeat.backend.global.service.S3Service;
 import java.util.List;
 import java.util.Optional;
@@ -55,11 +56,11 @@ public class FoodTalkService {
     private final FoodRecipeRepository foodRecipeRepository;
     private final FoodTalkCommentRepository foodTalkCommentRepository;
     private final FoodTalkReplyRepository foodTalkReplyRepository;
-    private final FoodLoveRepository foodLoveRepository;
     private final FoodTalkReportRepository foodTalkReportRepository;
     private final FoodTalkCommentReportRepository foodTalkCommentReportRepository;
     private final FoodTalkReplyReportRepository foodTalkReplyReportRepository;
     private final PostPictureRepository postPictureRepository;
+    private final PostLoveRepository postLoveRepository;
     private final S3Service s3Service;
 
 
@@ -160,7 +161,7 @@ public class FoodTalkService {
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
-        if (foodLoveRepository.findByFoodTalkAndMember(foodTalk, member) == null) {
+        if (postLoveRepository.findPostLoveByPostTypeAndMember(PostType.FoodTalk, member).isEmpty()) {
             foodTalk.setLove(false);
         } else {
             foodTalk.setLove(true);
@@ -375,15 +376,17 @@ public class FoodTalkService {
             throw new GeneralException(PostErrorStatus.POST_SET_LOVE_BAD_REQUEST);
         }
 
-        FoodTalkLove foodTalkLove = FoodTalkLove.builder()
-                .foodTalk(foodTalk)
+        PostLove postLove = PostLove.builder()
+                .postType(PostType.FoodTalk)
+                .mappingId(foodTalk.getId())
                 .member(member)
                 .build();
+
 
         foodTalk.plusLove(foodTalk.getLove() + 1);
         foodTalk.setLove(true);
 
-        foodLoveRepository.save(foodTalkLove);
+        postLoveRepository.save(postLove);
     }
 
     @Transactional
@@ -395,12 +398,12 @@ public class FoodTalkService {
             throw new GeneralException(PostErrorStatus.POST_CANCEL_LOVE_BAD_REQUEST);
         }
 
-        FoodTalkLove foodTalkLove = foodLoveRepository.findByFoodTalkAndMember(foodTalk, member);
+        PostLove postLove = postLoveRepository.findPostLoveByPostTypeAndMember(PostType.FoodTalk, member).orElseThrow();
 
         foodTalk.setLove(false);
         foodTalk.plusLove(foodTalk.getLove() - 1);
 
-        foodLoveRepository.delete(foodTalkLove);
+        postLoveRepository.delete(postLove);
     }
 
     @Transactional

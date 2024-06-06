@@ -1,6 +1,5 @@
 package homeat.backend.domain.post.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.global.common.domain.BaseEntity;
 import java.util.ArrayList;
@@ -36,12 +35,10 @@ public class InfoTalkReply extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "infotalk_comment_id")
-    @JsonIgnore
     private InfoTalkComment infoTalkComment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    @JsonIgnore
     private Member member;
 
     private String content;

@@ -1,6 +1,5 @@
 package homeat.backend.domain.post.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.domain.user.entity.Member;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,11 +29,9 @@ public class InfoTalkCommentReport {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "infotalk_comment_id")
-    @JsonIgnore
     private InfoTalkComment infoTalkComment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    @JsonIgnore
     private Member member;
 }

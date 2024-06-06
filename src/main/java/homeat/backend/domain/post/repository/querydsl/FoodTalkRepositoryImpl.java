@@ -1,9 +1,9 @@
 package homeat.backend.domain.post.repository.querydsl;
 
 import static homeat.backend.domain.post.entity.QFoodTalk.*;
-import static homeat.backend.domain.post.entity.QFoodTalkComment.foodTalkComment;
-import static homeat.backend.domain.post.entity.QFoodTalkReply.foodTalkReply;
+import static homeat.backend.domain.post.entity.QPostComment.postComment;
 import static homeat.backend.domain.post.entity.QPostPicture.*;
+import static homeat.backend.domain.post.entity.QPostReply.postReply;
 import static org.springframework.util.StringUtils.hasText;
 
 import com.querydsl.core.QueryResults;
@@ -13,6 +13,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkTotalView;
 import homeat.backend.domain.post.entity.PostType;
+import homeat.backend.domain.post.entity.QPostComment;
+import homeat.backend.domain.post.entity.QPostReply;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.entity.Tag;
 import java.util.List;
@@ -205,18 +207,18 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
     @Override
     public Long countTotalCommentNumber(Long foodTalkId) {
         return queryFactory
-                .select(foodTalkComment.count())
-                .from(foodTalkComment)
-                .where(foodTalkComment.foodTalk.id.eq(foodTalkId))
+                .select(postComment.count())
+                .from(postComment)
+                .where(postComment.postType.eq(PostType.FoodTalk).and(postComment.mappingId.eq(foodTalkId)))
                 .fetchOne();
     }
 
     @Override
     public Long countTotalReplyNumber(Long foodTalkCommentId) {
         return queryFactory
-                .select(foodTalkReply.count())
-                .from(foodTalkReply)
-                .where(foodTalkReply.foodTalkComment.id.eq(foodTalkCommentId))
+                .select(postReply.count())
+                .from(postReply)
+                .where(postReply.postType.eq(PostType.FoodTalk).and(postReply.mappingId.eq(foodTalkCommentId)))
                 .fetchOne();
     }
 

@@ -2,9 +2,9 @@ package homeat.backend.domain.post.repository.querydsl;
 
 import static homeat.backend.domain.post.entity.QInfoHashTag.infoHashTag;
 import static homeat.backend.domain.post.entity.QInfoTalk.infoTalk;
-import static homeat.backend.domain.post.entity.QInfoTalkComment.infoTalkComment;
-import static homeat.backend.domain.post.entity.QInfoTalkReply.infoTalkReply;
+import static homeat.backend.domain.post.entity.QPostComment.postComment;
 import static homeat.backend.domain.post.entity.QPostPicture.postPicture;
+import static homeat.backend.domain.post.entity.QPostReply.postReply;
 import static org.springframework.util.StringUtils.hasText;
 
 import com.querydsl.core.QueryResults;
@@ -201,18 +201,18 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
     @Override
     public Long countTotalCommentNumber(Long infoTalkId) {
         return queryFactory
-                .select(infoTalkComment.count())
-                .from(infoTalkComment)
-                .where(infoTalkComment.infoTalk.id.eq(infoTalkId))
+                .select(postComment.count())
+                .from(postComment)
+                .where(postComment.postType.eq(PostType.InfoTalk).and(postComment.mappingId.eq(infoTalkId)))
                 .fetchOne();
     }
 
     @Override
     public Long countTotalReplyNumber(Long infoTalkCommentId) {
         return queryFactory
-                .select(infoTalkReply.count())
-                .from(infoTalkReply)
-                .where(infoTalkReply.infoTalkComment.id.eq(infoTalkCommentId))
+                .select(postReply.count())
+                .from(postReply)
+                .where(postReply.postType.eq(PostType.InfoTalk).and(postReply.mappingId.eq(infoTalkCommentId)))
                 .fetchOne();
     }
 }

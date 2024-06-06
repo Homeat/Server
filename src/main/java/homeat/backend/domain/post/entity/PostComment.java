@@ -1,7 +1,7 @@
 package homeat.backend.domain.post.entity;
 
-import homeat.backend.global.common.domain.BaseEntity;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.global.common.domain.BaseEntity;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -27,16 +27,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FoodTalkComment extends BaseEntity {
-
+public class PostComment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "foodtalk_comment_id")
+    @Column(name = "post_comment_id")
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "foodtalk_id")
-    private FoodTalk foodTalk;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -50,13 +45,10 @@ public class FoodTalkComment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @OneToMany(mappedBy = "foodTalkComment", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<FoodTalkReply> replyList = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    private PostType postType;
 
-    @OneToMany(mappedBy = "foodTalkComment", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<FoodTalkCommentReport> foodTalkCommentReports = new ArrayList<>();
+    private Long mappingId;
 
     public void reported() {
         this.status = Status.신고;

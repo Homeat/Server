@@ -107,16 +107,16 @@ public class InfoTalkService {
         }
 
         // 집밥토크 사진 삭제
-        postAsyncService.deleteInfoPictures(id);
+        postAsyncService.deletePictures(PostType.InfoTalk,id);
 
         // 댓글 대댓글 삭제
-        postAsyncService.deleteInfoTalkCommentAndReply(id);
+        postAsyncService.deleteCommentAndReply(PostType.InfoTalk,id);
 
         // 좋아요 삭제
-        postAsyncService.deleteInfoTalkLove(id);
+        postAsyncService.deleteLove(PostType.InfoTalk,id);
 
         // 신고 삭제
-        postAsyncService.deleteInfoTalkReport(id);
+        postAsyncService.deleteReport(PostType.InfoTalk,id);
 
 
 

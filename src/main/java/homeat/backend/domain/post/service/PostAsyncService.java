@@ -30,95 +30,49 @@ public class PostAsyncService {
     private final PostCommentRepository postCommentRepository;
     private final PostReplyRepository postReplyRepository;
     private final PostReportRepository postReportRepository;
-    private final FoodTalkRepository foodTalkRepository;
 
     @Async
-    public void deleteFoodPictures(Long foodTalkId) {
-        List<PostPicture> foodPictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(
-                PostType.FoodTalk, foodTalkId);
-        foodPictures.forEach(foodPicture -> {
-            s3Service.fileDelete(foodPicture.getUrl());
+    public void deletePictures(PostType postType,Long id) {
+        List<PostPicture> pictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(
+                postType, id);
+        pictures.forEach(picture -> {
+            s3Service.fileDelete(picture.getUrl());
         });
-        postPictureRepository.deleteAll(foodPictures);
+        postPictureRepository.deleteAll(pictures);
     }
 
     @Async
-    public void deleteFoodTalkCommentAndReply(Long foodTalkId) {
+    public void deleteCommentAndReply(PostType postType, Long id) {
         List<PostComment> postComments = postCommentRepository.findPostCommentByPostTypeAndMappingId(
-                PostType.FoodTalk, foodTalkId);
+                postType, id);
         postComments.forEach(postComment -> {
-            List<PostReply> foodReplies = postReplyRepository.findPostRepliesByPostTypeAndMappingId(
-                    PostType.FoodTalk, postComment.getId());
-            postReplyRepository.deleteAll(foodReplies);
+            List<PostReply> replies = postReplyRepository.findPostRepliesByPostTypeAndMappingId(
+                    postType, postComment.getId());
+            postReplyRepository.deleteAll(replies);
         });
         postCommentRepository.deleteAll(postComments);
     }
 
     @Async
-    public void deleteFoodTalkLove(Long foodTalkId) {
+    public void deleteLove(PostType postType,Long id) {
         List<PostLove> postLoves = postLoveRepository.findPostLoveByPostTypeAndMappingId(
-                PostType.FoodTalk, foodTalkId);
+                postType, id);
         postLoveRepository.deleteAll(postLoves);
     }
 
     @Async
-    public void deleteFoodTalkReport(Long foodTalkId) {
+    public void deleteReport(PostType postType,Long id) {
         List<PostReport> postReports = postReportRepository.findPostReportByPostTypeAndPostDetailTypeAndMappingId(
-                PostType.FoodTalk, PostDetailType.POST,
-                foodTalkId);
-        List<PostReport> commentReports = postReportRepository.findPostReportByPostTypeAndPostDetailTypeAndMappingId(
-                PostType.FoodTalk, PostDetailType.COMMENT,
-                foodTalkId);
-        List<PostReport> replyReports = postReportRepository.findPostReportByPostTypeAndPostDetailTypeAndMappingId(
-                PostType.FoodTalk, PostDetailType.REPLY,
-                foodTalkId);
-        postReportRepository.deleteAll(postReports);
-        postReportRepository.deleteAll(commentReports);
-        postReportRepository.deleteAll(replyReports);
-    }
-
-    @Async
-    public void deleteInfoPictures(Long id) {
-        List<PostPicture> infoTalkPictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(
-                PostType.InfoTalk, id);
-        infoTalkPictures.forEach(infoTalkPicture -> {
-            s3Service.fileDelete(infoTalkPicture.getUrl());
-        });
-        postPictureRepository.deleteAll(infoTalkPictures);
-    }
-
-    @Async
-    public void deleteInfoTalkCommentAndReply(Long id) {
-        List<PostComment> postComments = postCommentRepository.findPostCommentByPostTypeAndMappingId(
-                PostType.InfoTalk, id);
-        postComments.forEach(postComment -> {
-            List<PostReply> infoReplies = postReplyRepository.findPostRepliesByPostTypeAndMappingId(
-                    PostType.InfoTalk, postComment.getId());
-            postReplyRepository.deleteAll(infoReplies);
-        });
-        postCommentRepository.deleteAll(postComments);
-
-    }
-    @Async
-    public void deleteInfoTalkLove(Long id) {
-        List<PostLove> postLoves = postLoveRepository.findPostLoveByPostTypeAndMappingId(
-                PostType.FoodTalk, id);
-        postLoveRepository.deleteAll(postLoves);
-    }
-    @Async
-    public void deleteInfoTalkReport(Long id) {
-        List<PostReport> postReports = postReportRepository.findPostReportByPostTypeAndPostDetailTypeAndMappingId(
-                PostType.InfoTalk, PostDetailType.POST,
+                postType, PostDetailType.POST,
                 id);
         List<PostReport> commentReports = postReportRepository.findPostReportByPostTypeAndPostDetailTypeAndMappingId(
-                PostType.InfoTalk, PostDetailType.COMMENT,
+                postType, PostDetailType.COMMENT,
                 id);
         List<PostReport> replyReports = postReportRepository.findPostReportByPostTypeAndPostDetailTypeAndMappingId(
-                PostType.InfoTalk, PostDetailType.REPLY,
+                postType, PostDetailType.REPLY,
                 id);
         postReportRepository.deleteAll(postReports);
         postReportRepository.deleteAll(commentReports);
         postReportRepository.deleteAll(replyReports);
-
     }
 }

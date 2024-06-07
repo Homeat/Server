@@ -130,16 +130,16 @@ public class FoodTalkService {
         }
 
         // 집밥토크 사진 삭제
-        postAsyncService.deleteFoodPictures(id);
+        postAsyncService.deletePictures(PostType.FoodTalk,id);
 
         // 댓글 대댓글 삭제
-        postAsyncService.deleteFoodTalkCommentAndReply(id);
+        postAsyncService.deleteCommentAndReply(PostType.FoodTalk,id);
 
         // 좋아요 삭제
-        postAsyncService.deleteFoodTalkLove(id);
+        postAsyncService.deleteLove(PostType.FoodTalk,id);
 
         // 신고 삭제
-        postAsyncService.deleteFoodTalkReport(id);
+        postAsyncService.deleteReport(PostType.FoodTalk,id);
 
         // 레시피 사진 삭제
         if (foodTalk.getFoodRecipes() != null) {

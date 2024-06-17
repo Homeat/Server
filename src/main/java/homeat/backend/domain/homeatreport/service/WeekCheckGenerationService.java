@@ -9,6 +9,7 @@ import homeat.backend.domain.homeatreport.entity.WeekCheck;
 import homeat.backend.domain.homeatreport.entity.WeekStatus;
 import homeat.backend.domain.homeatreport.repository.BadgeImgRepository;
 import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
+import homeat.backend.domain.homeatreport.repository.querydsl.WeekRepositoryCustom;
 import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.domain.user.repository.MemberInfoRepository;
 import homeat.backend.global.exception.GeneralException;
@@ -28,6 +29,7 @@ public class WeekCheckGenerationService {
     private final FinanceDataRepository financeDataRepository;
     private final WeekCheckRepository weekCheckRepository;
     private final BadgeImgRepository badgeImgRepository;
+    private final WeekRepositoryCustom weekRepositoryCustom;
 
     @Scheduled(cron = "0 0 0 ? * MON")
     public void generateNewWeekCheckMembers() {
@@ -63,6 +65,8 @@ public class WeekCheckGenerationService {
         Long memberId = financeData.getMember().getId();
 
         System.out.println(memberId+"th member handling");
+
+        Long currentWeekCheckNum = weekRepositoryCustom.countPersonalWeekChecks(memberId) + 1;
 
         // 직전 WeekCheck 데이터에 따른 새로운 WeekCheck 데이터 최신화
         // 회원가입 시, WeekCheck 엔티티가 생성되기 때문에 previousWeek가 없는 이슈 방지
@@ -119,6 +123,7 @@ public class WeekCheckGenerationService {
                     .next_goal_price(next_goal_price)
                     .financeData(financeData)
                     .badge_img(badge_img)
+                    .personalWeekCheckNum(currentWeekCheckNum)
                     .build();
             weekCheckRepository.save(newWeekCheck);
         }
@@ -129,9 +134,11 @@ public class WeekCheckGenerationService {
                     .next_goal_price(0L)
                     .financeData(financeData)
                     .badge_img(null) // 자물쇠 이미지로 표시
+                    .personalWeekCheckNum(1l)
                     .build();
             weekCheckRepository.save(newWeekCheck);
         }
 
     }
+
 }

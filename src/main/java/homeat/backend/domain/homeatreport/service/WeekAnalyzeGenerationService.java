@@ -8,11 +8,9 @@ import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.domain.user.repository.MemberInfoRepository;
-import homeat.backend.domain.user.repository.MemberRepository;
 import homeat.backend.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +20,6 @@ import java.util.Optional;
 
 @Service
 @Transactional
-@Component
 @RequiredArgsConstructor
 public class WeekAnalyzeGenerationService {
     /*

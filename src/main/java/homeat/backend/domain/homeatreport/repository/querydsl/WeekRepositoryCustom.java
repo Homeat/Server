@@ -15,10 +15,12 @@ public interface WeekRepositoryCustom {
 
     Optional<WeekAnalyze> findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(Long memberId, Integer weekIdx, Integer input_year, Integer input_month);
 
-    Optional<WeekCheck> findWeekCheckTopByMemberIdOrderByIdDesc(Long memberId);
+    Long countPersonalWeekChecks(Long memberId);
 
-    List<WeekCheck> findAllByMemberIdOrderByWeekCheckIdAsc(Long memberId);
+    //List<WeekCheck> findAllByMemberIdOrderByWeekCheckIdAsc(Long memberId);
 
-    Optional<WeekAnalyze> findWeekAnalyzeTopByMemberOrderByIdDesc(Long memberId);
+    //Optional<WeekCheck> findWeekCheckTopByMemberIdOrderByIdDesc(Long memberId);
+
+    //Optional<WeekAnalyze> findWeekAnalyzeTopByMemberOrderByIdDesc(Long memberId);
 
 }

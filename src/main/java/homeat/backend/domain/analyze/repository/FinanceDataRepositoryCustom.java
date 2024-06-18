@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public interface FinanceDataRepositoryCustom {
-    FinanceData findByMemberIdAndCreatedYearAndCreatedMonth(Long member_id, Integer year, Integer month);
+    Optional<FinanceData> findByMemberIdAndCreatedYearAndCreatedMonth(Long member_id, Integer year, Integer month);
     Optional<FinanceData> findByMemberAndCreatedAt(Member member, LocalDate date);
     Optional<FinanceData> findLatestFinanceDataIdByMember(Member member);
     Optional<FinanceData> findByMemberAndYearAndMonth(Member member, String year, String month);

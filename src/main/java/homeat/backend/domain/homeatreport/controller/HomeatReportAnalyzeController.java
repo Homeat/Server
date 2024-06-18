@@ -23,8 +23,6 @@ public class HomeatReportAnalyzeController {
     private final HomeatReportAnalyzeService homeatReportAnalyzeService;
     private final MemberQueryService memberQueryService;
 
-    private static final Logger logger = LoggerFactory.getLogger(HomeatReportAnalyzeController.class);
-
     /**
      * 소비분석 월별
      * @param input_year

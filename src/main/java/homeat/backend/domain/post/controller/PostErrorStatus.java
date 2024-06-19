@@ -14,6 +14,7 @@ public enum PostErrorStatus implements BaseStatus {
     POST_REPORT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "POST_4002", "이미 신고한 글입니다"),
     POST_COMMENT_REPORT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "POST_4003", "이미 신고한 댓글입니다"),
     POST_REPLY_REPORT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "POST_4004", "이미 신고한 대댓글입니다"),
+    POST_IMAGE_BAD_REQUEST(HttpStatus.BAD_REQUEST, "POST_4005", "사진 입력 오류"),
 
     POST_DELETE_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "POST_4010", "작성자가 아니라 삭제할 권한이 없습니다"),
 
@@ -24,6 +25,7 @@ public enum PostErrorStatus implements BaseStatus {
     POST_ID_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4024", "게시물ID가 입력되지 않았습니다"),
     POST_TITLE_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4025", "TITLE이 입력되지 않았습니다"),
     POST_CONTENT_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4026", "CONTENT가 입력되지 않았습니다"),
+    POST_RECIPE_PAYMENT_REQUIRED(HttpStatus.PAYMENT_REQUIRED, "POST_4027", "RECIPE가 입력되지 않았습니다"),
 
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_4040", "존재하지 않는 게시물입니다"),
     POST_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_4041", "사진이 존재하지 않습니다"),

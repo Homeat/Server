@@ -10,7 +10,6 @@ import org.springframework.data.domain.Slice;
 
 public interface InfoTalkRepositoryCustom {
 
-    InfoTalk findByInfoTalkId(Long id);
 
     Slice<InfoTalkTotalView> findByIdLessThanOrderByIdDesc(InfoTalkSearchCondition condition, Long lastInfoTalkId, Pageable pageable);
 

@@ -1,7 +1,6 @@
 package homeat.backend.domain.post.dto.queryDto;
 
 import com.querydsl.core.annotations.QueryProjection;
-import homeat.backend.domain.post.entity.FoodPicture;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;

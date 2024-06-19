@@ -1,10 +1,10 @@
 package homeat.backend.domain.post.entity;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.domain.user.entity.Member;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,20 +22,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class InfoTalkReport {
-
+public class PostLove {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "infotalk_report_id")
+    @Column(name = "post_love_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "infotalk_id")
-    @JsonIgnore
-    private InfoTalk infoTalk;
+    @Enumerated(EnumType.STRING)
+    private PostType postType;
+
+    private Long mappingId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    @JsonIgnore
     private Member member;
 }

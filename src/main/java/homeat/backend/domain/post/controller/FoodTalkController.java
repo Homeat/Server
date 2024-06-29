@@ -1,7 +1,6 @@
 package homeat.backend.domain.post.controller;
 
 import homeat.backend.domain.post.dto.FoodRequestDTO;
-import homeat.backend.domain.post.dto.FoodRequestDTO.FoodRecipeRequest;
 import homeat.backend.domain.post.dto.FoodResponseDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
@@ -25,15 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -55,26 +46,19 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<?> saveFoodTalk(@RequestParam(value = "name", required = false) String name,
-                                         @RequestParam(value = "memo", required = false) String memo,
-                                         @RequestParam(value = "tag", required = false) Tag tag,
-                                         @ModelAttribute List<MultipartFile> foodPictures,
-                                         @ModelAttribute FoodRecipeRequest foodRecipeRequest,
+    public ApiPayload<?> saveFoodTalk(@RequestParam(value = "name") String name,
+                                         @RequestParam(value = "memo") String memo,
+                                         @RequestParam(value = "tag") Tag tag,
+                                         @RequestParam(value = "ingredient", required = false) String ingredient,
+                                         @RequestPart List<MultipartFile> foodPictures,
+                                         @ModelAttribute FoodRequestDTO.FoodRecipeRequest foodRecipeRequest,
                                          @AuthenticationPrincipal CustomUserDetails authentication) {
-        if (name == null || name.isEmpty()) {
-            throw new GeneralException(PostErrorStatus.POST_NAME_PAYMENT_REQUIRED);
-        }
-        if (memo == null || memo.isEmpty()) {
-            throw new GeneralException(PostErrorStatus.POST_MEMO_PAYMENT_REQUIRED);
-        }
-        if (tag == null) {
-            throw new GeneralException(PostErrorStatus.POST_TAG_PAYMENT_REQUIRED);
-        }
+
         if (foodPictures == null || foodPictures.isEmpty()) {
             throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
         }
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        foodTalkService.saveFoodTalk(name, memo, tag, foodPictures, member,foodRecipeRequest);
+        foodTalkService.saveFoodTalk(name, memo, tag,ingredient, foodPictures, member,foodRecipeRequest);
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 

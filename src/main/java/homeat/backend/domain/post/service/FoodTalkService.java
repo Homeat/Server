@@ -60,7 +60,7 @@ public class FoodTalkService {
 
     // 게시글 작성
     @Transactional
-    public void saveFoodTalk(String name, String memo, Tag tag, List<MultipartFile> multipartFiles, Member member, FoodRecipeRequest foodRecipeRequest) {
+    public void saveFoodTalk(String name, String memo, Tag tag,String ingredient, List<MultipartFile> multipartFiles, Member member, FoodRecipeRequest foodRecipeRequest) {
 
         List<String> imgPaths = s3Service.upload(multipartFiles);
         System.out.println("IMG 경로들 : " + imgPaths);
@@ -69,6 +69,7 @@ public class FoodTalkService {
                 .member(member)
                 .name(name)
                 .memo(memo)
+                .ingredient(ingredient)
                 .tag(tag)
                 .status(Status.저장)
                 .build();
@@ -95,7 +96,6 @@ public class FoodTalkService {
                 FoodRecipe foodRecipe = FoodRecipe.builder()
                         .foodTalk(foodTalk)
                         .recipe(foodRecipeDTO.getRecipe())
-                        .ingredient(foodRecipeDTO.getIngredient())
                         .build();
                 foodRecipeRepository.save(foodRecipe);
 

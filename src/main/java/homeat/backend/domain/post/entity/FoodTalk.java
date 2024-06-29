@@ -40,6 +40,7 @@ public class FoodTalk extends BaseEntity {
 
     private String name;
     private String memo;
+    private String ingredient;
 
     @Enumerated(EnumType.STRING)
     private Tag tag;

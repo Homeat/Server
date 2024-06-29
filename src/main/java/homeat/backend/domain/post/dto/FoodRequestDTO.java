@@ -31,7 +31,6 @@ public class FoodRequestDTO {
     @Data
     public static class FoodRecipeDTO {
         private String recipe;
-        private String ingredient;
         private MultipartFile recipePicture;
 
 

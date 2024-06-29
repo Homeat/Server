@@ -2,8 +2,8 @@ package homeat.backend.domain.analyze.service;
 
 import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
-import homeat.backend.domain.homeatreport.entity.Week_Analyze;
-import homeat.backend.domain.homeatreport.entity.Week_Check;
+import homeat.backend.domain.homeatreport.entity.WeekAnalyze;
+import homeat.backend.domain.homeatreport.entity.WeekCheck;
 import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
 import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
 import homeat.backend.domain.user.entity.MemberInfo;
@@ -67,8 +67,8 @@ public class MonthService {
                 LocalDateTime endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY)).atStartOfDay();
 
                 if (startOfWeek.getMonth() != endOfWeek.getMonth()) {
-                    List<Week_Check> weekChecks = weekCheckRepository.findAllByCreatedAtBetween(startOfWeek, endOfWeek);
-                    List<Week_Analyze> weekAnalyzes = weekAnalyzeRepository.findAllByCreatedAtBetween(startOfWeek, endOfWeek);
+                    List<WeekCheck> weekChecks = weekCheckRepository.findAllByCreatedAtBetween(startOfWeek, endOfWeek);
+                    List<WeekAnalyze> weekAnalyzes = weekAnalyzeRepository.findAllByCreatedAtBetween(startOfWeek, endOfWeek);
                     // weekCheck의 financeData 업데이트
                     weekChecks.forEach(weekCheck -> {
                         weekCheck.updateFinanceData(savedfinanceData);

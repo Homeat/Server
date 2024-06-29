@@ -11,7 +11,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Week_Check extends BaseEntity {
+public class WeekCheck extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +42,9 @@ public class Week_Check extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private TierStatus homeat_tier = TierStatus.홈잇스타터; // 홈잇 티어
+
+    // member별 WeekCheck의 개수를 알려주는 previousWeekCheckNum
+    private Long personalWeekCheckNum;
 
     // weekStatus setter
     public void setWeekStatus(WeekStatus weekStatus) { this.weekStatus = weekStatus; }

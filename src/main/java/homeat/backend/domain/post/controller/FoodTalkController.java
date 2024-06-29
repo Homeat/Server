@@ -1,6 +1,7 @@
 package homeat.backend.domain.post.controller;
 
 import homeat.backend.domain.post.dto.FoodRequestDTO;
+import homeat.backend.domain.post.dto.FoodRequestDTO.FoodRecipeRequest;
 import homeat.backend.domain.post.dto.FoodResponseDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
@@ -26,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,34 +47,35 @@ public class FoodTalkController {
     /**
      * 집밥토크 저장
      */
-    @Operation(summary = "집밥토크 저장 api")
+    @Operation(summary = "집밥토크 및 레시피 통합 저장 api")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "생성됨"),
-            @ApiResponse(responseCode = "400", description = "COMMON_400 : 잘못된 요청", content = {@Content()}),
-            @ApiResponse(responseCode = "402", description = "POST_4020 : NAME이 입력되지 않았습니다\n\nPOST_4021 : MEMO가 입력되지 않았습니다\n\nPOST_4022 : TAG가 입력되지 않았습니다\n\nPOST_4023 : IMAGE가 입력되지 않았습니다", content = {@Content()}),
+            @ApiResponse(responseCode = "400", description = "COMMON_400 : 잘못된 요청\n\nPOST_4005 : 사진 입력 오류", content = {@Content()}),
+            @ApiResponse(responseCode = "402", description = "POST_4020 : NAME이 입력되지 않았습니다\n\nPOST_4021 : MEMO가 입력되지 않았습니다\n\nPOST_4022 : TAG가 입력되지 않았습니다\n\nPOST_4023 : IMAGE가 입력되지 않았습니다\n\nPOST_4027 : RECIPE가 입력되지 않았습니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
-    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<Long> saveFoodTalk(@RequestParam(value = "name", required = false) String name,
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiPayload<?> saveFoodTalk(@RequestParam(value = "name", required = false) String name,
                                          @RequestParam(value = "memo", required = false) String memo,
                                          @RequestParam(value = "tag", required = false) Tag tag,
-                                         @RequestParam(value = "imgUrl", required = false) List<MultipartFile> multipartFiles,
+                                         @ModelAttribute List<MultipartFile> foodPictures,
+                                         @ModelAttribute FoodRecipeRequest foodRecipeRequest,
                                          @AuthenticationPrincipal CustomUserDetails authentication) {
-        if (name == null) {
+        if (name == null || name.isEmpty()) {
             throw new GeneralException(PostErrorStatus.POST_NAME_PAYMENT_REQUIRED);
         }
-        if (memo == null) {
+        if (memo == null || memo.isEmpty()) {
             throw new GeneralException(PostErrorStatus.POST_MEMO_PAYMENT_REQUIRED);
         }
         if (tag == null) {
             throw new GeneralException(PostErrorStatus.POST_TAG_PAYMENT_REQUIRED);
         }
-        if (multipartFiles == null) {
+        if (foodPictures == null || foodPictures.isEmpty()) {
             throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
         }
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        Long result = foodTalkService.saveFoodTalk(name, memo, tag, multipartFiles, member);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, result);
+        foodTalkService.saveFoodTalk(name, memo, tag, foodPictures, member,foodRecipeRequest);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
 
@@ -86,7 +89,7 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "404", description = "POST_4040 : 존재하지 않는 게시물입니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("{id}")
     public ApiPayload<?> deleteFoodTalk(@PathVariable("id") Long id,
                                         @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
@@ -182,34 +185,6 @@ public class FoodTalkController {
                                                              @RequestParam int view) {
         Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkByView(condition, id, view);
         return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
-    }
-
-    /**
-     * 레시피 업로드
-     */
-    @Operation(summary = "집밥토크 레시피 업로드, List 형식입니다!, id는 집밥토크 게시물 id 입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "생성됨"),
-            @ApiResponse(responseCode = "400", description = "COMMON_400 : 잘못된 요청", content = {@Content()}),
-            @ApiResponse(responseCode = "402", description = "POST_4023 : IMAGE가 입력되지 않았습니다\n\nPOST_4024 : ID가 입력되지 않았습니다", content = {@Content()}),
-            @ApiResponse(responseCode = "404", description = "POST_4040 : 존재하지 않는 게시물입니다", content = {@Content()}),
-            @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
-    })
-    @PostMapping(value = "/recipe", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<?> saveRecipe(@RequestParam(value = "id", required = false) Long id,
-                                    @RequestParam(value = "recipe", required = false) String recipe,
-                                    @RequestParam(value = "ingredient", required = false) String ingredient,
-                                    @RequestParam(value = "tip", required = false) String tip,
-                                    @RequestParam(value = "files", required = false) List<MultipartFile> files) {
-        if (id == null) {
-            throw new GeneralException(PostErrorStatus.POST_ID_PAYMENT_REQUIRED);
-        }
-        if (files == null) {
-            throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
-        }
-
-        foodTalkService.saveRecipe(id, recipe, ingredient, tip, files);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
     /**

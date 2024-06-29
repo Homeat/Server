@@ -119,6 +119,22 @@ public class HomeController {
     }
 
     /**
+     * 캘린더 세부 지출 확인
+     */
+    @Operation(summary = "세부 지출 확인 api")
+    @GetMapping("/calendar/daily/details")
+    public ApiPayload<List<HomeResponseDTO.CalendarDayDetailsResultDTO>> getCalendarDayDetails(
+            @RequestParam("year") String year,
+            @RequestParam("month") String month,
+            @RequestParam("day") String day,
+            @RequestParam("remainingGoal") Long remainingGoal,
+            @AuthenticationPrincipal CustomUserDetails authentication) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
+        List<HomeResponseDTO.CalendarDayDetailsResultDTO> result = homeService.getCalendarDayDetails(year, month, day, remainingGoal ,member);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
+    }
+
+    /**
      * 과거 지출 추가
      */
     @Operation(summary = "과거 지출 추가 api")

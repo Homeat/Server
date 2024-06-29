@@ -1,5 +1,6 @@
 package homeat.backend.domain.home.dto;
 
+import homeat.backend.domain.home.entity.CostType;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -60,5 +61,16 @@ public class HomeResponseDTO {
         private long remainingGoal;
         private boolean canAddExpense;
         private String message;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CalendarDayDetailsResultDTO {
+        private CostType type;
+        private String memo;
+        private Long usedMoney;
+        private Long remainingGoal;
     }
 }

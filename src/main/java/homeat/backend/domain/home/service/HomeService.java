@@ -366,6 +366,38 @@ public class HomeService {
                 .build();
     }
 
+    /**
+     * 캘린더 세부 지출 확인
+     */
+    public List<HomeResponseDTO.CalendarDayDetailsResultDTO> getCalendarDayDetails(String year, String month, String day, Long remainingGoal, Member member) {
+        FinanceData financeData = financeDataRepository.findByMemberAndYearAndMonth(member, year, month)
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터가 없습니다."));
+
+        LocalDate targetDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
+
+        DailyExpense dailyExpense = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), targetDate)
+                .orElseThrow(() -> new NoSuchElementException("해당 날짜의 지출 데이터가 없습니다."));
+
+        List<Receipt> receipts = receiptRepo.findByDailyExpenseIdOrderByIdAsc(dailyExpense.getId());
+
+        long currentRemainingGoal = remainingGoal;
+        List<HomeResponseDTO.CalendarDayDetailsResultDTO> details = new ArrayList<>();
+        for (Receipt receipt : receipts) {
+            long usedMoney = receipt.getExpense();
+            HomeResponseDTO.CalendarDayDetailsResultDTO detail = HomeResponseDTO.CalendarDayDetailsResultDTO.builder()
+                    .type(receipt.getCostType())
+                    .memo(receipt.getMemo())
+                    .usedMoney(usedMoney)
+                    .remainingGoal(currentRemainingGoal)
+                    .build();
+            currentRemainingGoal += usedMoney;
+            details.add(detail);
+        }
+
+        return details;
+    }
+
+
     @Transactional
     public String createPastExpense(HomeRequestDTO.PastExpenseDTO dto, Member member) {
 

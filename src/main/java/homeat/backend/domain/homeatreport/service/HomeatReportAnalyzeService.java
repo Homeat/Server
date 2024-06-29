@@ -16,13 +16,11 @@ import homeat.backend.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.View;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -34,7 +32,6 @@ public class HomeatReportAnalyzeService {
     private final MemberInfoRepository memberInfoRepository;
     private final MemberRepository memberRepository;
     private final WeekRepositoryCustom weekRepositoryCustom;
-    private final View error;
 
     // 소비분석 중 상단의 월별 분석
     public ReportMonthlyAnalyzeResponseDTO getMonthlyAnalyze(Integer input_year, Integer input_month, Member member) {

@@ -56,9 +56,9 @@ public class HomeResponseDTO {
     @AllArgsConstructor
     public static class CalendarDayResultDTO {
         private LocalDate date;
-        private long todayJipbapPrice;
-        private long todayOutPrice;
-        private long remainingGoal;
+        private Long todayJipbapPrice;
+        private Long todayOutPrice;
+        private Long remainingGoal;
         private boolean canAddExpense;
         private String message;
     }

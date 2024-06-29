@@ -295,7 +295,7 @@ public class HomeService {
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
 
         // DailyExpense 조회
-        List<DailyExpense> calendarData = dailyExpenseRepo.findByFinanceDataIdOrderByCreatedAtAsc(financeData.getId());
+        List<DailyExpense> calendarData = dailyExpenseRepo.findByFinanceDataIdOrderByDate(financeData.getId());
 
         // 조회된 데이터를 DTO로 변환
         List<HomeResponseDTO.CalendarResultDTO> result = calendarData.stream()

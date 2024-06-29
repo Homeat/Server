@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface DailyExpenseRepo extends JpaRepository<DailyExpense, Long>, DailyExpenseRepoCST {
-    List<DailyExpense> findByFinanceDataIdOrderByCreatedAtAsc(Long financeDataId);
+    List<DailyExpense> findByFinanceDataIdOrderByDate(Long financeDataId);
 
     List<DailyExpense> findDailyExpenseByFinanceDataIdAndDateBetween(Long financeDataId, LocalDate startDate, LocalDate endDate);
 

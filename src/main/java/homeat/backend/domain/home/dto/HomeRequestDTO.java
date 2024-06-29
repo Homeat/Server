@@ -53,7 +53,5 @@ public class HomeRequestDTO {
 
        @NotNull
        private LocalDate date;
-
-       private boolean canAddExpense;
     }
 }

@@ -398,13 +398,16 @@ public class HomeService {
     }
 
 
+    /**
+     * 과거 지출 추가
+     */
     @Transactional
     public String createPastExpense(HomeRequestDTO.PastExpenseDTO dto, Member member) {
+        LocalDate now = LocalDate.now();
+        LocalDate startOfWeek = now.with(DayOfWeek.MONDAY);
+        LocalDate targetDate = dto.getDate();
 
-        // 지출 추가 가능한 날짜인지 유효성 검증
-        if (!dto.isCanAddExpense()) {
-            throw new IllegalArgumentException("해당 날짜에는 지출 데이터를 추가할 수 없습니다.");
-        }
+        if (targetDate.isAfter(now) || targetDate.isBefore(startOfWeek)) throw new IllegalArgumentException("해당 날짜에는 지출 데이터를 추가할 수 없습니다.");
 
         FinanceData financeData = financeDataRepository.findByMemberAndYearAndMonth(member, String.valueOf(dto.getDate().getYear()), String.valueOf(dto.getDate().getMonthValue()))
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터가 없습니다."));
@@ -413,7 +416,7 @@ public class HomeService {
         DailyExpense dailyExpense = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), dto.getDate())
                 .orElseGet(() -> DailyExpense.builder()
                         .financeData(financeData)
-                        .date(dto.getDate())
+                        .date(targetDate)
                         .todayJipbapPrice(0)
                         .todayOutPrice(0)
                         .build());

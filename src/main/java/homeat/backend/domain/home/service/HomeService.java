@@ -13,13 +13,15 @@ import homeat.backend.domain.home.repository.DailyExpenseRepo;
 import homeat.backend.domain.home.repository.ReceiptRepo;
 import homeat.backend.domain.home.service.ocr.FileUtil;
 import homeat.backend.domain.home.service.ocr.OCRService;
+import homeat.backend.domain.homeatreport.controller.HomeatReportErrorStatus;
 import homeat.backend.domain.homeatreport.entity.Badge_img;
-import homeat.backend.domain.homeatreport.entity.Week_Check;
+import homeat.backend.domain.homeatreport.entity.WeekCheck;
 import homeat.backend.domain.homeatreport.repository.BadgeImgRepository;
 import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
 import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
 import homeat.backend.domain.homeatreport.service.WeekSaveService;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -69,7 +71,7 @@ public class HomeService {
                 .orElseThrow(() -> new NoSuchElementException("해당 회원의 FinanceData가 존재하지 않습니다."));
 
         // 다음 주 Week 조회
-        Week_Check nextWeekCheck = weekCheckRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData)
+        WeekCheck nextWeekCheck = weekCheckRepository.findFirstByFinanceDataOrderByCreatedAtDesc(financeData)
                         .orElseThrow(() -> new NoSuchElementException("해당 회원의 Week가 존재하지 않습니다."));
 
         nextWeekCheck.updateNextGoalPrice(dto.getNextTargetExpense());
@@ -92,7 +94,7 @@ public class HomeService {
         FinanceData beforeMonthFinanceData = financeDataList.size() > 1 ? financeDataList.get(1) : null;
 
         // 이번 주 목표 식비 조회
-        Week_Check thisWeekCheck = weekCheckRepository.findFirstByFinanceDataOrderByCreatedAtDesc(thisMonthFinanceData)
+        WeekCheck thisWeekCheck = weekCheckRepository.findFirstByFinanceDataOrderByCreatedAtDesc(thisMonthFinanceData)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 Week가 존재하지 않습니다."));
         Long thisWeekGoalPrice = thisWeekCheck.getGoal_price();
 
@@ -271,7 +273,7 @@ public class HomeService {
             /**
              * exceed_price update
              */
-            Week_Check weekCheck = weekCheckRepository.findTopByFinanceDataOrderByIdDesc(financeData)
+            WeekCheck weekCheck = weekCheckRepository.findTopByFinanceDataOrderByIdDesc(financeData)
                     .orElseThrow(() -> new NoSuchElementException("조회할 수 있는 Current Week가 없습니다."));
             Long accumulateExpense = accumulatePrice(financeData);
 
@@ -336,7 +338,7 @@ public class HomeService {
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터가 없습니다."));
 
         // Week 엔티티 조회
-        Week_Check weekCheck = weekCheckRepository.findFirstByFinanceDataAndCreatedAtBetween(financeData, startOfWeek, endOfWeek)
+        WeekCheck weekCheck = weekCheckRepository.findFirstByFinanceDataAndCreatedAtBetween(financeData, startOfWeek, endOfWeek)
                 .orElseThrow(() -> new NoSuchElementException("해당 Week 데이터가 없습니다."));
 
         // 해당 target 날짜 주간의 월요일 ~ 타겟날짜까지

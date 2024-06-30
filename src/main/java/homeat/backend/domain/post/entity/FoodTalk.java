@@ -1,6 +1,5 @@
 package homeat.backend.domain.post.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import homeat.backend.global.common.domain.BaseEntity;
 import homeat.backend.domain.user.entity.Member;
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ public class FoodTalk extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    @JsonIgnore
     private Member member;
 
     private String name;
@@ -66,19 +64,7 @@ public class FoodTalk extends BaseEntity {
 
     @OneToMany(mappedBy = "foodTalk", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<FoodPicture> foodPictures = new ArrayList<>();
-
-    @OneToMany(mappedBy = "foodTalk", cascade = CascadeType.ALL)
-    @Builder.Default
     private List<FoodRecipe> foodRecipes = new ArrayList<>();
-
-    @OneToMany(mappedBy = "foodTalk", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<FoodTalkComment> foodTalkComments = new ArrayList<>();
-
-    @OneToMany(mappedBy = "foodTalk", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<FoodTalkReport> foodTalkReports = new ArrayList<>();
 
     public void update(String name, String memo, Tag tag) {
 

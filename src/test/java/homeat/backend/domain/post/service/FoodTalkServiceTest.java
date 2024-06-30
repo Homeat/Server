@@ -1,32 +1,37 @@
 package homeat.backend.domain.post.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import homeat.backend.domain.post.entity.FoodTalk;
+import homeat.backend.domain.post.entity.PostLove;
+import homeat.backend.domain.post.entity.PostType;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.entity.Tag;
 import homeat.backend.domain.post.repository.FoodTalkRepository;
+import homeat.backend.domain.post.repository.PostLoveRepository;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.repository.MemberRepository;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
-@ExtendWith(MockitoExtension.class)
-@DisplayName("10명 이상의 회원이 신고 시 신고로 변경되는지에 대한 테스트")
+@SpringBootTest
+@Transactional
 class FoodTalkServiceTest {
 
-    @Mock
-    private MemberRepository memberRepository;
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Autowired
+    FoodTalkRepository foodTalkRepository;
+
+    @Autowired
+    PostLoveRepository postLoveRepository;
 
 
 
@@ -80,5 +85,70 @@ class FoodTalkServiceTest {
         // then
         assertEquals(10, foodTalk.getReportNumber());
         assertEquals(Status.신고, foodTalk.getStatus());
+    }
+    @Nested
+    class 좋아요_기능_테스트 {
+        @Nested
+        class 성공 {
+            @Test
+            void 집밥토크에서_유저가_좋아요를_누르면() throws Exception {
+                // Given
+                Member member = memberRepository.findById(6L).get();
+
+                FoodTalk foodTalk = foodTalkRepository.findById(180L).get();
+
+                // When
+                PostLove postLove = PostLove.builder()
+                        .postType(PostType.FoodTalk)
+                        .mappingId(foodTalk.getId())
+                        .member(member)
+                        .build();
+
+                foodTalk.plusLove(foodTalk.getLove() + 1);
+                foodTalk.setLove(true);
+
+                PostLove save = postLoveRepository.save(postLove);
+
+                // Then
+                assertEquals(1, foodTalk.getLove());
+                assertEquals(true, foodTalk.getSetLove());
+                assertEquals(foodTalk.getId(), save.getMappingId());
+                assertEquals(PostType.FoodTalk, save.getPostType());
+                assertEquals(member, save.getMember());
+            }
+            @Test
+            public void 집밥토크에서_유저가_좋아요를_취소하면() throws Exception {
+                //given
+                Member member = memberRepository.findById(6L).get();
+
+                FoodTalk foodTalk = foodTalkRepository.findById(180L).get();
+
+                // When
+                PostLove postLove = PostLove.builder()
+                        .postType(PostType.FoodTalk)
+                        .mappingId(foodTalk.getId())
+                        .member(member)
+                        .build();
+
+                foodTalk.plusLove(foodTalk.getLove() + 1);
+                foodTalk.setLove(true);
+
+                PostLove save = postLoveRepository.save(postLove);
+
+                //when
+                PostLove postLove2 = postLoveRepository.findPostLoveByPostTypeAndMember(PostType.FoodTalk, member).orElseThrow();
+
+                foodTalk.setLove(false);
+                foodTalk.plusLove(foodTalk.getLove() - 1);
+
+                postLoveRepository.delete(postLove);
+
+                //then
+                assertEquals(0, foodTalk.getLove());
+                assertEquals(false, foodTalk.getSetLove());
+                assertEquals(0, postLoveRepository.count());
+
+            }
+        }
     }
 }

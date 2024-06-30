@@ -9,8 +9,11 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import homeat.backend.domain.post.controller.PostErrorStatus;
+import homeat.backend.global.exception.GeneralException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -88,6 +91,7 @@ public class S3Service  {
         return imgUrl;
     }
 
+    // 게시물 리스트 사진 저장 서비스
     public List<String> upload(List<MultipartFile> multipartFile)   {
         List<String> imgUrlList = new ArrayList<>();
 
@@ -103,10 +107,29 @@ public class S3Service  {
                         .withCannedAcl(CannedAccessControlList.PublicRead));
                 imgUrlList.add(s3Client.getUrl(bucket+"/homeat/image", fileName).toString());
             } catch(IOException e) {
-                throw new IllegalArgumentException("사진 입력 오류");
+                throw new GeneralException(PostErrorStatus.POST_IMAGE_BAD_REQUEST);
             }
         }
         return imgUrlList;
+    }
+
+    public String singleUpload(MultipartFile file)   {
+
+        StringBuilder sb = new StringBuilder();
+
+        String fileName = createFileName(file.getOriginalFilename());
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(file.getSize());
+        objectMetadata.setContentType(file.getContentType());
+        try(InputStream inputStream = file.getInputStream()) {
+            s3Client.putObject(new PutObjectRequest(bucket+"/homeat/image", fileName, inputStream, objectMetadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            sb.append(s3Client.getUrl(bucket+"/homeat/image", fileName).toString());
+        } catch(IOException e) {
+            throw new GeneralException(PostErrorStatus.POST_IMAGE_BAD_REQUEST);
+        }
+
+        return sb.toString();
     }
 
     //파일 삭제

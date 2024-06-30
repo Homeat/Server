@@ -1,6 +1,5 @@
 package homeat.backend.domain.post.dto;
 
-import homeat.backend.domain.post.entity.FoodPicture;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.entity.Tag;
 import java.time.LocalDateTime;

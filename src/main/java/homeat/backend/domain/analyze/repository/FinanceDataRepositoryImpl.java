@@ -9,7 +9,6 @@ import homeat.backend.domain.user.entity.Member;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -25,13 +24,13 @@ public class FinanceDataRepositoryImpl implements FinanceDataRepositoryCustom{
     }
 
     @Override
-    public FinanceData findByMemberIdAndCreatedYearAndCreatedMonth(Long member_id, Integer year, Integer month) {
+    public Optional<FinanceData> findByMemberIdAndCreatedYearAndCreatedMonth(Long member_id, Integer year, Integer month) {
         QFinanceData qFinanceData = QFinanceData.financeData;
-        return queryFactory.selectFrom(qFinanceData)
+        return Optional.ofNullable(queryFactory.selectFrom(qFinanceData)
                 .where(qFinanceData.member.id.eq(member_id)
                         .and(qFinanceData.createdAt.year().eq(year)
                                 .and(qFinanceData.createdAt.month().eq(month))))
-                .fetchOne();
+                .fetchOne());
     }
 
 

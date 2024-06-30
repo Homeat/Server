@@ -1,8 +1,5 @@
 package homeat.backend.domain.post.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import homeat.backend.domain.address.entity.Address;
-import homeat.backend.domain.user.entity.MemberInfo;
 import homeat.backend.global.common.domain.BaseEntity;
 import homeat.backend.domain.user.entity.Member;
 import java.util.ArrayList;
@@ -19,13 +16,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -39,12 +34,13 @@ public class InfoTalk extends BaseEntity {
     @Column(name = "infotalk_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
-    private String title;
-    private String content;
 
+    private String title;
+
+    private String content;
 
     @Builder.Default
     private Integer love = 0;
@@ -64,19 +60,7 @@ public class InfoTalk extends BaseEntity {
 
     @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<InfoPicture> infoPictures = new ArrayList<>();
-
-    @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
-    @Builder.Default
     private List<InfoHashTag> infoHashTags = new ArrayList<>();
-
-    @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<InfoTalkComment> infoTalkComments = new ArrayList<>();
-
-    @OneToMany(mappedBy = "infoTalk", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<InfoTalkReport> infoTalkReports = new ArrayList<>();
 
 
     public void update(String title, String content) {

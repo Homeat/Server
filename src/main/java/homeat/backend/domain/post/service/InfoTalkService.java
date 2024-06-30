@@ -8,28 +8,24 @@ import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkReplyViewDTO;
 import homeat.backend.domain.post.dto.InfoResponseDTO.InfoTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkSearchCondition;
 import homeat.backend.domain.post.dto.queryDto.InfoTalkTotalView;
-import homeat.backend.domain.post.entity.FoodTalkCommentReport;
-import homeat.backend.domain.post.entity.FoodTalkReply;
-import homeat.backend.domain.post.entity.FoodTalkReplyReport;
+import homeat.backend.domain.post.entity.FoodTalk;
 import homeat.backend.domain.post.entity.InfoHashTag;
-import homeat.backend.domain.post.entity.InfoPicture;
 import homeat.backend.domain.post.entity.InfoTalk;
-import homeat.backend.domain.post.entity.InfoTalkComment;
-import homeat.backend.domain.post.entity.InfoTalkCommentReport;
-import homeat.backend.domain.post.entity.InfoTalkLove;
-import homeat.backend.domain.post.entity.InfoTalkReply;
-import homeat.backend.domain.post.entity.InfoTalkReplyReport;
-import homeat.backend.domain.post.entity.InfoTalkReport;
+import homeat.backend.domain.post.entity.PostComment;
+import homeat.backend.domain.post.entity.PostDetailType;
+import homeat.backend.domain.post.entity.PostLove;
+import homeat.backend.domain.post.entity.PostPicture;
+import homeat.backend.domain.post.entity.PostReply;
+import homeat.backend.domain.post.entity.PostReport;
+import homeat.backend.domain.post.entity.PostType;
 import homeat.backend.domain.post.entity.Status;
 import homeat.backend.domain.post.repository.InfoHashTagRepository;
-import homeat.backend.domain.post.repository.InfoPictureRepository;
-import homeat.backend.domain.post.repository.InfoTalkCommentReportRepository;
-import homeat.backend.domain.post.repository.InfoTalkCommentRepository;
-import homeat.backend.domain.post.repository.InfoTalkLoveRepository;
-import homeat.backend.domain.post.repository.InfoTalkReplyReportRepository;
-import homeat.backend.domain.post.repository.InfoTalkReplyRepository;
-import homeat.backend.domain.post.repository.InfoTalkReportRepository;
 import homeat.backend.domain.post.repository.InfoTalkRepository;
+import homeat.backend.domain.post.repository.PostCommentRepository;
+import homeat.backend.domain.post.repository.PostLoveRepository;
+import homeat.backend.domain.post.repository.PostPictureRepository;
+import homeat.backend.domain.post.repository.PostReplyRepository;
+import homeat.backend.domain.post.repository.PostReportRepository;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.service.S3Service;
@@ -49,14 +45,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class InfoTalkService {
 
     private final InfoTalkRepository infoTalkRepository;
-    private final InfoPictureRepository infoPictureRepository;
     private final InfoHashTagRepository infoHashTagRepository;
-    private final InfoTalkCommentRepository infoTalkCommentRepository;
-    private final InfoTalkReplyRepository infoTalkReplyRepository;
-    private final InfoTalkLoveRepository infoTalkLoveRepository;
-    private final InfoTalkReportRepository infoTalkReportRepository;
-    private final InfoTalkCommentReportRepository infoTalkCommentReportRepository;
-    private final InfoTalkReplyReportRepository infoTalkReplyReportRepository;
+    private final PostPictureRepository postPictureRepository;
+    private final PostLoveRepository postLoveRepository;
+    private final PostCommentRepository postCommentRepository;
+    private final PostReplyRepository postReplyRepository;
+    private final PostReportRepository postReportRepository;
+    private final PostAsyncService postAsyncService;
     private final S3Service s3Service;
 
     // 정보토크 게시글 작성
@@ -90,13 +85,14 @@ public class InfoTalkService {
 
 
 
-        for (String imgUrl : imgPaths) {
-            InfoPicture infoPicture = InfoPicture.builder()
-                    .infoTalk(infoTalk)
-                    .url(imgUrl)
+        imgPaths.forEach(img -> {
+            PostPicture postPicture = PostPicture.builder()
+                    .postType(PostType.InfoTalk)
+                    .mappingId(infoTalk.getId())
+                    .url(img)
                     .build();
-            infoPictureRepository.save(infoPicture);
-        }
+            postPictureRepository.save(postPicture);
+        });
 
     }
 
@@ -110,23 +106,22 @@ public class InfoTalkService {
             throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
-        for (InfoPicture infoPicture : infoTalk.getInfoPictures()) {
-            s3Service.fileDelete(infoPicture.getUrl());
-        }
+        // 집밥토크 사진 삭제
+        postAsyncService.deletePictures(PostType.InfoTalk,id);
+
+        // 댓글 대댓글 삭제
+        postAsyncService.deleteCommentAndReply(PostType.InfoTalk,id);
+
+        // 좋아요 삭제
+        postAsyncService.deleteLove(PostType.InfoTalk,id);
+
+        // 신고 삭제
+        postAsyncService.deleteReport(PostType.InfoTalk,id);
+
+
 
         infoTalkRepository.delete(infoTalk);
     }
-
-//    @Transactional
-//    public ResponseEntity<?> updateInfoTalk(InfoRequestDTO.InfoTalkDTO dto, Long id) {
-//
-//        InfoTalk infoTalk = infoTalkRepository.findById(id)
-//                .orElseThrow(() -> new IllegalArgumentException(id + " 번의 게시글을 찾을 수 없습니다."));
-//
-//        infoTalk.update(dto.getTitle(), dto.getContent());
-//
-//        return ResponseEntity.ok(id + " 번 게시글 수정완료");
-//    }
 
     @Transactional
     // 정보토크 게시글 1개 조회
@@ -135,7 +130,7 @@ public class InfoTalkService {
         InfoTalk infoTalk = infoTalkRepository.findById(id)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
-        if (infoTalkLoveRepository.findByInfoTalkAndMember(infoTalk, member) == null) {
+        if (postLoveRepository.findPostLoveByPostTypeAndMember(PostType.InfoTalk, member).isEmpty()) {
             infoTalk.setLove(false);
         } else {
             infoTalk.setLove(true);
@@ -150,14 +145,20 @@ public class InfoTalkService {
 
 
         // 정보토크 사진 리스트
-        List<String> infoImages = infoTalk.getInfoPictures().stream()
-                .map(InfoPicture::getUrl)
+        List<String> infoImages = postPictureRepository.findPostPictureByPostTypeAndMappingId(PostType.InfoTalk,
+                        infoTalk.getId()).stream()
+                .map(PostPicture::getUrl)
                 .collect(Collectors.toList());
 
         // 정보토크 댓글, 대댓글 DTO 생성
-        List<InfoResponseDTO.InfoTalkCommentViewDTO> infoTalkCommentViewDTOList = infoTalk.getInfoTalkComments().stream()
+        List<PostComment> infoComments = postCommentRepository.findPostCommentByPostTypeAndMappingId(
+                PostType.InfoTalk, infoTalk.getId());
+
+        List<InfoResponseDTO.InfoTalkCommentViewDTO> infoTalkCommentViewDTOList = infoComments.stream()
                 .map(infoTalkComment -> {
-                    List<InfoResponseDTO.InfoTalkReplyViewDTO> infoTalkReplyViewDTOList = infoTalkComment.getReplyList().stream()
+                    List<PostReply> infoReplies = postReplyRepository.findPostRepliesByPostTypeAndMappingId(
+                            PostType.InfoTalk, infoTalkComment.getId());
+                    List<InfoResponseDTO.InfoTalkReplyViewDTO> infoTalkReplyViewDTOList = infoReplies.stream()
                             .map(infoTalkReply -> InfoTalkReplyViewDTO.builder()
                                     .createdAt(infoTalkReply.getCreatedAt())
                                     .updatedAt(infoTalkReply.getUpdatedAt())
@@ -234,17 +235,18 @@ public class InfoTalkService {
         InfoTalk infoTalk = infoTalkRepository.findById(dto.getId())
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
-        InfoTalkComment infoTalkComment = InfoTalkComment.builder()
+        PostComment postComment = PostComment.builder()
                 .member(member)
-                .infoTalk(infoTalk)
+                .postType(PostType.InfoTalk)
+                .mappingId(infoTalk.getId())
                 .content(dto.getContent())
                 .status(Status.저장)
                 .build();
 
-        infoTalkCommentRepository.save(infoTalkComment);
+        postCommentRepository.save(postComment);
 
         int commentNum = infoTalkRepository.countTotalCommentNumber(dto.getId()).intValue();
-        int replyNum = infoTalkRepository.countTotalReplyNumber(infoTalkComment.getId()).intValue();
+        int replyNum = infoTalkRepository.countTotalReplyNumber(postComment.getId()).intValue();
 
 
 
@@ -254,16 +256,21 @@ public class InfoTalkService {
 
     @Transactional
     public void deleteComment(Long commentId, Member member) {
-        InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(commentId)
+        PostComment postComment = postCommentRepository.findById(commentId)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
-        if (member != infoTalkComment.getMember()) {
+        if (member != postComment.getMember()) {
             throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
-        infoTalkCommentRepository.delete(infoTalkComment);
+        postCommentRepository.delete(postComment);
 
-        InfoTalk infoTalk = infoTalkComment.getInfoTalk();
+        // 연관된 대댓글 삭제
+        List<PostReply> infoReplies = postReplyRepository.findPostRepliesByPostTypeAndMappingId(
+                PostType.InfoTalk, commentId);
+        postReplyRepository.deleteAll(infoReplies);
+
+        InfoTalk infoTalk = infoTalkRepository.findById(postComment.getMappingId()).orElseThrow();
 
         int commentNum = infoTalkRepository.countTotalCommentNumber(infoTalk.getId()).intValue();
         int replyNum = infoTalkRepository.countTotalReplyNumber(commentId).intValue();
@@ -274,22 +281,23 @@ public class InfoTalkService {
 
     @Transactional
     public void saveReply(InfoRequestDTO.CommentDTO dto, Member member) {
-        InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(dto.getId())
+        PostComment postComment = postCommentRepository.findById(dto.getId())
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
-        InfoTalkReply infoTalkReply = InfoTalkReply.builder()
-                .infoTalkComment(infoTalkComment)
+        PostReply postReply = PostReply.builder()
+                .postType(PostType.InfoTalk)
                 .member(member)
                 .content(dto.getContent())
                 .status(Status.저장)
+                .mappingId(postComment.getId())
                 .build();
 
-        infoTalkReplyRepository.save(infoTalkReply);
+        postReplyRepository.save(postReply);
 
-        InfoTalk infoTalk = infoTalkComment.getInfoTalk();
+        InfoTalk infoTalk = infoTalkRepository.findById(postComment.getMappingId()).orElseThrow();
 
         int commentNum = infoTalkRepository.countTotalCommentNumber(infoTalk.getId()).intValue();
-        int replyNum = infoTalkRepository.countTotalReplyNumber(infoTalkComment.getId()).intValue();
+        int replyNum = infoTalkRepository.countTotalReplyNumber(postComment.getId()).intValue();
 
         infoTalk.updateCommentSize(commentNum + replyNum);
 
@@ -298,19 +306,20 @@ public class InfoTalkService {
 
     @Transactional
     public void deleteReply(Long id, Member member) {
-        InfoTalkReply infoTalkReply = infoTalkReplyRepository.findById(id)
+        PostReply postReply = postReplyRepository.findById(id)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_REPLY_NOT_FOUND));
 
-        if (member != infoTalkReply.getMember()) {
+        if (member != postReply.getMember()) {
             throw new GeneralException(PostErrorStatus.POST_DELETE_UNAUTHORIZED);
         }
 
-        infoTalkReplyRepository.delete(infoTalkReply);
+        postReplyRepository.delete(postReply);
 
-        InfoTalk infoTalk = infoTalkReply.getInfoTalkComment().getInfoTalk();
+        InfoTalk infoTalk = infoTalkRepository.findById(
+                postCommentRepository.findById(postReply.getMappingId()).orElseThrow().getMappingId()).orElseThrow();
 
         int commentNum = infoTalkRepository.countTotalCommentNumber(infoTalk.getId()).intValue();
-        int replyNum = infoTalkRepository.countTotalReplyNumber(infoTalkReply.getInfoTalkComment().getId()).intValue();
+        int replyNum = infoTalkRepository.countTotalReplyNumber(postReply.getMappingId()).intValue();
 
         infoTalk.updateCommentSize(commentNum + replyNum);
     }
@@ -324,15 +333,17 @@ public class InfoTalkService {
             throw new GeneralException(PostErrorStatus.POST_SET_LOVE_BAD_REQUEST);
         }
 
-        InfoTalkLove infoTalkLove = InfoTalkLove.builder()
-                .infoTalk(infoTalk)
+        PostLove postLove = PostLove.builder()
+                .postType(PostType.InfoTalk)
+                .mappingId(infoTalk.getId())
                 .member(member)
                 .build();
+
 
         infoTalk.plusLove(infoTalk.getLove() + 1);
         infoTalk.setLove(true);
 
-        infoTalkLoveRepository.save(infoTalkLove);
+        postLoveRepository.save(postLove);
     }
 
     @Transactional
@@ -346,12 +357,12 @@ public class InfoTalkService {
             throw new GeneralException(PostErrorStatus.POST_CANCEL_LOVE_BAD_REQUEST);
         }
 
-        InfoTalkLove infoTalkLove = infoTalkLoveRepository.findByInfoTalkAndMember(infoTalk, member);
+        PostLove postLove = postLoveRepository.findPostLoveByPostTypeAndMember(PostType.InfoTalk, member).orElseThrow();
 
         infoTalk.setLove(false);
         infoTalk.plusLove(infoTalk.getLove() - 1);
 
-        infoTalkLoveRepository.delete(infoTalkLove);
+        postLoveRepository.delete(postLove);
 
     }
 
@@ -360,14 +371,17 @@ public class InfoTalkService {
         InfoTalk infoTalk = infoTalkRepository.findById(postId)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
-        if (infoTalkReportRepository.findByInfoTalkAndMember(infoTalk, member) != null) {
+        if (postReportRepository.findPostReportByPostTypeAndPostDetailTypeAndMappingIdAndMember(PostType.InfoTalk,
+                PostDetailType.POST,postId, member).isPresent()) {
             throw new GeneralException(PostErrorStatus.POST_REPORT_BAD_REQUEST);
         } else {
-            InfoTalkReport infoTalkReport = InfoTalkReport.builder()
-                    .infoTalk(infoTalk)
+            PostReport postReport = PostReport.builder()
+                    .postType(PostType.InfoTalk)
+                    .postDetailType(PostDetailType.POST)
+                    .mappingId(postId)
                     .member(member)
                     .build();
-            infoTalkReportRepository.save(infoTalkReport);
+            postReportRepository.save(postReport);
 
             infoTalk.plusReport(infoTalk.getReportNumber() + 1);
 
@@ -380,22 +394,25 @@ public class InfoTalkService {
 
     @Transactional
     public void reportInfoTalkComment(Long commentId, Member member) {
-        InfoTalkComment infoTalkComment = infoTalkCommentRepository.findById(commentId)
+        PostComment postComment = postCommentRepository.findById(commentId)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
-        if (infoTalkCommentReportRepository.findByInfoTalkCommentAndMember(infoTalkComment, member) != null) {
+        if (postReportRepository.findPostReportByPostTypeAndPostDetailTypeAndMappingIdAndMember(PostType.InfoTalk,
+                PostDetailType.COMMENT, commentId, member).isPresent()) {
             throw new GeneralException(PostErrorStatus.POST_COMMENT_REPORT_BAD_REQUEST);
         } else {
-            InfoTalkCommentReport infoTalkCommentReport = InfoTalkCommentReport.builder()
-                    .infoTalkComment(infoTalkComment)
+            PostReport postReport = PostReport.builder()
+                    .postType(PostType.InfoTalk)
+                    .postDetailType(PostDetailType.COMMENT)
+                    .mappingId(commentId)
                     .member(member)
                     .build();
-            infoTalkCommentReportRepository.save(infoTalkCommentReport);
+            postReportRepository.save(postReport);
 
-            infoTalkComment.plusReport(infoTalkComment.getReportNumber() + 1);
+            postComment.plusReport(postComment.getReportNumber() + 1);
 
-            if (infoTalkComment.getReportNumber() >= 10) {
-                infoTalkComment.reported();
+            if (postComment.getReportNumber() >= 10) {
+                postComment.reported();
             }
         }
     }
@@ -404,24 +421,25 @@ public class InfoTalkService {
 
     @Transactional
     public void reportInfoTalkReply(Long replyId, Member member) {
-
-        InfoTalkReply infoTalkReply = infoTalkReplyRepository.findById(replyId)
+        PostReply postReply = postReplyRepository.findById(replyId)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_REPLY_NOT_FOUND));
 
-        if (infoTalkReplyReportRepository.findByInfoTalkReplyAndMember(infoTalkReply, member) != null) {
+        if (postReportRepository.findPostReportByPostTypeAndPostDetailTypeAndMappingIdAndMember(PostType.InfoTalk,
+                PostDetailType.REPLY, replyId, member).isPresent()) {
             throw new GeneralException(PostErrorStatus.POST_REPLY_REPORT_BAD_REQUEST);
         } else {
-            InfoTalkReplyReport infoTalkReplyReport = InfoTalkReplyReport.builder()
-                    .infoTalkReply(infoTalkReply)
+            PostReport postReport = PostReport.builder()
+                    .postType(PostType.InfoTalk)
+                    .postDetailType(PostDetailType.REPLY)
+                    .mappingId(replyId)
                     .member(member)
                     .build();
+            postReportRepository.save(postReport);
 
-            infoTalkReplyReportRepository.save(infoTalkReplyReport);
+            postReply.plusReport(postReply.getReportNumber() + 1);
 
-            infoTalkReply.plusReport(infoTalkReply.getReportNumber() + 1);
-
-            if (infoTalkReply.getReportNumber() >= 10) {
-                infoTalkReply.reported();
+            if (postReply.getReportNumber() >= 10) {
+                postReply.reported();
             }
         }
 

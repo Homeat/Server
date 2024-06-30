@@ -51,7 +51,7 @@ public class HomeRequestDTO {
 
        private String url;
 
-       @NotNull
+       @NotBlank
        private LocalDate date;
     }
 }

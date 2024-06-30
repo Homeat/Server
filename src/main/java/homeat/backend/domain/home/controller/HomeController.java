@@ -21,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class HomeController {
     @Operation(summary = "다음 주 목표 금액 수정 api, 완료")
     @PatchMapping("/next-target-expense")
     public ApiPayload<String> updateNextTargetExpense(
-            @RequestBody HomeRequestDTO.nextTargetExpenseDTO dto,
+            @Valid @RequestBody HomeRequestDTO.nextTargetExpenseDTO dto,
             @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         String message = homeService.updateNextTargetExpense(dto, member);
@@ -81,7 +82,7 @@ public class HomeController {
      */
     @Operation(summary = "지출 추가 api, 완료")
     @PostMapping("/add-expense")
-    public ApiPayload<String> createReceipt(@RequestBody HomeRequestDTO.ReceiptDTO dto,
+    public ApiPayload<String> createReceipt(@Valid @RequestBody HomeRequestDTO.ReceiptDTO dto,
                                             @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         String message = homeService.createReceipt(dto, member);
@@ -139,7 +140,7 @@ public class HomeController {
      */
     @Operation(summary = "과거 지출 추가 api")
     @PostMapping("/calendar/add-expense")
-    public ApiPayload<String> createPastExpense(@RequestBody HomeRequestDTO.PastExpenseDTO dto,
+    public ApiPayload<String> createPastExpense(@Valid @RequestBody HomeRequestDTO.PastExpenseDTO dto,
                                                 @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         String message = homeService.createPastExpense(dto, member);

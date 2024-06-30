@@ -28,7 +28,6 @@ public class FoodRecipe extends BaseEntity {
     private Long id;
 
     private String recipe;
-    private String ingredient;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "foodtalk_id")

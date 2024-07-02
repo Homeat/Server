@@ -113,6 +113,10 @@ public class WeekCheckGenerationService {
                 weekCheckRepository.save(previousWeekCheck);
             }
 
+            if (badge_num >= 10L) {
+                badge_num = 9L;
+            }
+
             Badge_img badge_img = badgeImgRepository.findBadge_imgById(badge_num)
                     .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_BADGE_IMG_NOT_FOUND));
 

@@ -31,9 +31,10 @@ public class LogoutFilter extends OncePerRequestFilter {
 
         try {
             String refreshToken = loginService.validateRefreshToken(request.getCookies());
-            Cookie nullCookie = loginService.revokeRefreshToken(refreshToken);
+//            Cookie nullCookie = loginService.revokeRefreshToken(refreshToken);
+            loginService.revokeRefreshToken(refreshToken);
 
-            response.addCookie(nullCookie);
+//            response.addCookie(nullCookie);
             writeOutput(request, response, HttpServletResponse.SC_OK, ApiPayload.onSuccess(CommonSuccessStatus.OK, null));
         } catch (Exception e) {
             writeOutput(request, response, HttpServletResponse.SC_BAD_REQUEST, ApiPayload.onFailure(CommonErrorStatus.BAD_REQUEST, null));

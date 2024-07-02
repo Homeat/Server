@@ -161,10 +161,10 @@ public class FoodTalkService {
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
-        if (postLoveRepository.findPostLoveByPostTypeAndMember(PostType.FoodTalk, member).isEmpty()) {
-            foodTalk.setLove(false);
-        } else {
+        if (postLoveRepository.findPostLoveByPostTypeAndMappingIdAndMember(PostType.FoodTalk,id, member).isPresent()) {
             foodTalk.setLove(true);
+        } else {
+            foodTalk.setLove(false);
         }
 
         foodTalk.plusView(foodTalk.getView() + 1);
@@ -409,7 +409,7 @@ public class FoodTalkService {
             throw new GeneralException(PostErrorStatus.POST_CANCEL_LOVE_BAD_REQUEST);
         }
 
-        PostLove postLove = postLoveRepository.findPostLoveByPostTypeAndMember(PostType.FoodTalk, member).orElseThrow();
+        PostLove postLove = postLoveRepository.findPostLoveByPostTypeAndMappingIdAndMember(PostType.FoodTalk,id, member).orElseThrow();
 
         foodTalk.setLove(false);
         foodTalk.plusLove(foodTalk.getLove() - 1);

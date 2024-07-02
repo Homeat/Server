@@ -6,7 +6,6 @@ import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -71,11 +70,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Long userId = customUserDetails.getUserId();
 
         String accessToken = loginService.issueAccessToken(userId);
-        Cookie refreshToken = loginService.issueRefreshToken(userId);
+//        Cookie refreshToken = loginService.issueRefreshToken(userId);
+        String refreshToken = loginService.issueRefreshToken(userId);
 
         response.addHeader("Authorization", accessToken);
-        response.addCookie(refreshToken);
-        writeOutput(request, response, HttpServletResponse.SC_OK, ApiPayload.onSuccess(CommonSuccessStatus.OK, null));
+//        response.addCookie(refreshToken);
+        writeOutput(request, response, HttpServletResponse.SC_OK, ApiPayload.onSuccess(CommonSuccessStatus.OK, refreshToken));
     }
 
     @Override

@@ -47,21 +47,25 @@ public class MemberService {
     }
 
     @Transactional
-    public boolean insertMemberByKakao(HttpServletResponse response, MemberRequest.joinKakaoDto requestDto) {
-        boolean isCreated = false;
+    public String insertMemberByKakao(HttpServletResponse response, MemberRequest.joinKakaoDto requestDto) {
         validateKakaoUser(requestDto.getKakaoId(), requestDto.getNickname());
 
+        if (memberRepository.existsByEmailAndLoginType(requestDto.getKakaoId().toString(), LoginType.KAKAO))
+            throw new GeneralException(MemberErrorStatus.EXIST_KAKAO);
+
+        Member newMember = MemberMapper.toKakaoMember(requestDto.getKakaoId().toString());
+        memberRepository.save(newMember);
+
+        return issueToken(newMember.getId(), response);
+    }
+
+    @Transactional
+    public String loginMemberByKakao(HttpServletResponse response, MemberRequest.joinKakaoDto requestDto) {
+        validateKakaoUser(requestDto.getKakaoId(), requestDto.getNickname());
         Member selectedMember = memberRepository.findByEmailAndLoginType(requestDto.getKakaoId().toString(), LoginType.KAKAO)
-                .orElse(null);
+                .orElseThrow(() -> new GeneralException(MemberErrorStatus.KAKAO_NOT_FOUND));
 
-        if (selectedMember == null) {
-            Member newMember = MemberMapper.toKakaoMember(requestDto.getKakaoId().toString());
-            selectedMember = memberRepository.save(newMember);
-            isCreated = true;
-        }
-
-        issueToken(selectedMember.getId(), response);
-        return isCreated;
+        return issueToken(selectedMember.getId(), response);
     }
 
     @Transactional

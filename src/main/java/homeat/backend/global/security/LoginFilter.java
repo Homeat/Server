@@ -31,7 +31,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         this.authenticationManager = authenticationManager;
         this.loginService = loginService;
 
-        setFilterProcessesUrl("/v1/members/login");
+        setFilterProcessesUrl("/v1/members/login/email");
     }
 
     @Getter

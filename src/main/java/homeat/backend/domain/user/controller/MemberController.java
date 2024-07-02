@@ -35,7 +35,7 @@ import javax.validation.Valid;
 public class MemberController {
     private final MemberService memberService;
 
-    @Operation(summary = "이메일 회원가입 api")
+    @Operation(summary = "이메일 회원가입 api", description = "헤더의 Authorization에 access 토큰, 바디(쿠키)에 refresh 토큰 반환")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "생성됨"),
             @ApiResponse(responseCode = "400", description = "COMMON_400 : 잘못된 요청", content = {@Content()}),
@@ -48,24 +48,30 @@ public class MemberController {
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberMapper.toRefreshToken(refreshToken));
     }
 
-    @Operation(summary = "카카오 회원가입(로그인) api", description = "DB에 가입 내역이 존재하는 경우 바로 로그인\n\n(추후 분리될 가능성 있음)")
+    @Operation(summary = "카카오 회원가입 api", description = "헤더의 Authorization에 access 토큰, 바디(쿠키)에 refresh 토큰 반환")
     @PostMapping("/join/kakao")
-    public ApiPayload<?> joinByKakao(HttpServletResponse response,
+    public ApiPayload<MemberResponse.refreshTokenDto> joinByKakao(HttpServletResponse response,
                                      @RequestBody @Valid MemberRequest.joinKakaoDto requestDto) {
-        boolean isCreated = memberService.insertMemberByKakao(response, requestDto);
-
-        if (!isCreated) return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
+        String refreshToken = memberService.insertMemberByKakao(response, requestDto);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberMapper.toRefreshToken(refreshToken));
     }
 
-    @Operation(summary = "로그인 api", description = "헤더의 Authorization에 access 토큰, 쿠키에 refresh 토큰 반환")
+    @Operation(summary = "카카오 로그인 api", description = "헤더의 Authorization에 access 토큰, 바디(쿠키)에 refresh 토큰 반환")
+    @PostMapping("/login/kakao")
+    public ApiPayload<MemberResponse.refreshTokenDto> loginByKakao(HttpServletResponse response,
+                                     @RequestBody @Valid MemberRequest.joinKakaoDto requestDto) {
+        String refreshToken = memberService.loginMemberByKakao(response, requestDto);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberMapper.toRefreshToken(refreshToken));
+    }
+
+    @Operation(summary = "이메일 로그인 api", description = "헤더의 Authorization에 access 토큰, 바디(쿠키)에 refresh 토큰 반환")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "생성됨"),
             @ApiResponse(responseCode = "400", description = "AUTH_4000 : 잘못된 파라미터 형식입니다", content = {@Content()}),
             @ApiResponse(responseCode = "401", description = "AUTH_4010 : 로그인 정보가 잘못되었습니다\n\nAUTH_4011 : 토큰이 존재하지 않습니다\n\nAUTH_4012 : 토큰이 만료되었습니다\n\nAUTH_4013 : 토큰이 올바르지 않습니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요\n\nAUTH_5000 : 서버 출력에 오류가 있습니다. 관리자에게 문의하세요", content = {@Content()})
     })
-    @PostMapping("/login")
+    @PostMapping("/login/email")
     public ApiPayload<?> login(@RequestBody MemberRequest.loginDto request) {
         // Filter에서 작동하지만, Swagger 위해서 틀만 작성
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
@@ -84,7 +90,7 @@ public class MemberController {
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
-    @Operation(summary = "토큰 재발급 api", description = "Cookie에 기존 refresh 토큰 필요, 헤더의 Authorization에 access 토큰, 쿠키에 refresh 토큰 반환")
+    @Operation(summary = "토큰 재발급 api", description = "Cookie에 기존 refresh 토큰 필요, 헤더의 Authorization에 access 토큰, 바디(쿠키)에 refresh 토큰 반환")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "400", description = "AUTH_4000 : 잘못된 파라미터 형식입니다", content = {@Content()}),

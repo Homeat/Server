@@ -38,3 +38,5 @@ out/
 
 ### Querydsl
 /src/main/generated
+
+.env

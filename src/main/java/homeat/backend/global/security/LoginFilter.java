@@ -2,6 +2,7 @@ package homeat.backend.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import homeat.backend.domain.user.dto.CustomUserDetails;
+import homeat.backend.domain.user.service.MemberMapper;
 import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
@@ -75,7 +76,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         response.addHeader("Authorization", accessToken);
 //        response.addCookie(refreshToken);
-        writeOutput(request, response, HttpServletResponse.SC_OK, ApiPayload.onSuccess(CommonSuccessStatus.OK, refreshToken));
+        writeOutput(request, response, HttpServletResponse.SC_OK, ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberMapper.toRefreshToken(refreshToken)));
     }
 
     @Override

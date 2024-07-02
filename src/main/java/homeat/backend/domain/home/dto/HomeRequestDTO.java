@@ -17,7 +17,7 @@ public class HomeRequestDTO {
     // 목표 금액
     @Getter
     public static class nextTargetExpenseDTO {
-        @NotBlank
+        @NotNull
         private Long nextTargetExpense;
     }
 
@@ -51,7 +51,7 @@ public class HomeRequestDTO {
 
        private String url;
 
-       @NotBlank
+       @NotNull
        private LocalDate date;
     }
 }

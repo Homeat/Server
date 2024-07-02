@@ -1,6 +1,5 @@
 package homeat.backend.domain.homeatreport.controller;
 
-import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.global.payload.BaseStatus;
 import homeat.backend.global.payload.ReasonDTO;
 import lombok.AllArgsConstructor;

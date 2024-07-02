@@ -1,7 +1,6 @@
 package homeat.backend.domain.homeatreport.repository.querydsl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.entity.QFinanceData;
 import homeat.backend.domain.homeatreport.entity.QWeekAnalyze;
 import homeat.backend.domain.homeatreport.entity.QWeekCheck;

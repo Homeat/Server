@@ -27,17 +27,19 @@ public class HomeatReportBadgeService {
 
     public List<ReportBadgeResponseDTO> getHomeatBadge(Member member, Long lastWeekId) {
 
+        String nickname = member.getNickname();
+
         Optional<WeekCheck> optionalWeekCheck = weekRepositoryCustom.findWeekByMemberIdOrderByWeekCheckIdDesc(member.getId());
         if (optionalWeekCheck.isEmpty()) {
-            throw new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND);
+            String homeatTier = "홈잇스타터";
+            String message = "REPORT_WEEK_CHECK_NOT+EXIST / " + "HomeatTier: " + homeatTier + " / Nickname: " + nickname;
+            throw new RuntimeException(message);
         }
 
         WeekCheck weekCheck = optionalWeekCheck.get();
         TierStatus tierStatus = weekCheck.getHomeat_tier();
-        String nickname = member.getNickname();
 
 
-        // ** 수정 요망 **
         Pageable pageable = PageRequest.of(0, 9);
         Slice<WeekCheck> weekCheckPage = weekRepositoryCustom.findWeekByMemberIdAsc(member.getId(), lastWeekId, pageable);
         List<ReportBadgeResponseDTO> reportBadgeResponseDTOList = weekCheckPage.getContent().stream()

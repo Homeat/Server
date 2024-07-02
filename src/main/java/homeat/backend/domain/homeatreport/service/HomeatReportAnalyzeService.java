@@ -21,7 +21,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -135,9 +134,12 @@ public class HomeatReportAnalyzeService {
         LocalDate date = LocalDate.of(input_year, input_month, input_day);
         Integer weekIdx = findWeekIdx(date);
 
+
+        String message = "REPORT_WEEK_ANALYZE_NOT_FOUND, " + "AgeRange: " + ageRange + ", Income: " + income_str + ", Gender: " + gender_kor + ", Nickname: " + member.getNickname(); // member는 사용자(비교군의 member가 아님)
         for (Member m : members) {
             WeekAnalyze weekAnalyze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(m.getId(), weekIdx, input_year, input_month)
-                    .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
+                    //.orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
+                    .orElseThrow(() -> new RuntimeException(message));
 
             jipbapPrices += weekAnalyze.getWeek_jipbap_price(); // 멤버들의 집밥 가격 누적
             outPrices += weekAnalyze.getWeek_out_price(); // 멤버들의 외식 배달 가격 누적
@@ -147,7 +149,8 @@ public class HomeatReportAnalyzeService {
         Long average_out = outPrices / members.size(); // 비교군 멤버들의 평균 외식 배달 지출 비용
 
         WeekAnalyze memberWeekAnaylze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(member.getId(), weekIdx, input_year, input_month)
-                .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
+                .orElseThrow(() -> new RuntimeException(message));
+                //.orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
         Long jipbap_save = average_jipbap - memberWeekAnaylze.getWeek_jipbap_price(); // 주어진 멤버가 n째주에 절약한 집밥 비용
         Long out_save = average_out - memberWeekAnaylze.getWeek_out_price(); // 주어진 멤버가 n째주에 절약한 외식 배달 비용
 

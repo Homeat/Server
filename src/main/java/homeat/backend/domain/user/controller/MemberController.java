@@ -44,8 +44,8 @@ public class MemberController {
     @PostMapping("/join/email")
     public ApiPayload<MemberResponse.refreshTokenDto> joinByEmail(HttpServletResponse response,
                                      @RequestBody @Valid MemberRequest.joinEmailDto requestDto) {
-        memberService.insertMemberByEmail(response, requestDto);
-        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
+        String refreshToken = memberService.insertMemberByEmail(response, requestDto);
+        return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, MemberMapper.toRefreshToken(refreshToken));
     }
 
     @Operation(summary = "카카오 회원가입(로그인) api", description = "DB에 가입 내역이 존재하는 경우 바로 로그인\n\n(추후 분리될 가능성 있음)")

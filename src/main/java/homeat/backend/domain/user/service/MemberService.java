@@ -39,11 +39,11 @@ public class MemberService {
     private String kakaoAdminKey;
 
     @Transactional
-    public void insertMemberByEmail(HttpServletResponse response, MemberRequest.joinEmailDto requestDto) {
+    public String insertMemberByEmail(HttpServletResponse response, MemberRequest.joinEmailDto requestDto) {
         Member newMember = MemberMapper.toEmailMember(requestDto.getEmail(), encoder.encode(requestDto.getPassword()));
         Member savedMember = memberRepository.save(newMember);
 
-        issueToken(savedMember.getId(), response);
+        return issueToken(savedMember.getId(), response);
     }
 
     @Transactional
@@ -97,12 +97,14 @@ public class MemberService {
         return sendCodeToEmail(request.getEmail());
     }
 
-    private void issueToken(Long memberId, HttpServletResponse response) {
+    private String issueToken(Long memberId, HttpServletResponse response) {
         String newAccessToken = loginService.issueAccessToken(memberId);
-        Cookie newRefreshToken = loginService.issueRefreshToken(memberId);
+//        Cookie newRefreshToken = loginService.issueRefreshToken(memberId);
+        String newRefreshToken = loginService.issueRefreshToken(memberId);
 
         response.addHeader("Authorization", newAccessToken);
-        response.addCookie(newRefreshToken);
+//        response.addCookie(newRefreshToken);
+        return newRefreshToken;
     }
 
     private String sendCodeToEmail(String email) {

@@ -60,22 +60,4 @@ public class DailyExpenseRepoImpl implements DailyExpenseRepoCST{
                 .fetchOne());
     }
 
-    /**
-     * member_id와 week 시작일/마지막일을 통해 dailyexpense 찾기
-     * @param member_id
-     * @param startOfWeek
-     * @param endOfWeek
-     * @return
-     */
-    @Override
-    public List<DailyExpense> findDailyExpenseByMemberIdAndDateBetween(Long member_id, LocalDate startOfWeek, LocalDate endOfWeek) {
-        QDailyExpense qDailyExpense = QDailyExpense.dailyExpense;
-        QFinanceData qFinanceData = QFinanceData.financeData;
-        return queryFactory.selectFrom(qDailyExpense)
-                .leftJoin(qDailyExpense.financeData, qFinanceData)
-                .where(qFinanceData.member.id.eq(member_id)
-                        .and(qDailyExpense.financeData.id.eq(qFinanceData.id))
-                        .and(qDailyExpense.createdAt.between(startOfWeek.atStartOfDay(), endOfWeek.atStartOfDay())))
-                .fetch();
-    }
 }

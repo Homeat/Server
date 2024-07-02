@@ -34,7 +34,8 @@ public class DailyExpenseRepoImpl implements DailyExpenseRepoCST{
         Long sum = queryFactory
                 .select(dailyExpense.todayJipbapPrice.add(dailyExpense.todayOutPrice).sum())
                 .from(dailyExpense)
-                .where(dailyExpense.createdAt.between(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay().minusNanos(1))
+                .where(dailyExpense.date.goe(startDate)
+                        .and(dailyExpense.date.lt(endDate.plusDays(1)))
                         .and(dailyExpense.financeData.id.eq(financeData.getId())))
                 .fetchOne();
 
@@ -49,7 +50,7 @@ public class DailyExpenseRepoImpl implements DailyExpenseRepoCST{
 
         QDailyExpense dailyExpense = QDailyExpense.dailyExpense;
 
-        StringExpression formattedDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, '%Y-%m-%d')", dailyExpense.createdAt);
+        StringExpression formattedDate = Expressions.stringTemplate("FUNCTION('DATE_FORMAT', {0}, '%Y-%m-%d')", dailyExpense.date);
         String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
         return Optional.ofNullable(queryFactory

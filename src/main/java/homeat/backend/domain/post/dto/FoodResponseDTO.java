@@ -20,6 +20,7 @@ public class FoodResponseDTO {
         private String postNickName;
         private String name;
         private String memo;
+        private String ingredient;
         private Tag tag;
         private Integer love;
         private Integer view;

@@ -1,7 +1,6 @@
 package homeat.backend.domain.post.controller;
 
 import homeat.backend.domain.post.dto.FoodRequestDTO;
-import homeat.backend.domain.post.dto.FoodRequestDTO.FoodRecipeRequest;
 import homeat.backend.domain.post.dto.FoodResponseDTO;
 import homeat.backend.domain.post.dto.FoodResponseDTO.FoodTalkViewDTO;
 import homeat.backend.domain.post.dto.queryDto.FoodTalkSearchCondition;
@@ -11,7 +10,6 @@ import homeat.backend.domain.post.service.FoodTalkService;
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
-import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
 import homeat.backend.global.payload.SlicePayload;
@@ -21,21 +19,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@Validated
 @RestController
 @RequestMapping("/v1/foodTalk")
 @RequiredArgsConstructor
@@ -55,26 +49,17 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<?> saveFoodTalk(@RequestParam(value = "name", required = false) String name,
-                                         @RequestParam(value = "memo", required = false) String memo,
-                                         @RequestParam(value = "tag", required = false) Tag tag,
-                                         @ModelAttribute List<MultipartFile> foodPictures,
-                                         @ModelAttribute FoodRecipeRequest foodRecipeRequest,
+    public ApiPayload<?> saveFoodTalk(@RequestParam(value = "name") String name,
+                                         @RequestParam(value = "memo") String memo,
+                                         @RequestParam(value = "tag") Tag tag,
+                                         @RequestParam(value = "ingredient", required = false) String ingredient,
+                                         @RequestPart List<MultipartFile> foodPictures,
+                                         @Valid @ModelAttribute FoodRequestDTO.FoodRecipeRequest foodRecipeRequest,
                                          @AuthenticationPrincipal CustomUserDetails authentication) {
-        if (name == null || name.isEmpty()) {
-            throw new GeneralException(PostErrorStatus.POST_NAME_PAYMENT_REQUIRED);
-        }
-        if (memo == null || memo.isEmpty()) {
-            throw new GeneralException(PostErrorStatus.POST_MEMO_PAYMENT_REQUIRED);
-        }
-        if (tag == null) {
-            throw new GeneralException(PostErrorStatus.POST_TAG_PAYMENT_REQUIRED);
-        }
-        if (foodPictures == null || foodPictures.isEmpty()) {
-            throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
-        }
+
+
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        foodTalkService.saveFoodTalk(name, memo, tag, foodPictures, member,foodRecipeRequest);
+        foodTalkService.saveFoodTalk(name, memo, tag,ingredient, foodPictures, member,foodRecipeRequest);
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
@@ -90,7 +75,7 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @DeleteMapping("{id}")
-    public ApiPayload<?> deleteFoodTalk(@PathVariable("id") Long id,
+    public ApiPayload<?> deleteFoodTalk(@PathVariable("id") @Min(value = 0, message = "최소값은 0입니다.") Long id,
                                         @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         foodTalkService.deleteFoodTalk(id, member);
@@ -116,7 +101,7 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "404", description = "POST_4040 : 존재하지 않는 게시물입니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
-    public ApiPayload<FoodResponseDTO.FoodTalkViewDTO> getFoodTalk(@PathVariable("id") Long id,
+    public ApiPayload<FoodResponseDTO.FoodTalkViewDTO> getFoodTalk(@PathVariable("id") @Min(value = 0, message = "최소값은 0입니다.") Long id,
                                                                    @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         FoodTalkViewDTO result = foodTalkService.getFoodTalk(id, member);
@@ -134,7 +119,7 @@ public class FoodTalkController {
     })
     @GetMapping("/posts/latest")
     public SlicePayload<FoodTalkTotalView> getFoodTalkLatest(FoodTalkSearchCondition condition,
-                                                             @RequestParam Long lastFoodTalkId) {
+                                                             @RequestParam @Min(value = 0, message = "최소값은 0입니다.") Long lastFoodTalkId) {
         Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkLatest(condition, lastFoodTalkId);
         return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
@@ -150,7 +135,7 @@ public class FoodTalkController {
     })
     @GetMapping("/posts/oldest")
     public SlicePayload<FoodTalkTotalView> getFoodTalkOldest(FoodTalkSearchCondition condition,
-                                                             @RequestParam Long OldestFoodTalkId) {
+                                                             @RequestParam @Min(value = 0, message = "최소값은 0입니다.") Long OldestFoodTalkId) {
         Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkOldest(condition, OldestFoodTalkId);
         return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
@@ -165,8 +150,8 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @GetMapping("/posts/love")
-    public SlicePayload<FoodTalkTotalView> getFoodTalkByLove(FoodTalkSearchCondition condition, @RequestParam Long id,
-                                                             @RequestParam int love) {
+    public SlicePayload<FoodTalkTotalView> getFoodTalkByLove(FoodTalkSearchCondition condition, @RequestParam @Min(value = 0, message = "최소값은 0입니다.") Long id,
+                                                             @RequestParam @Min(value = 0, message = "최소값은 0입니다.") int love) {
         Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkByLove(condition, id, love);
         return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
@@ -181,8 +166,8 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @GetMapping("/posts/view")
-    public SlicePayload<FoodTalkTotalView> getFoodTalkByView(FoodTalkSearchCondition condition, @RequestParam Long id,
-                                                             @RequestParam int view) {
+    public SlicePayload<FoodTalkTotalView> getFoodTalkByView(FoodTalkSearchCondition condition, @RequestParam @Min(value = 0, message = "최소값은 0입니다.") Long id,
+                                                             @RequestParam @Min(value = 0, message = "최소값은 0입니다.") int view) {
         Slice<FoodTalkTotalView> result = foodTalkService.getFoodTalkByView(condition, id, view);
         return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
@@ -216,7 +201,7 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @DeleteMapping("/comment/{commentId}")
-    public ApiPayload<?> deleteComment(@PathVariable("commentId") Long commentId,
+    public ApiPayload<?> deleteComment(@PathVariable("commentId") @Min(value = 0, message = "최소값은 0입니다.") Long commentId,
                                        @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         foodTalkService.deleteComment(commentId, member);
@@ -252,7 +237,7 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @DeleteMapping("/reply/{replyId}")
-    public ApiPayload<?> deleteReply(@PathVariable("replyId") Long id,
+    public ApiPayload<?> deleteReply(@PathVariable("replyId") @Min(value = 0, message = "최소값은 0입니다.") Long id,
                                      @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         foodTalkService.deleteReply(id, member);
@@ -270,7 +255,7 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping("/love/{id}")
-    public ApiPayload<?> saveLove(@PathVariable("id") Long id,
+    public ApiPayload<?> saveLove(@PathVariable("id") @Min(value = 0, message = "최소값은 0입니다.") Long id,
                                   @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         foodTalkService.saveLove(id, member);
@@ -288,7 +273,7 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @DeleteMapping("/love/{id}")
-    public ApiPayload<?> deleteLove(@PathVariable("id") Long id,
+    public ApiPayload<?> deleteLove(@PathVariable("id") @Min(value = 0, message = "최소값은 0입니다.") Long id,
                                     @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         foodTalkService.deleteLove(id, member);
@@ -306,7 +291,7 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping("/report/post/{postId})")
-    public ApiPayload<?> reportFoodTalk(@PathVariable("postId") Long postId,
+    public ApiPayload<?> reportFoodTalk(@PathVariable("postId") @Min(value = 0, message = "최소값은 0입니다.") Long postId,
                                         @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         foodTalkService.reportFoodTalk(postId, member);
@@ -324,7 +309,7 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping("/report/comment/{commentId})")
-    public ApiPayload<?> reportFoodTalkComment(@PathVariable("commentId") Long commentId,
+    public ApiPayload<?> reportFoodTalkComment(@PathVariable("commentId") @Min(value = 0, message = "최소값은 0입니다.") Long commentId,
                                         @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         foodTalkService.reportFoodTalkComment(commentId, member);
@@ -342,7 +327,7 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping("/report/reply/{replyId})")
-    public ApiPayload<?> reportFoodTalkReply(@PathVariable("replyId") Long replyId,
+    public ApiPayload<?> reportFoodTalkReply(@PathVariable("replyId") @Min(value = 0, message = "최소값은 0입니다.") Long replyId,
                                                @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         foodTalkService.reportFoodTalkReply(replyId, member);

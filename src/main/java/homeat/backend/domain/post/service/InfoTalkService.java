@@ -130,7 +130,7 @@ public class InfoTalkService {
         InfoTalk infoTalk = infoTalkRepository.findById(id)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
-        if (postLoveRepository.findPostLoveByPostTypeAndMember(PostType.InfoTalk, member).isEmpty()) {
+        if (postLoveRepository.findPostLoveByPostTypeAndMappingIdAndMember(PostType.InfoTalk,id, member).isEmpty()) {
             infoTalk.setLove(false);
         } else {
             infoTalk.setLove(true);
@@ -357,7 +357,7 @@ public class InfoTalkService {
             throw new GeneralException(PostErrorStatus.POST_CANCEL_LOVE_BAD_REQUEST);
         }
 
-        PostLove postLove = postLoveRepository.findPostLoveByPostTypeAndMember(PostType.InfoTalk, member).orElseThrow();
+        PostLove postLove = postLoveRepository.findPostLoveByPostTypeAndMappingIdAndMember(PostType.InfoTalk,id, member).orElseThrow();
 
         infoTalk.setLove(false);
         infoTalk.plusLove(infoTalk.getLove() - 1);

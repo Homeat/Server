@@ -60,7 +60,7 @@ public class FoodTalkService {
 
     // 게시글 작성
     @Transactional
-    public void saveFoodTalk(String name, String memo, Tag tag, List<MultipartFile> multipartFiles, Member member, FoodRecipeRequest foodRecipeRequest) {
+    public void saveFoodTalk(String name, String memo, Tag tag,String ingredient, List<MultipartFile> multipartFiles, Member member, FoodRecipeRequest foodRecipeRequest) {
 
         List<String> imgPaths = s3Service.upload(multipartFiles);
         System.out.println("IMG 경로들 : " + imgPaths);
@@ -69,6 +69,7 @@ public class FoodTalkService {
                 .member(member)
                 .name(name)
                 .memo(memo)
+                .ingredient(ingredient)
                 .tag(tag)
                 .status(Status.저장)
                 .build();
@@ -95,7 +96,6 @@ public class FoodTalkService {
                 FoodRecipe foodRecipe = FoodRecipe.builder()
                         .foodTalk(foodTalk)
                         .recipe(foodRecipeDTO.getRecipe())
-                        .ingredient(foodRecipeDTO.getIngredient())
                         .build();
                 foodRecipeRepository.save(foodRecipe);
 
@@ -161,10 +161,10 @@ public class FoodTalkService {
 
         FoodTalk foodTalk = foodTalkRepository.findById(id)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
-        if (postLoveRepository.findPostLoveByPostTypeAndMember(PostType.FoodTalk, member).isEmpty()) {
-            foodTalk.setLove(false);
-        } else {
+        if (postLoveRepository.findPostLoveByPostTypeAndMappingIdAndMember(PostType.FoodTalk,id, member).isPresent()) {
             foodTalk.setLove(true);
+        } else {
+            foodTalk.setLove(false);
         }
 
         foodTalk.plusView(foodTalk.getView() + 1);
@@ -188,7 +188,6 @@ public class FoodTalkService {
                     return FoodTalkRecipeViewDTO.builder()
                             .step(cnt.getAndIncrement())
                             .recipe(recipe.getRecipe())
-                            .ingredient(recipe.getIngredient())
                             .foodRecipeImages(recipePictures)
                             .build();
                 })
@@ -233,6 +232,7 @@ public class FoodTalkService {
                 .postNickName(member.getNickname())
                 .name(foodTalk.getName())
                 .memo(foodTalk.getMemo())
+                .ingredient(foodTalk.getIngredient())
                 .tag(foodTalk.getTag())
                 .love(foodTalk.getLove())
                 .view(foodTalk.getView())
@@ -409,7 +409,7 @@ public class FoodTalkService {
             throw new GeneralException(PostErrorStatus.POST_CANCEL_LOVE_BAD_REQUEST);
         }
 
-        PostLove postLove = postLoveRepository.findPostLoveByPostTypeAndMember(PostType.FoodTalk, member).orElseThrow();
+        PostLove postLove = postLoveRepository.findPostLoveByPostTypeAndMappingIdAndMember(PostType.FoodTalk,id, member).orElseThrow();
 
         foodTalk.setLove(false);
         foodTalk.plusLove(foodTalk.getLove() - 1);

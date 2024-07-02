@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostLoveRepository extends JpaRepository<PostLove, Long> {
-    Optional<PostLove> findPostLoveByPostTypeAndMember(PostType postType, Member member);
+    Optional<PostLove> findPostLoveByPostTypeAndMappingIdAndMember(PostType postType,Long mappingId, Member member);
 
     List<PostLove> findPostLoveByPostTypeAndMappingId(PostType postType, Long mappingId);
 }

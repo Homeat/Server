@@ -2,18 +2,22 @@ package homeat.backend.domain.home.dto;
 
 import homeat.backend.domain.home.entity.CostType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 
 public class HomeRequestDTO {
 
     // 목표 금액
     @Getter
     public static class nextTargetExpenseDTO {
-        @NotBlank
+        @NotNull
         private Long nextTargetExpense;
     }
 
@@ -30,5 +34,24 @@ public class HomeRequestDTO {
         private String memo;
 
         private String url;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PastExpenseDTO {
+       @Min(value = 0)
+       private Long money;
+
+       @Schema(example = "장보기 / 외식비 / 배달비")
+       private CostType type;
+
+       @NotBlank
+       private String memo;
+
+       private String url;
+
+       @NotNull
+       private LocalDate date;
     }
 }

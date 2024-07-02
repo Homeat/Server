@@ -37,6 +37,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -98,7 +99,7 @@ public class HomeService {
         Long thisWeekGoalPrice = thisWeekCheck.getGoal_price();
 
         int badgeCount = thisMonthFinanceData.getNum_homeat_badge().intValue();
-        badgeCount = Math.min(badgeCount, 9);
+        badgeCount = Math.min(Math.max(badgeCount, 1), 9);  // 0이면 1로, 최대 9로 설정
         Badge_img badgeImg = badgeImgRepository.findBadge_imgById((long) badgeCount)
                 .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_BADGE_IMG_NOT_FOUND));
 
@@ -245,6 +246,7 @@ public class HomeService {
                             .financeData(financeData)
                             .todayJipbapPrice(0)
                             .todayOutPrice(0)
+                            .date(todayDate)
                             .build());
 
             // finance, daily 실시간 반영(receipt 추가되는)
@@ -257,7 +259,6 @@ public class HomeService {
             }
 
             dailyExpenseRepo.save(dailyExpense);
-
 
             // receipt 추출
             Receipt receipt = Receipt.builder()
@@ -297,23 +298,27 @@ public class HomeService {
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터(finance)가 없습니다."));
 
         // DailyExpense 조회
-        List<DailyExpense> calendarData = dailyExpenseRepo.findByFinanceDataIdOrderByCreatedAtAsc(financeData.getId());
+        List<DailyExpense> calendarData = dailyExpenseRepo.findByFinanceDataIdOrderByDate(financeData.getId());
 
         // 조회된 데이터를 DTO로 변환
-        List<HomeResponseDTO.CalendarResultDTO> result = new ArrayList<>();
-        for (DailyExpense data : calendarData) {
-            long total = data.getTodayOutPrice() + data.getTodayJipbapPrice();
-            if (total != 0) {
-                int jipbapPricePercent = (int)((double)data.getTodayJipbapPrice() / total * 100);
-                int outPricePercent = 100 - jipbapPricePercent;
-                HomeResponseDTO.CalendarResultDTO dto = HomeResponseDTO.CalendarResultDTO.builder()
-                        .date(data.getCreatedAt().toLocalDate())
-                        .todayJipbapPricePercent(jipbapPricePercent)
-                        .todayOutPricePercent(outPricePercent)
-                        .build();
-                result.add(dto);
-            }
-        }
+        List<HomeResponseDTO.CalendarResultDTO> result = calendarData.stream()
+                .map(data -> {
+                    long total = data.getTodayOutPrice() + data.getTodayJipbapPrice();
+                    if (total != 0) {
+                        int jipbapPricePercent = (int) ((double) data.getTodayJipbapPrice() / total * 100);
+                        int outPricePercent = 100 - jipbapPricePercent;
+                        return HomeResponseDTO.CalendarResultDTO.builder()
+                                .date(data.getDate())
+                                .todayJipbapPricePercent(jipbapPricePercent)
+                                .todayOutPricePercent(outPricePercent)
+                                .build();
+                    } else {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
         return result;
     }
 
@@ -321,64 +326,116 @@ public class HomeService {
      * 캘린더 하루 지출 확인
      */
     public HomeResponseDTO.CalendarDayResultDTO getCalendarDay(String year, String month, String day, Member member) {
-        LocalDateTime startDateTime = LocalDateTime.of(Integer.parseInt(year), Integer.parseInt(month), 1, 0, 0);
-        LocalDateTime endDateTime = startDateTime.plusMonths(2).minusSeconds(1);
+        LocalDate targetDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
+
+        // 오늘 날짜
+        LocalDate today = LocalDate.now();
+
+        LocalDateTime startOfWeek = targetDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay();
+        LocalDateTime endOfWeek = targetDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY)).atTime(23, 59, 59);
 
         // FinanceData 엔티티 조회
-        List<FinanceData> financeDataList = financeDataRepository.findByMember_IdAndCreatedAtBetween(member.getId(), startDateTime, endDateTime);
-        if (financeDataList.size() == 0) {
-            return HomeResponseDTO.CalendarDayResultDTO.builder()
-                    .message("조회할 수 없는 날짜입니다.")
-                    .build();
-        }
-        // 선택 날짜의 주 계산
-        LocalDate targetDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
-        LocalDateTime startOfWeek = targetDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).atStartOfDay();
-        LocalDateTime endOfWeek = targetDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY)).atTime(23, 59, 59);
-
-        FinanceData financeData;
-        if (startOfWeek.getMonth() != endOfWeek.getMonth()) {
-            financeData = financeDataList.size() > 1 ? financeDataList.get(1) : financeDataList.get(0);
-        } else {
-            financeData = financeDataList.get(0);
-        }
+        FinanceData financeData = financeDataRepository.findByMemberAndYearAndMonth(member, year, month)
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터가 없습니다."));
 
         // Week 엔티티 조회
         WeekCheck weekCheck = weekCheckRepository.findFirstByFinanceDataAndCreatedAtBetween(financeData, startOfWeek, endOfWeek)
                 .orElseThrow(() -> new NoSuchElementException("해당 Week 데이터가 없습니다."));
 
-        // 일요일부터 선택 날짜까지의 DailyExpense 모두 조회
-        List<DailyExpense> dailyExpenses = dailyExpenseRepo.findDailyExpenseByMemberIdAndDateBetween(member.getId(), startOfWeek.toLocalDate(), targetDate);
+        // 해당 target 날짜 주간의 월요일 ~ 타겟날짜까지
+        List<DailyExpense> weeklyExpenses = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDateBetween(financeData.getId(), startOfWeek.toLocalDate(), targetDate);
 
-        long totalUsedPrice = 0L;
-        for (DailyExpense dailyExpense : dailyExpenses) {
-            totalUsedPrice += dailyExpense.getTodayJipbapPrice();
-            totalUsedPrice += dailyExpense.getTodayOutPrice();
-        }
+        long totalUsedPrice = weeklyExpenses.stream()
+                .mapToLong(expense -> expense.getTodayJipbapPrice() + expense.getTodayOutPrice())
+                .sum();
 
+        Optional<DailyExpense> targetExpenseOpt = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), targetDate);
 
-        // 해당 날짜의 DailyExpense 엔티티 조회
-        Optional<DailyExpense> todayExpenseOpt = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), targetDate);
+        // 해당 날짜 집밥 및 배달/외식 값
+        long todayJipbapPrice = targetExpenseOpt.map(DailyExpense::getTodayJipbapPrice).orElse(0L);
+        long todayOutPrice = targetExpenseOpt.map(DailyExpense::getTodayOutPrice).orElse(0L);
 
-        // DailyExpense 존재하면 값 반환, 없으면 0
-        long todayJipbapPrice = todayExpenseOpt.map(DailyExpense::getTodayJipbapPrice).orElse(0L);
-        long todayOutPrice = todayExpenseOpt.map(DailyExpense::getTodayOutPrice).orElse(0L);
-
-        // 오늘 날짜는 반영이 안될 수 있으므로
-        totalUsedPrice += todayJipbapPrice + todayOutPrice;
-
-        // 총 사용 금액과 목표 금액
         long remainingGoalPrice = weekCheck.getGoal_price() - totalUsedPrice;
 
-        HomeResponseDTO.CalendarDayResultDTO result = HomeResponseDTO.CalendarDayResultDTO.builder()
+        boolean canAddExpense = !targetDate.isAfter(today) && !targetDate.isBefore(today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)));
+
+        return HomeResponseDTO.CalendarDayResultDTO.builder()
                 .date(targetDate)
                 .todayJipbapPrice(todayJipbapPrice)
                 .todayOutPrice(todayOutPrice)
                 .remainingGoal(remainingGoalPrice)
+                .canAddExpense(canAddExpense)
                 .message("")
                 .build();
+    }
 
-        return result;
+    /**
+     * 캘린더 세부 지출 확인
+     */
+    public List<HomeResponseDTO.CalendarDayDetailsResultDTO> getCalendarDayDetails(String year, String month, String day, Long remainingGoal, Member member) {
+        FinanceData financeData = financeDataRepository.findByMemberAndYearAndMonth(member, year, month)
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터가 없습니다."));
+
+        LocalDate targetDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
+
+        DailyExpense dailyExpense = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), targetDate)
+                .orElseThrow(() -> new NoSuchElementException("해당 날짜의 지출 데이터가 없습니다."));
+
+        List<Receipt> receipts = receiptRepo.findByDailyExpenseIdOrderByIdAsc(dailyExpense.getId());
+
+        long currentRemainingGoal = remainingGoal;
+        List<HomeResponseDTO.CalendarDayDetailsResultDTO> details = new ArrayList<>();
+        for (Receipt receipt : receipts) {
+            long usedMoney = receipt.getExpense();
+            HomeResponseDTO.CalendarDayDetailsResultDTO detail = HomeResponseDTO.CalendarDayDetailsResultDTO.builder()
+                    .type(receipt.getCostType())
+                    .memo(receipt.getMemo())
+                    .usedMoney(usedMoney)
+                    .remainingGoal(currentRemainingGoal)
+                    .build();
+            currentRemainingGoal += usedMoney;
+            details.add(detail);
+        }
+
+        return details;
+    }
+
+
+    /**
+     * 과거 지출 추가
+     */
+    @Transactional
+    public String createPastExpense(HomeRequestDTO.PastExpenseDTO dto, Member member) {
+        LocalDate now = LocalDate.now();
+        LocalDate startOfWeek = now.with(DayOfWeek.MONDAY);
+        LocalDate targetDate = dto.getDate();
+
+        if (targetDate.isAfter(now) || targetDate.isBefore(startOfWeek)) throw new IllegalArgumentException("해당 날짜에는 지출 데이터를 추가할 수 없습니다.");
+
+        FinanceData financeData = financeDataRepository.findByMemberAndYearAndMonth(member, String.valueOf(dto.getDate().getYear()), String.valueOf(dto.getDate().getMonthValue()))
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버는 월 데이터가 없습니다."));
+
+        // 해당 날짜에 기록이 없었다면 row 추가
+        DailyExpense dailyExpense = dailyExpenseRepo.findDailyExpenseByFinanceDataIdAndDate(financeData.getId(), dto.getDate())
+                .orElseGet(() -> DailyExpense.builder()
+                        .financeData(financeData)
+                        .date(targetDate)
+                        .todayJipbapPrice(0)
+                        .todayOutPrice(0)
+                        .build());
+
+        if (dto.getType() == CostType.장보기) {
+            financeData.addJipbapPrice(dto.getMoney());
+            dailyExpense.addJipbapPrice(dto.getMoney());
+        } else if (dto.getType() == CostType.배달비 || dto.getType() == CostType.외식비) {
+            financeData.addOutPrice(dto.getMoney());
+            dailyExpense.addOutPrice(dto.getMoney());
+        }
+
+        dailyExpenseRepo.save(dailyExpense);
+        financeDataRepository.save(financeData);
+
+        return "과거 지출 데이터 저장 성공";
     }
 
     /**

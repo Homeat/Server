@@ -188,7 +188,6 @@ public class FoodTalkService {
                     return FoodTalkRecipeViewDTO.builder()
                             .step(cnt.getAndIncrement())
                             .recipe(recipe.getRecipe())
-                            .ingredient(recipe.getIngredient())
                             .foodRecipeImages(recipePictures)
                             .build();
                 })
@@ -233,6 +232,7 @@ public class FoodTalkService {
                 .postNickName(member.getNickname())
                 .name(foodTalk.getName())
                 .memo(foodTalk.getMemo())
+                .ingredient(foodTalk.getIngredient())
                 .tag(foodTalk.getTag())
                 .love(foodTalk.getLove())
                 .view(foodTalk.getView())

@@ -42,7 +42,7 @@ public class MemberController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping("/join/email")
-    public ApiPayload<?> joinByEmail(HttpServletResponse response,
+    public ApiPayload<MemberResponse.refreshTokenDto> joinByEmail(HttpServletResponse response,
                                      @RequestBody @Valid MemberRequest.joinEmailDto requestDto) {
         memberService.insertMemberByEmail(response, requestDto);
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
@@ -92,9 +92,9 @@ public class MemberController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요\n\nAUTH_5000 : 서버 출력에 오류가 있습니다. 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping("/reissue")
-    public ApiPayload<?> reissue(HttpServletRequest request, HttpServletResponse response) {
-        memberService.reissueToken(request, response);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    public ApiPayload<MemberResponse.refreshTokenDto> reissue(HttpServletRequest request, HttpServletResponse response) {
+        String newRefreshToken = memberService.reissueToken(request, response);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberMapper.toRefreshToken(newRefreshToken));
     }
 
     @Operation(summary = "비밀번호 찾기(인증 후, 재설정) api")

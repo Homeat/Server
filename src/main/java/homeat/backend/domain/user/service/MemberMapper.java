@@ -19,6 +19,12 @@ public class MemberMapper {
                 .build();
     }
 
+    public static MemberResponse.refreshTokenDto toRefreshToken(String refreshToken) {
+        return MemberResponse.refreshTokenDto.builder()
+                .refreshToken(refreshToken)
+                .build();
+    }
+
     public static MemberResponse.emailCheckDto toEmailCheck(String authCode) {
         return MemberResponse.emailCheckDto.builder()
                 .authCode(authCode)

@@ -65,15 +65,16 @@ public class MemberService {
     }
 
     @Transactional
-    public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
+    public String reissueToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = loginService.validateRefreshToken(request.getCookies());
 
         Long userId = jwtUtil.getUserId(refreshToken);
         String newAccessToken = loginService.issueAccessToken(userId);
-        Cookie newRefreshToken = loginService.reissueRefreshToken(userId, refreshToken);
+//        Cookie newRefreshToken = loginService.reissueRefreshToken(userId, refreshToken);
+        String newRefreshToken = loginService.reissueRefreshToken(userId, refreshToken);
 
         response.addHeader("Authorization", newAccessToken);
-        response.addCookie(newRefreshToken);
+        return newRefreshToken;
     }
 
     @Transactional

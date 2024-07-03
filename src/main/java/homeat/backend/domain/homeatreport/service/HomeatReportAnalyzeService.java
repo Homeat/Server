@@ -124,9 +124,14 @@ public class HomeatReportAnalyzeService {
             gender_kor = " ";
         }
 
+        String message = "REPORT_WEEK_ANALYZE_NOT_FOUND, " + "AgeRange: " + ageRange + ", Income: " + income_str + ", Gender: " + gender_kor + ", Nickname: " + member.getNickname(); // member는 사용자(비교군의 member가 아님)
+
         // 비교군 설정
+        // 수정 필요: 멤버 그룹이 없는 것은 오류가 아니므로 exception 처리하면 안됨.
         List<Member> members = memberRepository.findMemberByCriteria(ageIndex, gender, income)
-                .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_MEMBER_GROUP_NOT_FOUND)); // 특정 멤버의 연령대, 성별, 수입이 비슷한 멤버들
+                .orElseThrow(() -> new NotFoundException(message));
+                //.orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_MEMBER_GROUP_NOT_FOUND)); // 특정 멤버의 연령대, 성별, 수입이 비슷한 멤버들
+
         System.out.println("조건 충족 멤버 수: " + members.size());
         System.out.println(ageIndex*10 + "대 " + income_str + gender_kor);
 
@@ -138,7 +143,6 @@ public class HomeatReportAnalyzeService {
         Integer weekIdx = findWeekIdx(date);
 
 
-        String message = "REPORT_WEEK_ANALYZE_NOT_FOUND, " + "AgeRange: " + ageRange + ", Income: " + income_str + ", Gender: " + gender_kor + ", Nickname: " + member.getNickname(); // member는 사용자(비교군의 member가 아님)
         for (Member m : members) {
             WeekAnalyze weekAnalyze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(m.getId(), weekIdx, input_year, input_month)
                     //.orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));

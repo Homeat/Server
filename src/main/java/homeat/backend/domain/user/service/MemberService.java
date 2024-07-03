@@ -39,41 +39,46 @@ public class MemberService {
     private String kakaoAdminKey;
 
     @Transactional
-    public void insertMemberByEmail(HttpServletResponse response, MemberRequest.joinEmailDto requestDto) {
+    public String insertMemberByEmail(HttpServletResponse response, MemberRequest.joinEmailDto requestDto) {
         Member newMember = MemberMapper.toEmailMember(requestDto.getEmail(), encoder.encode(requestDto.getPassword()));
         Member savedMember = memberRepository.save(newMember);
 
-        issueToken(savedMember.getId(), response);
+        return issueToken(savedMember.getId(), response);
     }
 
     @Transactional
-    public boolean insertMemberByKakao(HttpServletResponse response, MemberRequest.joinKakaoDto requestDto) {
-        boolean isCreated = false;
+    public String insertMemberByKakao(HttpServletResponse response, MemberRequest.joinKakaoDto requestDto) {
         validateKakaoUser(requestDto.getKakaoId(), requestDto.getNickname());
 
-        Member selectedMember = memberRepository.findByEmailAndLoginType(requestDto.getKakaoId().toString(), LoginType.KAKAO)
-                .orElse(null);
+        if (memberRepository.existsByEmailAndLoginType(requestDto.getKakaoId().toString(), LoginType.KAKAO))
+            throw new GeneralException(MemberErrorStatus.EXIST_KAKAO);
 
-        if (selectedMember == null) {
-            Member newMember = MemberMapper.toKakaoMember(requestDto.getKakaoId().toString());
-            selectedMember = memberRepository.save(newMember);
-            isCreated = true;
-        }
+        Member newMember = MemberMapper.toKakaoMember(requestDto.getKakaoId().toString());
+        memberRepository.save(newMember);
 
-        issueToken(selectedMember.getId(), response);
-        return isCreated;
+        return issueToken(newMember.getId(), response);
     }
 
     @Transactional
-    public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
+    public String loginMemberByKakao(HttpServletResponse response, MemberRequest.joinKakaoDto requestDto) {
+        validateKakaoUser(requestDto.getKakaoId(), requestDto.getNickname());
+        Member selectedMember = memberRepository.findByEmailAndLoginType(requestDto.getKakaoId().toString(), LoginType.KAKAO)
+                .orElseThrow(() -> new GeneralException(MemberErrorStatus.KAKAO_NOT_FOUND));
+
+        return issueToken(selectedMember.getId(), response);
+    }
+
+    @Transactional
+    public String reissueToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = loginService.validateRefreshToken(request.getCookies());
 
         Long userId = jwtUtil.getUserId(refreshToken);
         String newAccessToken = loginService.issueAccessToken(userId);
-        Cookie newRefreshToken = loginService.reissueRefreshToken(userId, refreshToken);
+//        Cookie newRefreshToken = loginService.reissueRefreshToken(userId, refreshToken);
+        String newRefreshToken = loginService.reissueRefreshToken(userId, refreshToken);
 
         response.addHeader("Authorization", newAccessToken);
-        response.addCookie(newRefreshToken);
+        return newRefreshToken;
     }
 
     @Transactional
@@ -96,12 +101,14 @@ public class MemberService {
         return sendCodeToEmail(request.getEmail());
     }
 
-    private void issueToken(Long memberId, HttpServletResponse response) {
+    private String issueToken(Long memberId, HttpServletResponse response) {
         String newAccessToken = loginService.issueAccessToken(memberId);
-        Cookie newRefreshToken = loginService.issueRefreshToken(memberId);
+//        Cookie newRefreshToken = loginService.issueRefreshToken(memberId);
+        String newRefreshToken = loginService.issueRefreshToken(memberId);
 
         response.addHeader("Authorization", newAccessToken);
-        response.addCookie(newRefreshToken);
+//        response.addCookie(newRefreshToken);
+        return newRefreshToken;
     }
 
     private String sendCodeToEmail(String email) {

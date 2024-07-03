@@ -34,25 +34,45 @@ public class LoginService {
         return "Bearer " + accessToken;
     }
 
+//    @Transactional
+//    public Cookie issueRefreshToken(Long userId) {
+//        String refreshToken = jwtUtil.createJwt("refresh", userId, refreshExpirationTime*1000L);
+//        saveRefreshToken(userId, refreshToken, refreshExpirationTime);
+//        return createCookie("refresh", refreshToken, refreshExpirationTime.intValue());
+//    }
+//
+//    @Transactional
+//    public Cookie reissueRefreshToken(Long userId, String refreshToken) {
+//        refreshRepository.deleteByRefreshToken(refreshToken);
+//        String newRefreshToken = jwtUtil.createJwt("refresh", userId, refreshExpirationTime*1000L);
+//        saveRefreshToken(userId, newRefreshToken, refreshExpirationTime);
+//        return createCookie("refresh", newRefreshToken, refreshExpirationTime.intValue());
+//    }
+//
+//    @Transactional
+//    public Cookie revokeRefreshToken(String refreshToken) {
+//        refreshRepository.deleteByRefreshToken(refreshToken);
+//        return createCookie("refresh", null, 0);
+//    }
+
     @Transactional
-    public Cookie issueRefreshToken(Long userId) {
+    public String issueRefreshToken(Long userId) {
         String refreshToken = jwtUtil.createJwt("refresh", userId, refreshExpirationTime*1000L);
         saveRefreshToken(userId, refreshToken, refreshExpirationTime);
-        return createCookie("refresh", refreshToken, refreshExpirationTime.intValue());
+        return refreshToken;
     }
 
     @Transactional
-    public Cookie reissueRefreshToken(Long userId, String refreshToken) {
+    public String reissueRefreshToken(Long userId, String refreshToken) {
         refreshRepository.deleteByRefreshToken(refreshToken);
         String newRefreshToken = jwtUtil.createJwt("refresh", userId, refreshExpirationTime*1000L);
         saveRefreshToken(userId, newRefreshToken, refreshExpirationTime);
-        return createCookie("refresh", newRefreshToken, refreshExpirationTime.intValue());
+        return newRefreshToken;
     }
 
     @Transactional
-    public Cookie revokeRefreshToken(String refreshToken) {
+    public void revokeRefreshToken(String refreshToken) {
         refreshRepository.deleteByRefreshToken(refreshToken);
-        return createCookie("refresh", null, 0);
     }
 
     public String validateRefreshToken(Cookie[] cookies) {
@@ -92,13 +112,13 @@ public class LoginService {
         refreshRepository.save(newRefresh);
     }
 
-    private Cookie createCookie(String key, String value, int expiry) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(expiry);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-
-        return cookie;
-    }
+//    private Cookie createCookie(String key, String value, int expiry) {
+//        Cookie cookie = new Cookie(key, value);
+//        cookie.setMaxAge(expiry);
+//        cookie.setSecure(true);
+//        cookie.setPath("/");
+//        cookie.setHttpOnly(true);
+//
+//        return cookie;
+//    }
 }

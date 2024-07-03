@@ -32,7 +32,7 @@ public class HomeatReportBadgeService {
         Optional<WeekCheck> optionalWeekCheck = weekRepositoryCustom.findWeekByMemberIdOrderByWeekCheckIdDesc(member.getId());
         if (optionalWeekCheck.isEmpty()) {
             String homeatTier = "홈잇스타터";
-            String message = "REPORT_WEEK_CHECK_NOT+EXIST / " + "HomeatTier: " + homeatTier + " / Nickname: " + nickname;
+            String message = "REPORT_WEEK_CHECK_NOT_EXIST / " + "HomeatTier: " + homeatTier + " / Nickname: " + nickname;
             throw new RuntimeException(message);
         }
 

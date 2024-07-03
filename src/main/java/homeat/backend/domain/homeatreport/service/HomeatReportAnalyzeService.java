@@ -16,6 +16,7 @@ import homeat.backend.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.webjars.NotFoundException;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -41,6 +42,8 @@ public class HomeatReportAnalyzeService {
                 .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_FINANCE_DATA_NOT_FOUND));
         Long input_month_jipbap_price = inputFinanceData.getMonth_jipbap_price();
         Long input_month_out_price = inputFinanceData.getMonth_out_price();
+
+        System.out.println("inputFinanceData: " + inputFinanceData.getId());
 
         /**
          * 파이 차트 비율 계산
@@ -139,7 +142,7 @@ public class HomeatReportAnalyzeService {
         for (Member m : members) {
             WeekAnalyze weekAnalyze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(m.getId(), weekIdx, input_year, input_month)
                     //.orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
-                    .orElseThrow(() -> new RuntimeException(message));
+                    .orElseThrow(() -> new NotFoundException(message));
 
             jipbapPrices += weekAnalyze.getWeek_jipbap_price(); // 멤버들의 집밥 가격 누적
             outPrices += weekAnalyze.getWeek_out_price(); // 멤버들의 외식 배달 가격 누적
@@ -149,7 +152,7 @@ public class HomeatReportAnalyzeService {
         Long average_out = outPrices / members.size(); // 비교군 멤버들의 평균 외식 배달 지출 비용
 
         WeekAnalyze memberWeekAnaylze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(member.getId(), weekIdx, input_year, input_month)
-                .orElseThrow(() -> new RuntimeException(message));
+                .orElseThrow(() -> new NotFoundException(message));
                 //.orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
         Long jipbap_save = average_jipbap - memberWeekAnaylze.getWeek_jipbap_price(); // 주어진 멤버가 n째주에 절약한 집밥 비용
         Long out_save = average_out - memberWeekAnaylze.getWeek_out_price(); // 주어진 멤버가 n째주에 절약한 외식 배달 비용

@@ -283,9 +283,9 @@ public class FoodTalkService {
 
 
     @Transactional
-    public void saveComment(FoodRequestDTO.CommentDTO dto, Member member) {
+    public void saveComment(Long postId, FoodRequestDTO.CommentDTO dto, Member member) {
 
-        FoodTalk foodTalk = foodTalkRepository.findById(dto.getId())
+        FoodTalk foodTalk = foodTalkRepository.findById(postId)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         PostComment postComment = PostComment.builder()
@@ -298,7 +298,7 @@ public class FoodTalkService {
 
         postCommentRepository.save(postComment);
 
-        int commentNum = foodTalkRepository.countTotalCommentNumber(dto.getId()).intValue();
+        int commentNum = foodTalkRepository.countTotalCommentNumber(postId).intValue();
         int replyNum = foodTalkRepository.countTotalReplyNumber(postComment.getId()).intValue();
 
 
@@ -334,9 +334,9 @@ public class FoodTalkService {
     }
 
     @Transactional
-    public void saveReply(FoodRequestDTO.CommentDTO dto, Member member) {
+    public void saveReply(Long commentId, FoodRequestDTO.CommentDTO dto, Member member) {
 
-        PostComment postComment = postCommentRepository.findById(dto.getId())
+        PostComment postComment = postCommentRepository.findById(commentId)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
         PostReply postReply = PostReply.builder()

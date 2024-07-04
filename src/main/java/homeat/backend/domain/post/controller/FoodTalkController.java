@@ -182,11 +182,12 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "404", description = "POST_4040 : 존재하지 않는 게시물입니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
-    @PostMapping("/comment")
-    public ApiPayload<?> saveComment(@RequestBody @Valid FoodRequestDTO.CommentDTO dto,
+    @PostMapping("/comment/{postId}")
+    public ApiPayload<?> saveComment(@PathVariable("postId") @Min(value = 0, message = "최소값은 0입니다.") Long postId,
+                                     @RequestBody @Valid FoodRequestDTO.CommentDTO dto,
                                      @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        foodTalkService.saveComment(dto, member);
+        foodTalkService.saveComment(postId,dto, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 
@@ -218,11 +219,12 @@ public class FoodTalkController {
             @ApiResponse(responseCode = "404", description = "POST_4042 : 댓글이 존재하지 않습니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
-    @PostMapping("/reply")
-    public ApiPayload<?> saveReply(@RequestBody @Valid FoodRequestDTO.CommentDTO dto,
+    @PostMapping("/reply/{commentId}")
+    public ApiPayload<?> saveReply(@PathVariable("commentId") @Min(value = 0, message = "최소값은 0입니다.") Long commentId,
+                                   @RequestBody @Valid FoodRequestDTO.CommentDTO dto,
                                    @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
-        foodTalkService.saveReply(dto, member);
+        foodTalkService.saveReply(commentId, dto, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.CREATED, null);
     }
 

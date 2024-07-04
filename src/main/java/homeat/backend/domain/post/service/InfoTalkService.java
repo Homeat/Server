@@ -231,9 +231,9 @@ public class InfoTalkService {
 
 
     @Transactional
-    public void saveComment(InfoRequestDTO.CommentDTO dto, Member member) {
+    public void saveComment(Long postId, InfoRequestDTO.CommentDTO dto, Member member) {
 
-        InfoTalk infoTalk = infoTalkRepository.findById(dto.getId())
+        InfoTalk infoTalk = infoTalkRepository.findById(postId)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         PostComment postComment = PostComment.builder()
@@ -246,7 +246,7 @@ public class InfoTalkService {
 
         postCommentRepository.save(postComment);
 
-        int commentNum = infoTalkRepository.countTotalCommentNumber(dto.getId()).intValue();
+        int commentNum = infoTalkRepository.countTotalCommentNumber(postId).intValue();
         int replyNum = infoTalkRepository.countTotalReplyNumber(postComment.getId()).intValue();
 
 
@@ -281,8 +281,8 @@ public class InfoTalkService {
     }
 
     @Transactional
-    public void saveReply(InfoRequestDTO.CommentDTO dto, Member member) {
-        PostComment postComment = postCommentRepository.findById(dto.getId())
+    public void saveReply(Long commentId, InfoRequestDTO.CommentDTO dto, Member member) {
+        PostComment postComment = postCommentRepository.findById(commentId)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_COMMENT_NOT_FOUND));
 
         PostReply postReply = PostReply.builder()

@@ -36,7 +36,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("ConstraintViolationException 추출 도중 에러 발생"));
 
-        return handleExceptionInternalConstraint(e, CommonErrorStatus.valueOf(errorMessage), HttpHeaders.EMPTY,request);
+        return handleExceptionInternalConstraint(e,HttpHeaders.EMPTY,CommonErrorStatus.valueOf("BAD_REQUEST"),request,errorMessage);
     }
 
 
@@ -109,9 +109,9 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         );
     }
 
-    private ResponseEntity<Object> handleExceptionInternalConstraint(Exception e, CommonErrorStatus errorStatus,
-                                                                     HttpHeaders headers, WebRequest request) {
-        ApiPayload<Object> body = ApiPayload.onFailure(errorStatus.getCode(), errorStatus.getMessage(), null);
+    private ResponseEntity<Object> handleExceptionInternalConstraint(Exception e, HttpHeaders headers, CommonErrorStatus errorStatus,
+                                                                     WebRequest request, String error) {
+        ApiPayload<Object> body = ApiPayload.onFailure(errorStatus.getCode(), errorStatus.getMessage(), error);
         return super.handleExceptionInternal(
                 e,
                 body,

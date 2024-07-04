@@ -15,6 +15,7 @@ public class InfoResponseDTO {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private Long id;
+        private String profileImgUrl;
         private String postNickName;
         private String title;
         private String content;

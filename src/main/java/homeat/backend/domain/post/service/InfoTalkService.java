@@ -184,6 +184,7 @@ public class InfoTalkService {
                 .createdAt(infoTalk.getCreatedAt())
                 .updatedAt(infoTalk.getUpdatedAt())
                 .id(infoTalk.getId())
+                .profileImgUrl(infoTalk.getMember().getProfileImgUrl())
                 .postNickName(infoTalk.getMember().getNickname())
                 .title(infoTalk.getTitle())
                 .content(infoTalk.getContent())

@@ -229,6 +229,7 @@ public class FoodTalkService {
                 .createdAt(foodTalk.getCreatedAt())
                 .updatedAt(foodTalk.getUpdatedAt())
                 .id(foodTalk.getId())
+                .profileImgUrl(foodTalk.getMember().getProfileImgUrl())
                 .postNickName(foodTalk.getMember().getNickname())
                 .name(foodTalk.getName())
                 .memo(foodTalk.getMemo())

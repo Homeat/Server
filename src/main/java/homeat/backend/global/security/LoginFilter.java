@@ -2,11 +2,11 @@ package homeat.backend.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import homeat.backend.domain.user.dto.CustomUserDetails;
+import homeat.backend.domain.user.service.MemberMapper;
 import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,7 +32,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         this.authenticationManager = authenticationManager;
         this.loginService = loginService;
 
-        setFilterProcessesUrl("/v1/members/login");
+        setFilterProcessesUrl("/v1/members/login/email");
     }
 
     @Getter
@@ -71,11 +71,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Long userId = customUserDetails.getUserId();
 
         String accessToken = loginService.issueAccessToken(userId);
-        Cookie refreshToken = loginService.issueRefreshToken(userId);
+//        Cookie refreshToken = loginService.issueRefreshToken(userId);
+        String refreshToken = loginService.issueRefreshToken(userId);
 
         response.addHeader("Authorization", accessToken);
-        response.addCookie(refreshToken);
-        writeOutput(request, response, HttpServletResponse.SC_OK, ApiPayload.onSuccess(CommonSuccessStatus.OK, null));
+//        response.addCookie(refreshToken);
+        writeOutput(request, response, HttpServletResponse.SC_OK, ApiPayload.onSuccess(CommonSuccessStatus.OK, MemberMapper.toRefreshToken(refreshToken)));
     }
 
     @Override

@@ -9,7 +9,6 @@ import homeat.backend.domain.post.service.InfoTalkService;
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
 import homeat.backend.domain.user.service.MemberQueryService;
-import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.payload.ApiPayload;
 import homeat.backend.global.payload.CommonSuccessStatus;
 import homeat.backend.global.payload.SlicePayload;
@@ -19,10 +18,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Validated
 @RestController
 @RequestMapping("/v1/infoTalk")
 @RequiredArgsConstructor
@@ -52,23 +55,11 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiPayload<?> saveInfoTalk(@RequestParam(value = "title",required = false) String title,
-                                                                    @RequestParam(value = "content",required = false) String content,
-                                                                    @RequestParam(value = "tags",required = false) List<String> tags,
-                                                                    @RequestParam(value = "imgUrl",required = false) List<MultipartFile> multipartFiles,
-                                                                    @AuthenticationPrincipal CustomUserDetails authentication) {
-
-        if (title == null) {
-            throw new GeneralException(PostErrorStatus.POST_TITLE_PAYMENT_REQUIRED);
-        }
-        if (content == null) {
-            throw new GeneralException(PostErrorStatus.POST_CONTENT_PAYMENT_REQUIRED);
-        }
-        if (multipartFiles == null) {
-            throw new GeneralException(PostErrorStatus.POST_IMAGE_PAYMENT_REQUIRED);
-        }
-
-
+    public ApiPayload<?> saveInfoTalk(@RequestParam(value = "title") String title,
+                                      @RequestParam(value = "content") String content,
+                                      @RequestParam(value = "tags") List<String> tags,
+                                      @RequestParam(value = "imgUrl") List<MultipartFile> multipartFiles,
+                                      @AuthenticationPrincipal CustomUserDetails authentication) {
 
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         infoTalkService.saveInfoTalk(title,content,tags,multipartFiles, member);
@@ -87,7 +78,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @DeleteMapping("{id}")
-    public ApiPayload<?> deleteInfoTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteInfoTalk(@PathVariable("id") @Min(value = 0, message = "최소값은 0입니다.") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         infoTalkService.deleteInfoTalk(id, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
@@ -112,7 +103,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @GetMapping("{id}")
-    public ApiPayload<InfoResponseDTO.InfoTalkViewDTO> getInfoTalk(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<InfoResponseDTO.InfoTalkViewDTO> getInfoTalk(@PathVariable("id") @Min(value = 0, message = "최소값은 0입니다.") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         InfoTalkViewDTO result = infoTalkService.getInfoTalk(id, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, result);
@@ -128,7 +119,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @GetMapping("/posts/latest")
-    public SlicePayload<InfoTalkTotalView> getInfoTalkLatest(InfoTalkSearchCondition condition, @RequestParam Long lastInfoTalkId) {
+    public SlicePayload<InfoTalkTotalView> getInfoTalkLatest(InfoTalkSearchCondition condition, @RequestParam @Min(value = 0, message = "최소값은 0입니다.") Long lastInfoTalkId) {
         Slice<InfoTalkTotalView> result = infoTalkService.getInfoTalkLatest(condition, lastInfoTalkId);
         return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
@@ -144,7 +135,7 @@ public class InfoTalkController {
     })
     @GetMapping("/posts/oldest")
     public SlicePayload<InfoTalkTotalView> getInfoTalkOldest(InfoTalkSearchCondition condition,
-                                                                  @RequestParam Long oldestInfoTalkId) {
+                                                                  @RequestParam @Min(value = 0, message = "최소값은 0입니다.") Long oldestInfoTalkId) {
         Slice<InfoTalkTotalView> result = infoTalkService.getInfoTalkOldest(condition, oldestInfoTalkId);
         return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
@@ -159,7 +150,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @GetMapping("/posts/love")
-    public SlicePayload<InfoTalkTotalView> getInfoTalkByLove(InfoTalkSearchCondition condition, @RequestParam Long id, @RequestParam int love) {
+    public SlicePayload<InfoTalkTotalView> getInfoTalkByLove(InfoTalkSearchCondition condition, @RequestParam @Min(value = 0, message = "최소값은 0입니다.") Long id, @RequestParam int love) {
         Slice<InfoTalkTotalView> result = infoTalkService.getInfoTalkByLove(condition, id, love);
         return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
@@ -174,7 +165,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @GetMapping("/posts/view")
-    public SlicePayload<InfoTalkTotalView> getInfoTalkByView(InfoTalkSearchCondition condition,@RequestParam Long id,@RequestParam int view) {
+    public SlicePayload<InfoTalkTotalView> getInfoTalkByView(InfoTalkSearchCondition condition,@RequestParam @Min(value = 0, message = "최소값은 0입니다.") Long id,@RequestParam int view) {
         Slice<InfoTalkTotalView> result = infoTalkService.getInfoTalkByView(condition, id, view);
         return SlicePayload.onSuccess(CommonSuccessStatus.OK, result);
     }
@@ -208,7 +199,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @DeleteMapping("/comment/{commentId}")
-    public ApiPayload<?> deleteComment(@PathVariable("commentId") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteComment(@PathVariable("commentId") @Min(value = 0, message = "최소값은 0입니다.") Long commentId, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         infoTalkService.deleteComment(commentId, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
@@ -242,7 +233,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @DeleteMapping("/reply/{replyId}")
-    public ApiPayload<?> deleteReply(@PathVariable("replyId") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteReply(@PathVariable("replyId") @Min(value = 0, message = "최소값은 0입니다.") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         infoTalkService.deleteReply(id, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
@@ -259,7 +250,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping("/love/{id}")
-    public ApiPayload<?> saveLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> saveLove(@PathVariable("id") @Min(value = 0, message = "최소값은 0입니다.") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         infoTalkService.saveLove(id, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
@@ -276,7 +267,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @DeleteMapping("/love/{id}")
-    public ApiPayload<?> deleteLove(@PathVariable("id") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
+    public ApiPayload<?> deleteLove(@PathVariable("id") @Min(value = 0, message = "최소값은 0입니다.") Long id, @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         infoTalkService.deleteLove(id, member);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
@@ -293,7 +284,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping("/report/{postId})")
-    public ApiPayload<?> reportInfoTalk(@PathVariable("postId") Long postId,
+    public ApiPayload<?> reportInfoTalk(@PathVariable("postId") @Min(value = 0, message = "최소값은 0입니다.") Long postId,
                                         @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         infoTalkService.reportInfoTalk(postId, member);
@@ -311,7 +302,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping("/report/comment/{commentId})")
-    public ApiPayload<?> reportFoodTalkComment(@PathVariable("commentId") Long commentId,
+    public ApiPayload<?> reportFoodTalkComment(@PathVariable("commentId") @Min(value = 0, message = "최소값은 0입니다.") Long commentId,
                                                @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         infoTalkService.reportInfoTalkComment(commentId, member);
@@ -329,7 +320,7 @@ public class InfoTalkController {
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
     @PostMapping("/report/reply/{replyId})")
-    public ApiPayload<?> reportFoodTalkReply(@PathVariable("replyId") Long replyId,
+    public ApiPayload<?> reportFoodTalkReply(@PathVariable("replyId") @Min(value = 0, message = "최소값은 0입니다.") Long replyId,
                                              @AuthenticationPrincipal CustomUserDetails authentication) {
         Member member = memberQueryService.mypageMember(authentication.getUserId());
         infoTalkService.reportInfoTalkReply(replyId, member);

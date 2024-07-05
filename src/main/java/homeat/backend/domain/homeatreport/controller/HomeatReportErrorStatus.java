@@ -18,6 +18,7 @@ public enum HomeatReportErrorStatus implements BaseStatus {
     REPORT_MEMBER_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "REPORT_4042", "비교할 회원이 존재하지 않습니다."),
     REPORT_PREV_WEEK_CHECK_NOT_FOUND(HttpStatus.NOT_FOUND, "REPORT_4043", "전달 Week Check를 찾을 수 없습니다."),
     REPORT_BADGE_IMG_NOT_FOUND(HttpStatus.NOT_FOUND, "REPORT_4044", "Homeat Badge의 이미지 파일을 찾을 수 없습니다."),
+    REPORT_WEEK_CHECK_NOT_FOUND(HttpStatus.NOT_FOUND, "REPORT_4045", "이달 Week Check를 찾을 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;

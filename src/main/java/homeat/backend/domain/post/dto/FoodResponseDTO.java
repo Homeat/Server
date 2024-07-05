@@ -17,6 +17,7 @@ public class FoodResponseDTO {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private Long id;
+        private String profileImgUrl;
         private String postNickName;
         private String name;
         private String memo;

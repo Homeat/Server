@@ -1,17 +1,22 @@
 package homeat.backend.domain.homeatreport.service;
 
 import homeat.backend.domain.homeatreport.controller.HomeatReportErrorStatus;
-import homeat.backend.domain.homeatreport.dto.ReportBadgeResponseDTO;
+import homeat.backend.domain.homeatreport.dto.ReportBadgeImgResponseDTO;
+import homeat.backend.domain.homeatreport.dto.ReportBadgeInfoResponseDTO;
 import homeat.backend.domain.homeatreport.entity.TierStatus;
 import homeat.backend.domain.homeatreport.entity.WeekCheck;
-import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
 import homeat.backend.domain.homeatreport.repository.querydsl.WeekRepositoryCustom;
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.user.entity.MemberInfo;
+import homeat.backend.domain.user.repository.MemberInfoRepository;
 import homeat.backend.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.webjars.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,30 +27,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HomeatReportBadgeService {
 
-    private final WeekCheckRepository weekCheckRepository;
     private final WeekRepositoryCustom weekRepositoryCustom;
+    private final MemberInfoRepository memberInfoRepository;
 
-    public List<ReportBadgeResponseDTO> getHomeatBadge(Member member, Long lastWeekId) {
-
-        String nickname = member.getNickname();
-
-        Optional<WeekCheck> optionalWeekCheck = weekRepositoryCustom.findWeekByMemberIdOrderByWeekCheckIdDesc(member.getId());
-        if (optionalWeekCheck.isEmpty()) {
-            String homeatTier = "홈잇스타터";
-            String message = "REPORT_WEEK_CHECK_NOT_EXIST / " + "HomeatTier: " + homeatTier + " / Nickname: " + nickname;
-            throw new RuntimeException(message);
-        }
-
-        WeekCheck weekCheck = optionalWeekCheck.get();
-        TierStatus tierStatus = weekCheck.getHomeat_tier();
-
+    public List<ReportBadgeImgResponseDTO> getHomeatBadgeImg(Member member, Long lastWeekId) {
 
         Pageable pageable = PageRequest.of(0, 9);
         Slice<WeekCheck> weekCheckPage = weekRepositoryCustom.findWeekByMemberIdAsc(member.getId(), lastWeekId, pageable);
-        List<ReportBadgeResponseDTO> reportBadgeResponseDTOList = weekCheckPage.getContent().stream()
-                .map(week -> new ReportBadgeResponseDTO(
-                        tierStatus.toString(),
-                        nickname,
+        List<ReportBadgeImgResponseDTO> reportBadgeImgResponseDTOList = weekCheckPage.getContent().stream()
+                .map(week -> new ReportBadgeImgResponseDTO(
                         week.getId(),
                         week.getGoal_price(),
                         week.getExceed_price(),
@@ -54,8 +44,32 @@ public class HomeatReportBadgeService {
                 ))
                 .collect(Collectors.toList());
 
-        return reportBadgeResponseDTOList;
+        return reportBadgeImgResponseDTOList;
     }
+
+    public ReportBadgeInfoResponseDTO getHomeatBadgeInfo(Member member) {
+
+        Optional<MemberInfo> optionalMemberInfo = memberInfoRepository.findMemberInfoByMember(member); // 특정 멤버의 memberInfo 엔티티
+        if (optionalMemberInfo.isEmpty()) {
+            throw new NotFoundException("Member Not Exist");
+        }
+        MemberInfo memberInfo = optionalMemberInfo.get();
+
+        System.out.println("Member's Name:" + memberInfo.getMember().getNickname());
+
+        Optional<WeekCheck> optionalWeekCheck = weekRepositoryCustom.findWeekByMemberIdOrderByWeekCheckIdDesc(member.getId());
+        if (optionalWeekCheck.isEmpty()) {
+            throw new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_CHECK_NOT_FOUND);
+        }
+        WeekCheck weekCheck = optionalWeekCheck.get();
+        TierStatus tierStatus = weekCheck.getHomeat_tier();
+        String homeatTier = tierStatus.toString();
+
+        ReportBadgeInfoResponseDTO reportBadgeInfoResponseDTO = new ReportBadgeInfoResponseDTO(homeatTier, memberInfo.getMember().getNickname());
+        return reportBadgeInfoResponseDTO;
+
+    }
+
 
     /*
     // 주별 조회 회원 홈잇티어와 닉네임, 주차별 뱃지(존재하는 모든 주 list 반환)

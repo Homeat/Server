@@ -10,10 +10,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReportBadgeResponseDTO {
+public class ReportBadgeImgResponseDTO {
 
-    private String homeatTier;
-    private String nickname;
     private Long week_id;
     private Long goal_price;
     private Long exceed_price;

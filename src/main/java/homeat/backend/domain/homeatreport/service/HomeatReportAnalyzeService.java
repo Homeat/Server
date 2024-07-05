@@ -98,7 +98,13 @@ public class HomeatReportAnalyzeService {
 
     // 소비분석 하단의 주별 분석
     public ReportWeeklyResponseDTO getWeeklyAnalyze(Integer input_year, Integer input_month, Integer input_day, Member member) {
-        MemberInfo memberInfo = memberInfoRepository.findMemberInfoByMember(member).orElseThrow(); // 특정 멤버의 memberInfo 엔티티
+        //NonUniqueResultException 발생 가능
+        Optional<MemberInfo> optionalMemberInfo = memberInfoRepository.findMemberInfoByMember(member); // 특정 멤버의 memberInfo 엔티티
+        if (optionalMemberInfo.isEmpty()) {
+            throw new NotFoundException("Member Not Exist");
+        }
+        MemberInfo memberInfo = optionalMemberInfo.get();
+
         System.out.println("Member's Name:" + memberInfo.getMember().getNickname());
 
         // 생년을 LocalDate 객체 생성

@@ -1,7 +1,8 @@
 package homeat.backend.domain.homeatreport.controller;
 
 import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeResponseDTO;
-import homeat.backend.domain.homeatreport.dto.ReportWeeklyResponseDTO;
+import homeat.backend.domain.homeatreport.dto.ReportWeeklyAnalyzeInfoResponseDTO;
+import homeat.backend.domain.homeatreport.dto.ReportWeeklyAnalyzeResultResponseDTO;
 import homeat.backend.domain.homeatreport.service.HomeatReportAnalyzeService;
 import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.entity.Member;
@@ -45,7 +46,7 @@ public class HomeatReportAnalyzeController {
     }
 
     /**
-     * 소비분석 주별
+     * 소비분석 주별(분석 결과)
      * @param input_year
      * @param input_month
      * @param input_day
@@ -53,9 +54,9 @@ public class HomeatReportAnalyzeController {
      * @return
      */
 
-    @Operation(summary = "홈잇리포트 소비분석 하단의 날짜 조회 api")
-    @GetMapping("/ofWeek")
-    public ApiPayload<ReportWeeklyResponseDTO> getWeekInput(
+    @Operation(summary = "홈잇리포트 소비분석 하단의 주별 분석 결과 api")
+    @GetMapping("/ofWeekResult")
+    public ApiPayload<ReportWeeklyAnalyzeResultResponseDTO> getWeekInput(
             @RequestParam(value = "input_year", defaultValue = "#{T(java.time.LocalDate).now().getYear()}") String input_year,
             @RequestParam(value = "input_month", defaultValue = "#{T(java.time.LocalDate).now().getMonthValue()}") String input_month,
             @RequestParam(value = "input_day", defaultValue = "#{T(java.time.LocalDate).now().getDayOfMonth()}") String input_day,
@@ -66,6 +67,21 @@ public class HomeatReportAnalyzeController {
         Integer year = Integer.parseInt(input_year);
         Integer month = Integer.parseInt(input_month);
         Integer day = Integer.parseInt(input_day);
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, homeatReportAnalyzeService.getWeeklyAnalyze(year, month, day, member));
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, homeatReportAnalyzeService.getWeeklyAnalyzeResult(year, month, day, member));
+    }
+
+    /**
+     * 소비분석 주별(default 데이터)
+     * @param authentication
+     * @return
+     */
+    @Operation(summary = "홈잇리포트 소비분석 하단의 주별 개인 정보 조회 api")
+    @GetMapping("/ofWeekInfo")
+    public ApiPayload<ReportWeeklyAnalyzeInfoResponseDTO> getWeekDefault(
+            @AuthenticationPrincipal CustomUserDetails authentication
+    ) {
+        Member member = memberQueryService.mypageMember(authentication.getUserId());
+
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, homeatReportAnalyzeService.getWeeklyAnalyzeInfo(member));
     }
 }

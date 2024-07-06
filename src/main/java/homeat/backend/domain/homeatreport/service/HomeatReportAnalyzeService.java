@@ -4,7 +4,9 @@ import homeat.backend.domain.analyze.entity.FinanceData;
 import homeat.backend.domain.analyze.repository.FinanceDataRepository;
 import homeat.backend.domain.homeatreport.controller.HomeatReportErrorStatus;
 import homeat.backend.domain.homeatreport.dto.ReportMonthlyAnalyzeResponseDTO;
-import homeat.backend.domain.homeatreport.dto.ReportWeeklyResponseDTO;
+import homeat.backend.domain.homeatreport.dto.ReportWeeklyAnalyzeInfoListDTO;
+import homeat.backend.domain.homeatreport.dto.ReportWeeklyAnalyzeInfoResponseDTO;
+import homeat.backend.domain.homeatreport.dto.ReportWeeklyAnalyzeResultResponseDTO;
 import homeat.backend.domain.homeatreport.entity.WeekAnalyze;
 import homeat.backend.domain.homeatreport.repository.querydsl.WeekRepositoryCustom;
 import homeat.backend.domain.user.entity.Gender;
@@ -16,7 +18,6 @@ import homeat.backend.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.webjars.NotFoundException;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -96,11 +97,15 @@ public class HomeatReportAnalyzeService {
         return reportMonthlyAnalyzeResponseDTO;
     }
 
-    // 소비분석 하단의 주별 분석
-    public ReportWeeklyResponseDTO getWeeklyAnalyze(Integer input_year, Integer input_month, Integer input_day, Member member) {
-        //NonUniqueResultException 발생 가능
+    /**
+     * 소비분석 하단의 주별 분석에서 필요한 데이터 산출
+     * @param member
+     * @return
+     */
+    private ReportWeeklyAnalyzeInfoListDTO getWeeklyAnalyzeInfoList(Member member) {
+        // NonUniqueResultException 발생 가능
         MemberInfo memberInfo = memberInfoRepository.findMemberInfoByMember(member) // 특정 멤버의 memberInfo 엔티티
-                .orElseThrow(() -> new NotFoundException("Member Not Exist"));
+                .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_MEMBER_NOT_FOUND));
 
         System.out.println("Member's Name:" + memberInfo.getMember().getNickname());
 
@@ -114,11 +119,28 @@ public class HomeatReportAnalyzeService {
         Integer ageIndex = age/10; // 연령대. 1이면 10대
         String ageRange = ageIndex*10+"대";
 
-        Long income = memberInfo.getIncome(); // 특정 멤버의 수입
-        String income_str = "소득 " + (income/10000) +"만원 이하";
-
         Gender gender = memberInfo.getGender(); // 특정 멤버의 성별
-        String gender_kor = "";
+
+        Long income = memberInfo.getIncome(); // 특정 멤버의 수입
+
+        return new ReportWeeklyAnalyzeInfoListDTO(member.getNickname(), ageIndex, ageRange, gender, income);
+    }
+
+    /**
+     * 소비분석 하단 주별 분석에서 오류와 상관없이 default로 전달하는 값
+     * @param member
+     * @return
+     */
+    public ReportWeeklyAnalyzeInfoResponseDTO getWeeklyAnalyzeInfo(Member member) {
+
+        ReportWeeklyAnalyzeInfoListDTO reportWeeklyAnalyzeInfoListDTO = getWeeklyAnalyzeInfoList(member);
+
+        String nickname = reportWeeklyAnalyzeInfoListDTO.getNickname(); // 멤버의 닉네임
+
+        String ageRange = reportWeeklyAnalyzeInfoListDTO.getAgeRange(); // 멤버의 연령대
+
+        Gender gender = reportWeeklyAnalyzeInfoListDTO.getGender();
+        String gender_kor = ""; // 멤버의 성별
         if (gender == Gender.MALE) {
             gender_kor = "남성";
         } else if (gender == Gender.FEMALE) {
@@ -127,16 +149,40 @@ public class HomeatReportAnalyzeService {
             gender_kor = " ";
         }
 
-        String message = "REPORT_WEEK_ANALYZE_NOT_FOUND, " + "AgeRange: " + ageRange + ", Income: " + income_str + ", Gender: " + gender_kor + ", Nickname: " + member.getNickname(); // member는 사용자(비교군의 member가 아님)
+        Long income = reportWeeklyAnalyzeInfoListDTO.getIncome();
+        String income_str = "소득 " + (income/10000) +"만원 이하"; // 멤버의 소득
+
+        ReportWeeklyAnalyzeInfoResponseDTO reportWeeklyAnalyzeInfoResponseDTO = new ReportWeeklyAnalyzeInfoResponseDTO(nickname, gender_kor, income_str, ageRange);
+        return reportWeeklyAnalyzeInfoResponseDTO;
+
+    }
+
+    /**
+     * 소비분석 하단 주별 분석에서 분석 결과를 반환
+     * @param input_year
+     * @param input_month
+     * @param input_day
+     * @param member
+     * @return
+     */
+    public ReportWeeklyAnalyzeResultResponseDTO getWeeklyAnalyzeResult(Integer input_year, Integer input_month, Integer input_day, Member member) {
+
+        ReportWeeklyAnalyzeInfoListDTO reportWeeklyAnalyzeInfoListDTO = getWeeklyAnalyzeInfoList(member);
+
+        System.out.println("Member's Name:" + reportWeeklyAnalyzeInfoListDTO.getNickname());
+
+        Integer ageIndex = reportWeeklyAnalyzeInfoListDTO.getAgeIndex();
+        Gender gender = reportWeeklyAnalyzeInfoListDTO.getGender();
+        Long income = reportWeeklyAnalyzeInfoListDTO.getIncome();
 
         // 비교군 설정
         // 수정 필요: 멤버 그룹이 없는 것은 오류가 아니므로 exception 처리하면 안됨.
         List<Member> members = memberRepository.findMemberByCriteria(ageIndex, gender, income)
-                .orElseThrow(() -> new NotFoundException(message));
-                //.orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_MEMBER_GROUP_NOT_FOUND)); // 특정 멤버의 연령대, 성별, 수입이 비슷한 멤버들
+                .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_MEMBER_GROUP_NOT_FOUND)); // 특정 멤버의 연령대, 성별, 수입이 비슷한 멤버들
 
+        String income_str = "소득 " + (income/10000) +"만원 이하"; // 멤버의 소득
         System.out.println("조건 충족 멤버 수: " + members.size());
-        System.out.println(ageIndex*10 + "대 " + income_str + gender_kor);
+        System.out.println(ageIndex*10 + "대 " + income_str + gender.toString());
 
         Long jipbapPrices = 0L;
         Long outPrices = 0L;
@@ -148,8 +194,7 @@ public class HomeatReportAnalyzeService {
 
         for (Member m : members) {
             WeekAnalyze weekAnalyze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(m.getId(), weekIdx, input_year, input_month)
-                    //.orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
-                    .orElseThrow(() -> new NotFoundException(message));
+                    .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
 
             jipbapPrices += weekAnalyze.getWeek_jipbap_price(); // 멤버들의 집밥 가격 누적
             outPrices += weekAnalyze.getWeek_out_price(); // 멤버들의 외식 배달 가격 누적
@@ -159,13 +204,12 @@ public class HomeatReportAnalyzeService {
         Long average_out = outPrices / members.size(); // 비교군 멤버들의 평균 외식 배달 지출 비용
 
         WeekAnalyze memberWeekAnaylze = weekRepositoryCustom.findWeekAnalyzeByMemberIdAndWeekIdxAndInputDate(member.getId(), weekIdx, input_year, input_month)
-                .orElseThrow(() -> new NotFoundException(message));
-                //.orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_ANALYZE_NOT_FOUND));
         Long jipbap_save = average_jipbap - memberWeekAnaylze.getWeek_jipbap_price(); // 주어진 멤버가 n째주에 절약한 집밥 비용
         Long out_save = average_out - memberWeekAnaylze.getWeek_out_price(); // 주어진 멤버가 n째주에 절약한 외식 배달 비용
 
-        ReportWeeklyResponseDTO reportWeeklyResponseDTO = new ReportWeeklyResponseDTO(ageRange, income_str, gender_kor, member.getNickname(), jipbap_save, out_save, average_jipbap, memberWeekAnaylze.getWeek_jipbap_price(), average_out, memberWeekAnaylze.getWeek_out_price());
-        return reportWeeklyResponseDTO;
+        ReportWeeklyAnalyzeResultResponseDTO reportWeeklyAnalyzeResultResponseDTO = new ReportWeeklyAnalyzeResultResponseDTO(jipbap_save, out_save, average_jipbap, memberWeekAnaylze.getWeek_jipbap_price(), average_out, memberWeekAnaylze.getWeek_out_price());
+        return reportWeeklyAnalyzeResultResponseDTO;
     }
 
     /**

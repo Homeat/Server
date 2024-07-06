@@ -57,11 +57,9 @@ public class HomeatReportBadgeService {
 
         System.out.println("Member's Name:" + memberInfo.getMember().getNickname());
 
-        Optional<WeekCheck> optionalWeekCheck = weekRepositoryCustom.findWeekByMemberIdOrderByWeekCheckIdDesc(member.getId());
-        if (optionalWeekCheck.isEmpty()) {
-            throw new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_CHECK_NOT_FOUND);
-        }
-        WeekCheck weekCheck = optionalWeekCheck.get();
+        WeekCheck weekCheck = weekRepositoryCustom.findWeekByMemberIdOrderByWeekCheckIdDesc(member.getId())
+                .orElseThrow(() -> new GeneralException(HomeatReportErrorStatus.REPORT_WEEK_CHECK_NOT_FOUND));
+
         TierStatus tierStatus = weekCheck.getHomeat_tier();
         String homeatTier = tierStatus.toString();
 

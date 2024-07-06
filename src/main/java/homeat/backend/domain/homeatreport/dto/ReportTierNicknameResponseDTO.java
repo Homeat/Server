@@ -7,10 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReportTierNicknameResponseDTO {
+
     private TierStatus tierStatus;
     private String nickname;
+
 }

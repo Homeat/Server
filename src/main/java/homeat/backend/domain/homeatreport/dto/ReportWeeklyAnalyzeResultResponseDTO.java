@@ -2,16 +2,11 @@ package homeat.backend.domain.homeatreport.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
-public class ReportWeeklyResponseDTO {
+public class ReportWeeklyAnalyzeResultResponseDTO {
 
-    private String age_range; // 연령대
-    private String income; // 수입"(소득 **만원 이하)
-    private String gender; // 성별
-    private String nickname; // 닉네임
     private Long jipbap_save; // 집밥 절약 비용
     private Long out_save; // 외식/배달 절약 비용
     private Long jipbap_average; // 비교군 집밥 평균 지출 금액

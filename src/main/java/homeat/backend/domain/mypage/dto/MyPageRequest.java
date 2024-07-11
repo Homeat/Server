@@ -37,23 +37,13 @@ public class MyPageRequest {
     }
 
     @Getter
-    public static class patchInfoDto {
-        @Nullable
-        @Email
-        @ExistEmail
-        @Schema(example = "null 가능, 필요한 항목만 넣으면 됨, 아래 income도 동일")
-        String email;
-
-        @Nullable
-        @ExistNickname
-        @Schema(example = "null 가능, 필요한 항목만 넣으면 됨, 아래 income도 동일")
+    public static class updateNicknameDto {
+        @NotBlank
         String nickname;
+    }
 
-        @Nullable
-        @Min(value = 1)
-        Long addressId;
-
-        @Nullable
+    @Getter
+    public static class updateIncomeDto {
         @Min(value = 0)
         Long income;
     }

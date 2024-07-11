@@ -1,6 +1,7 @@
 package homeat.backend.domain.user.dto;
 
 import homeat.backend.domain.user.entity.Member;
+import homeat.backend.domain.user.entity.MemberStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,6 +31,10 @@ public class CustomUserDetails implements UserDetails {
         });
 
         return collection;
+    }
+
+    public MemberStatus getMemberStatus() {
+        return member.getStatus();
     }
 
     @Override

@@ -74,7 +74,7 @@ public class MyPageController {
     @PatchMapping("/nickname")
     public ApiPayload<?> updateNicknameInfo(@AuthenticationPrincipal CustomUserDetails authentication,
                                             @RequestBody @Valid MyPageRequest.updateNicknameDto request) {
-//        myPageService.updateInfo(authentication.getUserId(), request);
+        myPageService.updateNickname(authentication.getUserId(), request);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
@@ -88,7 +88,7 @@ public class MyPageController {
     @PatchMapping("/income")
     public ApiPayload<?> updateIncomeInfo(@AuthenticationPrincipal CustomUserDetails authentication,
                                             @RequestBody @Valid MyPageRequest.updateIncomeDto request) {
-//        myPageService.updateNickname(authentication.getUserId(), request);
+        myPageService.updateIncome(authentication.getUserId(), request);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 

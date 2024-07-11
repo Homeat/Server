@@ -93,20 +93,24 @@ public class MyPageService {
     }
 
     @Transactional
-    public void updateInfo(Long memberId, MyPageRequest.patchInfoDto request) {
+    public void updateNickname(Long memberId, MyPageRequest.updateNicknameDto request) {
+        Member selectedMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(MemberErrorStatus.MEMBER_NOT_FOUND));
+
+        if(memberRepository.existsByNickname(request.getNickname()))
+            throw new GeneralException(MemberErrorStatus.EXIST_NICKNAME);
+
+        selectedMember.updateNickname(request.getNickname());
+    }
+
+    @Transactional
+    public void updateIncome(Long memberId, MyPageRequest.updateIncomeDto request) {
         Member selectedMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(MemberErrorStatus.MEMBER_NOT_FOUND));
         MemberInfo selectedMemberInfo = memberInfoRepository.findMemberInfoByMember(selectedMember)
                 .orElseThrow(() -> new GeneralException(MemberErrorStatus.MEMBER_INFO_NOT_FOUND));
 
-        if (request.getEmail() != null) selectedMember.updateEmail(request.getEmail());
-        if (request.getNickname() != null) selectedMember.updateNickname(request.getNickname());
-        if (request.getIncome() != null) selectedMemberInfo.updateIncome(request.getIncome());
-        if (request.getAddressId() != null) {
-            Address selectedAddress = addressRepository.findById(request.getAddressId())
-                    .orElseThrow(() -> new GeneralException(MemberErrorStatus.ADDRESS_NOT_FOUND));
-            selectedMemberInfo.updateAddress(selectedAddress);
-        }
+        selectedMemberInfo.updateIncome(request.getIncome());
     }
 
     public void existNickname(String nickname) {

@@ -1,6 +1,7 @@
 package homeat.backend.domain.user.controller;
 
 
+import homeat.backend.domain.user.dto.CustomUserDetails;
 import homeat.backend.domain.user.dto.MemberRequest;
 import homeat.backend.domain.user.dto.MemberResponse;
 import homeat.backend.domain.user.service.MemberMapper;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -113,6 +115,19 @@ public class MemberController {
     @PatchMapping("/find-password")
     public ApiPayload<?> findPassword(@RequestBody @Valid MemberRequest.findPasswordDto request) {
         memberService.findPassword(request);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "회원 재활성 api")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "404", description = "MEMBER_4041 : 존재하지 않는 회원입니다", content = {@Content()}),
+            @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
+    })
+    @PatchMapping("/reactivate")
+    public ApiPayload<?> reactivate(@AuthenticationPrincipal CustomUserDetails authentication,
+                                    @RequestBody @Valid MemberRequest.loginDto request) {
+        memberService.reactivate(request);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 

@@ -142,16 +142,4 @@ public class MyPageController {
         myPageService.withdraw(authentication.getUserId());
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
-
-    @Operation(summary = "회원 재활성 api")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "404", description = "MEMBER_4041 : 존재하지 않는 회원입니다", content = {@Content()}),
-            @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
-    })
-    @PatchMapping("/reactivate")
-    public ApiPayload<?> reactivate(@AuthenticationPrincipal CustomUserDetails authentication) {
-        myPageService.reactivate(authentication.getUserId());
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
-    }
 }

@@ -152,11 +152,4 @@ public class MyPageService {
                 .orElseThrow(() -> new GeneralException(MemberErrorStatus.MEMBER_NOT_FOUND));
         selectedMember.withdraw();
     }
-
-    @Transactional
-    public void reactivate(Long memberId) {
-        Member selectedMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GeneralException(MemberErrorStatus.MEMBER_NOT_FOUND));
-        selectedMember.reactivate();
-    }
 }

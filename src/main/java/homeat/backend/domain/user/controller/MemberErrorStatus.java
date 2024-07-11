@@ -17,6 +17,7 @@ public enum MemberErrorStatus implements BaseStatus {
     KAKAO_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_4041", "존재하지 않는 카카오 회원정보 입니다"),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "MEMBER_4010", "비밀번호가 일치하지 않습니다"),
 
+    INACTIVATE_FORBIDDEN(HttpStatus.FORBIDDEN, "MEMBER_4030", "비활성된 회원입니다"),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_4042", "존재하지 않는 회원입니다"),
     MEMBER_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_4043", "존재하지 않는 회원 정보입니다"),
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_4044", "존재하지 않는 주소입니다"),

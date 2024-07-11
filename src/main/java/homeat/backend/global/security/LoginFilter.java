@@ -1,7 +1,9 @@
 package homeat.backend.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import homeat.backend.domain.user.controller.MemberErrorStatus;
 import homeat.backend.domain.user.dto.CustomUserDetails;
+import homeat.backend.domain.user.entity.MemberStatus;
 import homeat.backend.domain.user.service.MemberMapper;
 import homeat.backend.global.exception.GeneralException;
 import homeat.backend.global.payload.ApiPayload;
@@ -67,6 +69,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
 
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        if (customUserDetails.getMemberStatus() == MemberStatus.INACTIVE) {
+            writeOutput(request, response, HttpServletResponse.SC_FORBIDDEN, ApiPayload.onSuccess(MemberErrorStatus.INACTIVATE_FORBIDDEN, null));
+            return;
+        }
 
         Long userId = customUserDetails.getUserId();
 

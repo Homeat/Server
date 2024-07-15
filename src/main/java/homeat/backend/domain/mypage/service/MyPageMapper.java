@@ -37,9 +37,10 @@ public class MyPageMapper {
                 .build();
     }
 
-    public static WeekAnalyze toWeekAnalyze(FinanceData financeData) {
+    public static WeekAnalyze toWeekAnalyze(FinanceData financeData, Integer currentWeekIdx) {
         return WeekAnalyze.builder()
                 .financeData(financeData)
+                .weekIdx(currentWeekIdx)
                 .build();
     }
 }

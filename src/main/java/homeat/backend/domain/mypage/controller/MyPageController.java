@@ -64,17 +64,31 @@ public class MyPageController {
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, myPageService.selectDetailInfo(authentication.getUserId()));
     }
 
-    @Operation(summary = "회원정보 수정 api")
+    @Operation(summary = "닉네임 수정 api")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "400", description = "COMMON_400 : 잘못된 요청", content = {@Content()}),
-            @ApiResponse(responseCode = "404", description = "MEMBER_4041 : 존재하지 않는 회원입니다\n\nMEMBER_4042 : 존재하지 않는 회원 정보입니다\n\nMEMBER_4043 : 존재하지 않는 주소입니다", content = {@Content()}),
+            @ApiResponse(responseCode = "404", description = "MEMBER_4041 : 존재하지 않는 회원입니다\n\nMEMBER_4042 : 존재하지 않는 회원 정보입니다", content = {@Content()}),
             @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
     })
-    @PatchMapping("")
-    public ApiPayload<?> updateInfo(@AuthenticationPrincipal CustomUserDetails authentication,
-                                    @RequestBody @Valid MyPageRequest.patchInfoDto request) {
-        myPageService.updateInfo(authentication.getUserId(), request);
+    @PatchMapping("/nickname")
+    public ApiPayload<?> updateNicknameInfo(@AuthenticationPrincipal CustomUserDetails authentication,
+                                            @RequestBody @Valid MyPageRequest.updateNicknameDto request) {
+        myPageService.updateNickname(authentication.getUserId(), request);
+        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
+    }
+
+    @Operation(summary = "수입 수정 api")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "COMMON_400 : 잘못된 요청", content = {@Content()}),
+            @ApiResponse(responseCode = "404", description = "MEMBER_4041 : 존재하지 않는 회원입니다\n\nMEMBER_4042 : 존재하지 않는 회원 정보입니다", content = {@Content()}),
+            @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
+    })
+    @PatchMapping("/income")
+    public ApiPayload<?> updateIncomeInfo(@AuthenticationPrincipal CustomUserDetails authentication,
+                                            @RequestBody @Valid MyPageRequest.updateIncomeDto request) {
+        myPageService.updateIncome(authentication.getUserId(), request);
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 
@@ -140,18 +154,6 @@ public class MyPageController {
     @PatchMapping("/withdraw")
     public ApiPayload<?> withdraw(@AuthenticationPrincipal CustomUserDetails authentication) {
         myPageService.withdraw(authentication.getUserId());
-        return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
-    }
-
-    @Operation(summary = "회원 재활성 api")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "404", description = "MEMBER_4041 : 존재하지 않는 회원입니다", content = {@Content()}),
-            @ApiResponse(responseCode = "500", description = "COMMON_500 : 서버 에러, 관리자에게 문의하세요", content = {@Content()})
-    })
-    @PatchMapping("/reactivate")
-    public ApiPayload<?> reactivate(@AuthenticationPrincipal CustomUserDetails authentication) {
-        myPageService.reactivate(authentication.getUserId());
         return ApiPayload.onSuccess(CommonSuccessStatus.OK, null);
     }
 }

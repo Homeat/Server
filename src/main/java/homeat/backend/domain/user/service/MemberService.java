@@ -89,6 +89,13 @@ public class MemberService {
         selectedMember.updatePassword(encoder.encode(request.getNewPassword()));
     }
 
+    @Transactional
+    public void reactivate(MemberRequest.loginDto request) {
+        Member selectedMember = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new GeneralException(MemberErrorStatus.MEMBER_NOT_FOUND));
+        selectedMember.reactivate();
+    }
+
     public String certifyEmail(MemberRequest.emailCheckDto request) {
         if (memberRepository.existsByEmail(request.getEmail()))
             throw new GeneralException(MemberErrorStatus.EXIST_EMAIL);

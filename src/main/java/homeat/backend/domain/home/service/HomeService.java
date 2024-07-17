@@ -116,8 +116,8 @@ public class HomeService {
             LocalDate lastSunday = lastMonday.plusDays(6);
 
             // 저번 주, 이번 주 총 사용 금액
-            Long lastWeekTotal = calculateTotalExpense(lastMonday, lastSunday, thisMonthFinanceData, beforeMonthFinanceData);
-            Long thisWeekTotal = calculateTotalExpense(thisMonday, today, thisMonthFinanceData, beforeMonthFinanceData);
+            long lastWeekTotal = calculateTotalExpense(lastMonday, lastSunday, thisMonthFinanceData, beforeMonthFinanceData);
+            long thisWeekTotal = calculateTotalExpense(thisMonday, today, thisMonthFinanceData, beforeMonthFinanceData);
 
             // 4주 전까지만 조회(5주 전부터는 비교 x)
             int beforeWeek = 1;
@@ -145,8 +145,8 @@ public class HomeService {
         return builder.build();
     }
 
-    private Long calculateTotalExpense(LocalDate start, LocalDate end, FinanceData thisMonthFinanceData, FinanceData beforeMonthFinanceData) {
-        Long total = dailyExpenseRepo.sumPricesBetweenDates(start, end, thisMonthFinanceData);
+    private long calculateTotalExpense(LocalDate start, LocalDate end, FinanceData thisMonthFinanceData, FinanceData beforeMonthFinanceData) {
+        long total = dailyExpenseRepo.sumPricesBetweenDates(start, end, thisMonthFinanceData);
         if (beforeMonthFinanceData != null) {
             total += dailyExpenseRepo.sumPricesBetweenDates(start, end, beforeMonthFinanceData);
         }
@@ -265,7 +265,7 @@ public class HomeService {
              */
             WeekCheck weekCheck = weekCheckRepository.findTopByFinanceDataOrderByIdDesc(financeData)
                     .orElseThrow(() -> new NoSuchElementException("조회할 수 있는 Current Week가 없습니다."));
-            Long accumulateExpense = accumulatePrice(financeData);
+            long accumulateExpense = accumulatePrice(financeData);
 
             weekSaveService.saveWeekCheck(weekCheck, accumulateExpense);
 
@@ -430,7 +430,7 @@ public class HomeService {
     /**
      *  사용자 누적 지출 금액 계산(일요일 ~ 오늘)
      */
-    public Long accumulatePrice(FinanceData financeData) {
+    public long accumulatePrice(FinanceData financeData) {
 
         LocalDate today = LocalDate.now();
         DayOfWeek todayOfWeek = today.getDayOfWeek();

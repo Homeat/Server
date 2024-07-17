@@ -8,6 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DailyExpenseRepoCST {
-    Long sumPricesBetweenDates(LocalDate startDate, LocalDate endDate, FinanceData financeData);
+    long sumPricesBetweenDates(LocalDate startDate, LocalDate endDate, FinanceData financeData);
     Optional<DailyExpense> findDailyExpenseByFinanceDataIdAndDate(Long financeDataId, LocalDate date);
 }

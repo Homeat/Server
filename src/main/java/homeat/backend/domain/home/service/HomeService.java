@@ -111,39 +111,21 @@ public class HomeService {
         // 목표 식비가 0원이 아닐 경우
         if(thisWeekGoalPrice > 0) {
             LocalDate today = LocalDate.now();
-            // 예외처리(저번 주 존재하지 않는 경우)
-            LocalDate lastSunday = today.minusWeeks(2).with(DayOfWeek.SUNDAY);
-            LocalDate lastSaturday = lastSunday.plusDays(6);
-            LocalDate thisSunday = today.minusWeeks(1).with(DayOfWeek.SUNDAY);
+            LocalDate thisMonday = today.with(DayOfWeek.MONDAY);
+            LocalDate lastMonday = thisMonday.minusWeeks(1);
+            LocalDate lastSunday = lastMonday.plusDays(6);
 
-            // 저번 주, 이번 주 사용 금액
-            Long lastWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, thisMonthFinanceData);
-            Long thisWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today, thisMonthFinanceData);
-
-            if (beforeMonthFinanceData != null) {
-                lastWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, beforeMonthFinanceData);
-                thisWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today, beforeMonthFinanceData);
-            }
-
-            if (thisWeekTotal == null) {
-                thisWeekTotal = 0L;
-            }
+            // 저번 주, 이번 주 총 사용 금액
+            Long lastWeekTotal = calculateTotalExpense(lastMonday, lastSunday, thisMonthFinanceData, beforeMonthFinanceData);
+            Long thisWeekTotal = calculateTotalExpense(thisMonday, today, thisMonthFinanceData, beforeMonthFinanceData);
 
             // 저번 주 금액이 0원 예외처리
             int beforeWeek = 1;
-            while (lastWeekTotal == null || lastWeekTotal == 0) {
-                beforeWeek += 1;
-                lastSunday = lastSunday.minusWeeks(1);
-                lastSaturday = lastSunday.plusDays(6);
-
-                Long beforeMonthTotal = beforeMonthFinanceData != null ? dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, beforeMonthFinanceData) : 0L;
-                Long thisMonthTotal = thisMonthFinanceData != null ? dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, thisMonthFinanceData) : 0L;
-
-                lastWeekTotal = beforeMonthTotal + thisMonthTotal;
-
-                if (beforeWeek > 4) {
-                    break;
-                }
+            while (lastWeekTotal == 0 && beforeWeek <= 4) {
+                beforeWeek++;
+                lastMonday = lastMonday.minusWeeks(1);
+                lastSunday = lastMonday.plusDays(6);
+                lastWeekTotal = calculateTotalExpense(lastMonday, lastSunday, thisMonthFinanceData, beforeMonthFinanceData);
             }
 
             // 전주 대비 이번 주 절약 퍼센트

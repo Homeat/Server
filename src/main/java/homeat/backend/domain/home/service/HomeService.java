@@ -111,48 +111,27 @@ public class HomeService {
         // 목표 식비가 0원이 아닐 경우
         if(thisWeekGoalPrice > 0) {
             LocalDate today = LocalDate.now();
-            // 예외처리(저번 주 존재하지 않는 경우)
-            LocalDate lastSunday = today.minusWeeks(2).with(DayOfWeek.SUNDAY);
-            LocalDate lastSaturday = lastSunday.plusDays(6);
-            LocalDate thisSunday = today.minusWeeks(1).with(DayOfWeek.SUNDAY);
+            LocalDate thisMonday = today.with(DayOfWeek.MONDAY);
+            LocalDate lastMonday = thisMonday.minusWeeks(1);
+            LocalDate lastSunday = lastMonday.plusDays(6);
 
-            // 저번 주, 이번 주 사용 금액
-            Long lastWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, thisMonthFinanceData);
-            Long thisWeekTotal = dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today, thisMonthFinanceData);
+            // 저번 주, 이번 주 총 사용 금액
+            long lastWeekTotal = calculateTotalExpense(lastMonday, lastSunday, thisMonthFinanceData, beforeMonthFinanceData);
+            long thisWeekTotal = calculateTotalExpense(thisMonday, today, thisMonthFinanceData, beforeMonthFinanceData);
 
-            if (beforeMonthFinanceData != null) {
-                lastWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, beforeMonthFinanceData);
-                thisWeekTotal += dailyExpenseRepo.sumPricesBetweenDates(thisSunday, today, beforeMonthFinanceData);
-            }
-
-            if (thisWeekTotal == null) {
-                thisWeekTotal = 0L;
-            }
-
-            // 저번 주 금액이 0원 예외처리
+            // 4주 전까지만 조회(5주 전부터는 비교 x)
             int beforeWeek = 1;
-            while (lastWeekTotal == null || lastWeekTotal == 0) {
-                beforeWeek += 1;
-                lastSunday = lastSunday.minusWeeks(1);
-                lastSaturday = lastSunday.plusDays(6);
-
-                Long beforeMonthTotal = beforeMonthFinanceData != null ? dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, beforeMonthFinanceData) : 0L;
-                Long thisMonthTotal = thisMonthFinanceData != null ? dailyExpenseRepo.sumPricesBetweenDates(lastSunday, lastSaturday, thisMonthFinanceData) : 0L;
-
-                lastWeekTotal = beforeMonthTotal + thisMonthTotal;
-
-                if (beforeWeek > 4) {
-                    break;
-                }
+            while (lastWeekTotal == 0 && beforeWeek <= 4) {
+                beforeWeek++;
+                lastMonday = lastMonday.minusWeeks(1);
+                lastSunday = lastMonday.plusDays(6);
+                lastWeekTotal = calculateTotalExpense(lastMonday, lastSunday, thisMonthFinanceData, beforeMonthFinanceData);
             }
 
             // 전주 대비 이번 주 절약 퍼센트
-            int thisWeekSavingPercent = (lastWeekTotal != null && thisWeekTotal != null && lastWeekTotal != 0) ? (int) ((double) (lastWeekTotal - thisWeekTotal) / lastWeekTotal * 100) : 0;
+            int thisWeekSavingPercent = calculateSavingPercent(lastWeekTotal, thisWeekTotal);
             // 목표 금액에 대한 이번 주 남은 사용 퍼센트
-            int remainingPercent = 100;
-            if (thisWeekTotal != null) {
-                remainingPercent = Math.max(0, (int) (remainingPercent - (double) thisWeekTotal / thisWeekGoalPrice * 100));
-            }
+            int remainingPercent = calculateRemainingPercent(thisWeekTotal, thisWeekGoalPrice);
 
             // 목표 금액 & 전주 대비 이번 주 절약 퍼센트 & 사용 금액 & 목표 금액 대비 사용 금액 퍼센트
             builder.targetMoney(thisWeekGoalPrice)
@@ -160,16 +139,26 @@ public class HomeService {
                     .remainingMoney(thisWeekGoalPrice - thisWeekTotal)
                     .remainingPercent(remainingPercent)
                     .beforeWeek(beforeWeek)
-                    .message("");
-
-            if (beforeWeek > 4) {
-                builder.message("비교할 과거 데이터가 존재하지 않습니다.");
-            }
+                    .message(beforeWeek > 4 ? "비교할 과거 데이터가 존재하지 않습니다." : "");
         }
 
-        HomeResponseDTO.HomeResultDTO result = builder.build();
+        return builder.build();
+    }
 
-        return result;
+    private long calculateTotalExpense(LocalDate start, LocalDate end, FinanceData thisMonthFinanceData, FinanceData beforeMonthFinanceData) {
+        long total = dailyExpenseRepo.sumPricesBetweenDates(start, end, thisMonthFinanceData);
+        if (beforeMonthFinanceData != null) {
+            total += dailyExpenseRepo.sumPricesBetweenDates(start, end, beforeMonthFinanceData);
+        }
+        return total;
+    }
+
+    private int calculateSavingPercent(Long lastWeekTotal, Long thisWeekTotal) {
+        return (lastWeekTotal != 0) ? (int) ((double) (lastWeekTotal - thisWeekTotal) / lastWeekTotal * 100) : 0;
+    }
+
+    private int calculateRemainingPercent(Long thisWeekTotal, Long thisWeekGoalPrice) {
+        return 100 - (int) ((double) thisWeekTotal / thisWeekGoalPrice * 100);
     }
 
     /**
@@ -276,7 +265,7 @@ public class HomeService {
              */
             WeekCheck weekCheck = weekCheckRepository.findTopByFinanceDataOrderByIdDesc(financeData)
                     .orElseThrow(() -> new NoSuchElementException("조회할 수 있는 Current Week가 없습니다."));
-            Long accumulateExpense = accumulatePrice(financeData);
+            long accumulateExpense = accumulatePrice(financeData);
 
             weekSaveService.saveWeekCheck(weekCheck, accumulateExpense);
 
@@ -441,7 +430,7 @@ public class HomeService {
     /**
      *  사용자 누적 지출 금액 계산(일요일 ~ 오늘)
      */
-    public Long accumulatePrice(FinanceData financeData) {
+    public long accumulatePrice(FinanceData financeData) {
 
         LocalDate today = LocalDate.now();
         DayOfWeek todayOfWeek = today.getDayOfWeek();

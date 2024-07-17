@@ -27,7 +27,7 @@ public class DailyExpenseRepoImpl implements DailyExpenseRepoCST{
      * 주간 지출 금액 조회
      */
     @Override
-    public Long sumPricesBetweenDates(LocalDate startDate, LocalDate endDate, FinanceData financeData) {
+    public long sumPricesBetweenDates(LocalDate startDate, LocalDate endDate, FinanceData financeData) {
 
         QDailyExpense dailyExpense = QDailyExpense.dailyExpense;
 

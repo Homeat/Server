@@ -119,7 +119,7 @@ public class HomeService {
             Long lastWeekTotal = calculateTotalExpense(lastMonday, lastSunday, thisMonthFinanceData, beforeMonthFinanceData);
             Long thisWeekTotal = calculateTotalExpense(thisMonday, today, thisMonthFinanceData, beforeMonthFinanceData);
 
-            // 저번 주 금액이 0원 예외처리
+            // 4주 전까지만 조회(5주 전부터는 비교 x)
             int beforeWeek = 1;
             while (lastWeekTotal == 0 && beforeWeek <= 4) {
                 beforeWeek++;
@@ -129,12 +129,9 @@ public class HomeService {
             }
 
             // 전주 대비 이번 주 절약 퍼센트
-            int thisWeekSavingPercent = (lastWeekTotal != null && thisWeekTotal != null && lastWeekTotal != 0) ? (int) ((double) (lastWeekTotal - thisWeekTotal) / lastWeekTotal * 100) : 0;
+            int thisWeekSavingPercent = calculateSavingPercent(lastWeekTotal, thisWeekTotal);
             // 목표 금액에 대한 이번 주 남은 사용 퍼센트
-            int remainingPercent = 100;
-            if (thisWeekTotal != null) {
-                remainingPercent = Math.max(0, (int) (remainingPercent - (double) thisWeekTotal / thisWeekGoalPrice * 100));
-            }
+            int remainingPercent = calculateRemainingPercent(thisWeekTotal, thisWeekGoalPrice);
 
             // 목표 금액 & 전주 대비 이번 주 절약 퍼센트 & 사용 금액 & 목표 금액 대비 사용 금액 퍼센트
             builder.targetMoney(thisWeekGoalPrice)
@@ -142,16 +139,26 @@ public class HomeService {
                     .remainingMoney(thisWeekGoalPrice - thisWeekTotal)
                     .remainingPercent(remainingPercent)
                     .beforeWeek(beforeWeek)
-                    .message("");
-
-            if (beforeWeek > 4) {
-                builder.message("비교할 과거 데이터가 존재하지 않습니다.");
-            }
+                    .message(beforeWeek > 4 ? "비교할 과거 데이터가 존재하지 않습니다." : "");
         }
 
-        HomeResponseDTO.HomeResultDTO result = builder.build();
+        return builder.build();
+    }
 
-        return result;
+    private Long calculateTotalExpense(LocalDate start, LocalDate end, FinanceData thisMonthFinanceData, FinanceData beforeMonthFinanceData) {
+        Long total = dailyExpenseRepo.sumPricesBetweenDates(start, end, thisMonthFinanceData);
+        if (beforeMonthFinanceData != null) {
+            total += dailyExpenseRepo.sumPricesBetweenDates(start, end, beforeMonthFinanceData);
+        }
+        return total;
+    }
+
+    private int calculateSavingPercent(Long lastWeekTotal, Long thisWeekTotal) {
+        return (lastWeekTotal != 0) ? (int) ((double) (lastWeekTotal - thisWeekTotal) / lastWeekTotal * 100) : 0;
+    }
+
+    private int calculateRemainingPercent(Long thisWeekTotal, Long thisWeekGoalPrice) {
+        return 100 - (int) ((double) thisWeekTotal / thisWeekGoalPrice * 100);
     }
 
     /**

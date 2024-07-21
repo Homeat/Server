@@ -9,6 +9,7 @@ import homeat.backend.domain.homeatreport.entity.WeekAnalyze;
 import homeat.backend.domain.homeatreport.entity.WeekCheck;
 import homeat.backend.domain.homeatreport.repository.WeekAnalyzeRepository;
 import homeat.backend.domain.homeatreport.repository.WeekCheckRepository;
+import homeat.backend.domain.homeatreport.service.HomeatReportAnalyzeService;
 import homeat.backend.domain.mypage.dto.MyPageRequest;
 import homeat.backend.domain.mypage.dto.MyPageResponse;
 import homeat.backend.domain.user.controller.MemberErrorStatus;
@@ -24,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 public class MyPageService {
@@ -35,6 +38,7 @@ public class MyPageService {
     private final WeekAnalyzeRepository weekAnalyzeRepository;
     private final S3Service s3Service;
     private final BCryptPasswordEncoder encoder;
+    private final HomeatReportAnalyzeService homeatReportAnalyzeService;
 
     @Transactional
     public void insertInfo(Long memberId, MyPageRequest.postInfoDto request) {
@@ -50,7 +54,9 @@ public class MyPageService {
 
         FinanceData newFinanceData = MyPageMapper.toFinanceData(selectedMember);
         WeekCheck newWeekCheck = MyPageMapper.toWeekCheck(newFinanceData, request.getGoalPrice());
-        WeekAnalyze newWeekAnalyze = MyPageMapper.toWeekAnalyze(newFinanceData);
+
+        Integer currentWeekIdx = homeatReportAnalyzeService.findWeekIdx(LocalDate.now());
+        WeekAnalyze newWeekAnalyze = MyPageMapper.toWeekAnalyze(newFinanceData, currentWeekIdx);
 
         financeDataRepository.save(newFinanceData);
         weekCheckRepository.save(newWeekCheck);

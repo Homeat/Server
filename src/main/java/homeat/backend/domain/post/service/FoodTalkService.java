@@ -381,7 +381,7 @@ public class FoodTalkService {
     @Transactional
     public void saveLove(Long id, Member member) {
 
-        FoodTalk foodTalk = foodTalkRepository.findById(id)
+        FoodTalk foodTalk = foodTalkRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         if (foodTalk.getSetLove()) {
@@ -403,7 +403,7 @@ public class FoodTalkService {
 
     @Transactional
     public void deleteLove(Long id, Member member) {
-        FoodTalk foodTalk = foodTalkRepository.findById(id)
+        FoodTalk foodTalk = foodTalkRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         if (!foodTalk.getSetLove()) {

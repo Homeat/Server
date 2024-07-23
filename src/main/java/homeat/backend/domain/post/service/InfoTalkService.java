@@ -327,7 +327,7 @@ public class InfoTalkService {
 
     @Transactional
     public void saveLove(Long id, Member member) {
-        InfoTalk infoTalk = infoTalkRepository.findById(id)
+        InfoTalk infoTalk = infoTalkRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         if (infoTalk.getSetLove()) {
@@ -351,7 +351,7 @@ public class InfoTalkService {
     public void deleteLove(Long id, Member member) {
 
 
-        InfoTalk infoTalk = infoTalkRepository.findById(id)
+        InfoTalk infoTalk = infoTalkRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new GeneralException(PostErrorStatus.POST_NOT_FOUND));
 
         if (!infoTalk.getSetLove()) {

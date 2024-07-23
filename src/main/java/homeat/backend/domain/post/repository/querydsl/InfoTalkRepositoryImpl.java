@@ -21,6 +21,8 @@ import javax.persistence.EntityManager;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
 
@@ -199,6 +201,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
     }
 
     @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Long countTotalCommentNumber(Long infoTalkId) {
         return queryFactory
                 .select(postComment.count())
@@ -208,6 +211,7 @@ public class InfoTalkRepositoryImpl implements InfoTalkRepositoryCustom{
     }
 
     @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Long countTotalReplyNumber(Long infoTalkCommentId) {
         return queryFactory
                 .select(postReply.count())

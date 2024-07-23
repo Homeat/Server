@@ -23,6 +23,8 @@ import javax.persistence.EntityManager;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
 
@@ -205,6 +207,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
     }
 
     @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Long countTotalCommentNumber(Long foodTalkId) {
         return queryFactory
                 .select(postComment.count())
@@ -214,6 +217,7 @@ public class FoodTalkRepositoryImpl implements FoodTalkRepositoryCustom {
     }
 
     @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public Long countTotalReplyNumber(Long foodTalkCommentId) {
         return queryFactory
                 .select(postReply.count())

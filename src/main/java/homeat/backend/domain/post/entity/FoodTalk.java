@@ -78,10 +78,6 @@ public class FoodTalk extends BaseEntity {
         this.commentNumber = nowSize;
     }
 
-    public void plusView(int nowView) {
-        this.view = nowView;
-    }
-
     public void plusLove(int nowLove) {
         this.love = nowLove;
     }

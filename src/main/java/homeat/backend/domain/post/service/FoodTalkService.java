@@ -167,7 +167,7 @@ public class FoodTalkService {
             foodTalk.setLove(false);
         }
 
-        foodTalk.plusView(foodTalk.getView() + 1);
+        foodTalkRepository.updateLove(id);
 
         // 집밥토크 사진 리스트
         List<String> foodPictures = postPictureRepository.findPostPictureByPostTypeAndMappingId(PostType.FoodTalk,

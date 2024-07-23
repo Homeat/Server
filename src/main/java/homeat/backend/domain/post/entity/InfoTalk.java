@@ -73,10 +73,6 @@ public class InfoTalk extends BaseEntity {
         this.commentNumber = nowNum;
     }
 
-    public void plusView(int nowView) {
-        this.view = nowView;
-    }
-
     public void setLove(boolean nowState) {
         this.setLove = nowState;
     }

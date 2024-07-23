@@ -136,7 +136,7 @@ public class InfoTalkService {
             infoTalk.setLove(true);
         }
 
-        infoTalk.plusView(infoTalk.getView() + 1);
+        infoTalkRepository.updateLove(id);
 
         // 해시태그 리스트
         List<String> infoTags = infoTalk.getInfoHashTags().stream()

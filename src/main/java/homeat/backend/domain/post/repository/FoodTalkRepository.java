@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import javax.persistence.LockModeType;
@@ -19,5 +20,9 @@ public interface FoodTalkRepository extends JpaRepository<FoodTalk, Long>, FoodT
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT f FROM FoodTalk f WHERE f.id=:id")
     Optional<FoodTalk> findByIdForUpdate(Long id);
+
+    @Modifying
+    @Query("UPDATE FoodTalk f SET f.love = f.love + 1 WHERE f.id = :id")
+    int updateLove(Long id);
 
 }
